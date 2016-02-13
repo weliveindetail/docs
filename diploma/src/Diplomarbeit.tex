@@ -1,0 +1,507 @@
+\documentclass[
+%  draft,                  % Entwurfsmodus
+  11pt,                    % KOMA default
+  a4paper,                % DIN A4
+  twoside,                % Zweiseitig
+  german,                  % deutsches Sprachpaket für Umlaute etc.
+  headsepline,            % Linie unter der Kopfzeile
+%  footsepline,            % Linie für Fußzeile  
+%  appendixprefix,          % "Anhang" vor Überschriften im Anhang
+  open=right,              % Kapitel beginnen auf der ungeraden Seiten
+%  abstracton,              % Abschnitt "Abstract" aktivieren
+  BCOR1cm,                % Bindungskorrektur
+  index=totoc,            % Index soll im Inhaltsverzeichnis auftauchen
+  listof=totoc,            % Abbildungs- und Tabellenverzeichnis aktivieren
+  bibliography=totoc,      % Inhaltsverzeichnis
+  footsepline=false,      % keine Linie über der Fußzeile
+  headings=normal,        % Überschriften normal setzen (nicht groß)
+  cleardoublepage=empty,  % leere Seiten werden nicht nummeriert etc. (sonst plain)
+]{scrreprt}
+
+% neue deutsche Rechtschreibung
+\usepackage[ngerman]{babel}
+\usepackage{babelbib}
+
+% Webseiten sinnvoll zitieren
+%\usepackage{biblatex}
+
+% Ergänzungen für mathematische Umgebung, Sätze, Definitionen, etc.
+\usepackage{amsmath}
+\usepackage{amsthm}
+\newtheorem*{remark}{Remark}
+
+% Korrekte Trennung von Worten mit Umlauten
+\usepackage[T1]{fontenc}
+
+% MS-Erweiterung für korrektes Rendering auch von Umlauten
+\usepackage[latin1]{inputenc}
+
+% jede Seite 5mm breiter
+\usepackage[a4paper, hmarginratio=4:3]{geometry}
+
+\usepackage{fancyhdr}
+
+% Laden von Grafiken
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
+% enumerate kann nach Unterbrechung fortgesetzt werden
+\usepackage{enumitem}
+
+% für die Ausrichtung von Text in Tabellen
+\usepackage{array}
+\usepackage{longtable}
+
+% Monospaced Typewriter mit sichtbarem Fettdruck
+\usepackage{courier}
+
+\input{./settings/syntaxhighlighting.tex}
+\input{./settings/footnotes.tex}
+\input{./settings/styles.tex} 
+\input{./settings/hyphenation.tex}
+
+\DeclareMathOperator{\landau}{\mathcal{O}}
+\DeclareMathOperator{\dlandau}{\scalebox{1.4}{$\landau$}}
+\DeclareMathOperator{\dprod}{\scalebox{1.4}{$\prod$}}
+\DeclareMathOperator{\dsum}{\scalebox{1.4}{$\sum$}}
+
+\begin{document}
+%\pagestyle{empty}
+
+%\pagenumbering{roman}
+%\pagenumbering{arabic}
+
+% Deckblatt inkl. Rückseite
+\input{./general/title.tex}
+\maketitle
+
+%\input{./general/abstract.tex}
+%\clearpage
+
+\input{./general/decl-of-authorship.tex}
+%\clearpage
+
+% Inhaltsverzeichnis
+%\begingroup
+%\renewcommand*{\chapterpagestyle}{empty}
+%\pagestyle{empty}
+%\newgeometry{left=35mm, right=35mm}
+\tableofcontents
+%\restoregeometry
+%\clearpage
+%\endgroup
+
+%\setcounter{page}{1}
+
+%\pagestyle{headings}
+
+%\pagestyle{fancy}
+%\fancyhead[RO]{\nouppercase{\rightmark}}
+%\fancyhead[LE]{\nouppercase{\leftmark}}
+%\fancyfoot[RO]{\thepage}
+%\fancyfoot[LE]{\thepage}
+
+%--------------------------------------------------------------------------------------------------
+
+\chapter{Einleitung}
+\label{sec:intro}
+
+\input{01-intro.tex}
+\clearpage
+
+%\begin{itemize}
+%	\item Begriffsherkunft Debugging
+%	\item Definition/Einführung der Begriffe "`Debugging"', "`Debugger"', "`Prüfling"', "`Defekt"'
+%\end{itemize}
+
+%\begin{remark}
+%	Sollte hier schon in die anderen Teilgebiete eingeführt werden?
+%\end{remark}
+%\begin{itemize}
+%	\item das "`Debugging Problem"` \cite{GenerativeProgramming} und domänenspezifische Sprachen (DSL)
+%	\item Problematik des Tool-Support für DSLs \cite{LanguageWorkbenches} \cite{Spinellis}
+%	\item Debugging-Support speziell \cite{DslCaseStudy} und Anforderungen im End-User-Development (EUD) \cite{DomainExpertDev} \cite{EndUserDevEnv}
+%	\item EUD in der digitalen Signalverarbeitung
+%\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+
+%\chapter{Aufgabenstellung}
+%\label{sec:task}
+
+%\begin{remark}
+%TODO
+%	Aufgabenstellung/Beschreibung vollständig oder gekürzt?
+%\end{remark}
+
+%--------------------------------------------------------------------------------------------------
+
+\chapter{Technischer Kontext}
+\label{sec:context}
+
+In diesem Kapitel soll zunächst ein Überblick zu den verschiedenen Themenbereichen gegeben werden, die den technischen Kontext dieser Arbeit bilden.
+
+\section{Domänenspezifische Programmiersprachen}
+\label{sec:context-dsls}
+
+%\subsection{Einordnung}
+%\label{sec:context-dsls-classification}
+
+%\subsection{Differenzierung}
+%\label{sec:context-dsls-differentiation}
+
+%\subsection{Werkzeugunterstützung}
+%\label{sec:context-dsls-tools}
+
+%\subsection{Nutzergruppen}
+%\label{sec:context-dsls-users}
+
+\input{03-context-dsls.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Debugging Techniken}
+\label{sec:context-debugging}
+
+%\subsection{Überblick}
+
+%\subsubsection{Trace-Debugging}
+%\label{sec:context-debugging-trace}
+
+%\subsubsection{Andere Debugging-Ansätze}
+%\label{sec:context-debugging-others}
+	
+%\subsection{Funktionsweise herkömmlicher Debugger}
+%\label{sec:context-debugging-separate}
+
+%\subsection{Same-Process Debugger}
+%\label{sec:context-debugging-same}
+
+\input{03-context-debugging.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Digitale Signalverarbeitung}
+\label{sec:context-dsp}
+
+\input{03-context-dsp.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Reaktor Core}
+\label{sec:context-core}
+
+%\begin{remark}
+%Anwendungsfall beschreiben um dem Leser ein konkretes Beispiel zu geben. Beschreiben in wie fern Reaktor in den betrachteten Problembereich fällt.
+%\end{remark}
+
+\input{03-context-core.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\chapter{Konzeption}
+\label{sec:concept}
+
+In diesem Kapitel wird das allgemeine Konzept eines integrierten, interaktiven Same-Process Debuggers für externe, kompilierte, domänenspezifische Sprachen der digitalen Signalverarbeitung erarbeitet.
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Vorbetrachtung}
+\label{sec:concept-prolog}
+
+\input{04-concept-prolog.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Same-Process Debugger}
+\label{sec:concept-sameprocess}
+
+\input{04-concept-sameprocess.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Echtzeitfähigkeit}
+\label{sec:concept-realtime}
+
+\input{04-concept-realtime.tex}
+\clearpage
+
+%\begin{itemize}
+%	\item Echtzeitverarbeitung muss gewährleistet bleiben (bis erster Haltepunkt getroffen wird)
+%	\item x86 ISA
+%	\item Trace-Debugger
+%	\item Portabilität muss erhalten bleiben
+%	\item Modifikationen und Erweiterbarkeit des Compilers müssen minimal gehalten werden - Omniscient Debugging wäre prinzipiell umsetzbar und hätte diverse Vorteile, würde aber die künftige Weiterentwicklung des Compilers stark begrenzen
+%	\item Anwendung ist Endbenutzersystem und muss Standardanwendung bleiben - es dürfen keine zusätzlichen Privilegien notwendig werden
+%\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsection{Realisierung von Haltepunkten}
+%\label{sec:problems-breakpoints}
+
+%\begin{remark}
+%Wegen \ref{sec:problems-sameprocess} steht kein 1-Byte-Opcode für Breakpoints zur Verfügung. Die Verwendung einfacher Calls kann zum Überschreiben von Sprungzielen führen.
+%\end{remark}
+
+%\begin{itemize}
+%	\item Lösungen: Aufzeichnung der Verzweigungsstruktur im Maschinencode und Einfügen von Paddings \textbf{vor} jedem Jump-Target vs. Alignment aller Maschinenbefehle auf Länge eines Calls
+%	\item Aspekte: Änderungen/Erweiterbarkeit des Compilers, Echtzeitfähigkeit, Strukturierung des Kompilats (Mächtigkeit der Sprache!)
+%\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsection{Aufzeichnung der Programmstruktur}
+%\label{sec:problems-recording}
+
+%\begin{remark}
+%Wegen \ref{sec:problems-breakpoints} muss zur Übersetzungszeit neben den Programmdaten für Zuordnung Maschinencode <-> DSL auch die Verzweigungsstruktur im Code ausgezeichnet werden.
+%\end{remark}
+
+%\begin{itemize}
+%	\item Lösung: Aufzeichnung der Verzweigungsstruktur im Maschinencode - Algorithmus zur Einteilung in sequenzielle Segmente + Erfassen und Verlinken entsprechend der rekursiven Programmstruktur - Online während der Kompilierung vs. Offline danach
+%	\item Aspekte: deterministischer rekursiver Online-Algorithmus, Flussnetzwerk mit max. 2 Nachfolgern pro Knoten
+%\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsection{Kommunikation zwischen Compiler und Aufzeichnungsprozess}
+%\label{sec:problems-communication}
+
+%\begin{remark}
+%Compiler sendet nur Benachrichtigungen und Daten. Filterung und Aufzeichnung durch Debugger. \textbf{Das ist aus architektonischer Sicht interessant, aber keine Problemstellung im Sinne der Aufgabenstellung. Darauf evtl. im Implementierungsteil eingehen.}
+%\end{remark}
+
+%\begin{itemize}
+%	\item Lösungen: Abstract-Factory Pattern vs. direkte Kommunikation
+%	\item Aspekte: Änderungen/Erweiterbarkeit des Compilers, Effizienz im Nicht-Debug-Fall
+%\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Zusammenfassung}
+\label{sec:concept-summary}
+
+\input{04-concept-summary.tex}
+\clearpage
+
+%\begin{itemize}
+%  \item Zusammenfassung der gewählten Ansätze und Konsequenzen (Vor- und Nachteile)
+%  \item Was geht und was geht nicht (z.\,B. asynchrone Unterbrechung)?
+%  \item Anwendungsszenarien: unter welchen Umständen macht das Konzept Sinn? / wofür ist es nicht geeignet?
+%  \item Implikationen für Compiler, DSL und IDE
+%  \item Evtl. Betrachtungen zu erwarteten Laufzeit- und Speicheranforderungen
+%\end{itemize}
+
+%\begin{remark}
+%Wo könnte man die Ergänzung von Tracking-Points, zur Aufzeichnung der tatsächlichen History (statt Call-Stack) unterbringen?
+%\end{remark}
+
+%--------------------------------------------------------------------------------------------------
+
+\chapter{Implementierung in Reaktor Core}
+\label{sec:impl}
+
+In diesem Kapitel wird die Implementierung des Prototypen eines interaktiven, integrierten Same-Process Debuggers für eine externe, kompilierte, domänenspezifische Sprache der digitalen Klangsynthese beschrieben. Die Grundlage bildet das in Kapitel \ref{sec:concept} erarbeitete Konzept. Als Beispiel dient die Programmiersprache Reaktor Core (\ref{sec:context-core}). Es werden Spezialisierungen vorgenommen, technische Fragen geklärt und konkrete Implementierungsansätze vorgestellt.
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Funktionsumfang des Prototypen}
+\label{sec:impl-functionality}
+
+\input{05-impl-prototype.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Technische Realisierung von Reaktor Core}
+\label{sec:impl-preface}
+
+\input{05-impl-preface.tex}  
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+
+%\section{Technischer Kontext}
+%\label{sec:impl-context}
+
+%\subsection{Reaktor}
+%\label{sec:impl-context-reaktor}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsection{Reaktor Core}
+%\label{sec:impl-context-core}
+
+%\subsubsection{Architektur}
+%\label{sec:impl-context-core-architecture}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsubsection{Kompilierung}
+%\label{sec:impl-context-core-compilation}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsubsection{Ausführung}
+%\label{sec:impl-context-core-execution}
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsubsection{Wire-Debugging}
+%\label{sec:impl-context-core-debugging}
+%\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Aufgaben zur Übersetzungszeit}
+\label{sec:impl-compiletime}
+
+\input{05-impl-programdata.tex}
+\input{05-impl-compilation.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+%\subsection{Modell der Programmdaten}
+%\label{sec:impl-factory-data}
+
+%\begin{figure}[ht!]
+%  \centering
+%  \includegraphics[width=\textwidth]{06-debug-data.png} %[scale=0.25]
+%  \caption{Integration und Strukturierung der Programmdaten (dargestellt als abgerundete Rechtecke). Struktur und Auswahl der Daten sind für eine kompakte Speicherung optimiert. Gelb hinterlegte Informationen werden erst zur Linkzeit eingesammelt. Während des Aufzeichnungsprozesses ist die aktive Instanz der Klasse \emph{DebugDataFactoryImpl} Eigentümer der Daten. Bei einem Abbruch der Kompilierung werden die Daten von dieser Klasse gelöscht. Mit Abschluss des Übersetzungsvorgangs werden die Programmdaten an die aktive Instanz der Klasse \emph{DebuggerImpl} übergeben.}
+%  \label{fig:debug-data}
+%\end{figure}
+%\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\section{Laufzeitprozess}
+\label{sec:impl-runtime}
+
+Im folgenden Abschnitt werden die Aspekte der Implementierung eines Same-Process Debuggers betrachtet, die zur Laufzeit des Prüflings erforderlich werden. Dabei handelt es sich um die Realisierung von Breakpoints nach \ref{sec:concept-sameprocess-overwriting-blocks} und die Unterbrechung der Echtzeitverarbeitung nach \ref{sec:concept-realtime-break}.
+
+\input{05-impl-runtime.tex}
+\clearpage
+
+%\subsection{Modell der Laufzeitdaten}
+%\label{sec:impl-runtime-data}
+
+%\begin{remark}
+%Was muss zusätzlich zu den Programmdaten zur Laufzeit bekannt sein? Bild ist hier möglicherweise Overkill. Aber wichtig: Struktur ist für effiziente Ausführung optimiert.
+%\end{remark}
+
+%\begin{figure}[ht!]
+%  \centering
+%  \includegraphics[width=\textwidth]{06-runtime-data.png} %[scale=0.25]
+%  \caption{Datenstruktur für Laufzeitdaten. Optimiert für effiziente Ausführung. Starke Vernetzung/Höhere Redundanz. Details später - je nachdem wie sich der Abschnitt entwickelt.}
+%  \label{fig:runtime-data}
+%\end{figure}
+%\clearpage
+
+%\subsection{Callback-Points}
+%\label{sec:impl-runtime-callbackpoints}
+
+%\begin{remark}
+%Todo: Die konzeptionellen Aspekte sollten schon im Konzept-Teil untergebracht werden. Hier darauf eingehen, wie das Konzept in Reaktor realisiert wurde.
+%\end{remark}
+
+%\noindent
+%Problembeschreibung (bereits besprochen):
+%\begin{itemize}
+%  \item Umschalten des Speicherbereichs für den Maschinencode (ausführbar -> editierbar) zur Laufzeit von außen nicht möglich
+%  \item Realtime-Thread selbst muss Breakpoint implementieren
+%  \item wird durch fest einkompilierten Callback-Point am Anfang jedes Handlers ermöglicht
+%\end{itemize}
+
+%\noindent
+%Funktionsweise:
+%\begin{itemize}
+%  \item es existiert globales Flag, welches anzeigt, dass Breakpoint implementiert werden soll (Callback-Flag)
+  
+%  \item Speicherzugriff auf das Flag ist implizit synchronisiert:
+%  \begin{itemize}
+%    \item GUI-Thread kann Flag nur setzen
+%    \item Audio-Thread kann Flag nur zurücksetzen
+%    \item beide können lesen
+%  \end{itemize}
+  
+%  \item bei gesetztem Flag springt Audio-Thread in Callback-Behandlungsroutine außerhalb des Audio-Codes:
+%  \begin{itemize}
+%    \item Speicherbereich des Maschinencodes umschalten: ausführbar -> editierbar
+%    \item Breakpoint(s) setzen
+%    \item Speicherbereich des Maschinencodes umschalten: editierbar -> ausführbar
+%    \item Audio-Processing fortsetzen
+%  \end{itemize}
+%\end{itemize}
+
+%\noindent
+%Implementierung:
+%\begin{itemize}
+%  \item darauf ausgiebig eingehen! wie in Listing \ref{lst:compile-callback-point-pseudo-code} bzw. \ref{lst:compile-callback-point}
+%\end{itemize}
+%\clearpage
+
+%\clearpage
+
+%\begin{remark}
+%Das folgende Listing sollte wohl auch in den Anhang (weil länger als eine Seite). Hier im Hauptteil wird dann nur der Pseudo-Assembler-Code des vorigen Beispiels stehen. Sollte die Betrachtung der Implementierung auf den Kompilierungsvorgang eingehen und damit den Anhang referenzieren?
+%\end{remark}
+
+%\lstinputlisting[style=cppstyle, morekeywords={if, endif, CTDHandler, MemoryAddress, tByte}, emph={SRS_DEBUG_BREAK_ON_ENTER_HANDLER, M_SRS_ASSERT, MEMORY_ADDRESS_SIZE, OPCODE_INT3, OPCODE_MOV_CONST_TO_EBX, OPCODE_CMP_BYTE, PHYS_REG_CODE_EBX, PHYS_REG_CODE_ECX, PHYS_REG_CODE_EDX, OPCODE_NEAR_JUMP_IF_NOT_EQUAL, OPCODE_POP_PHYS_REG, OPCODE_PUSH_PHYS_REG, OPCODE_PUSH_CONST_DWORD, OPCODE_MOV_CONST_TO_EBX, OPCODE_ABSOLUTE_CALL}, caption={Funktion zur Kompilierung von Callback-Points im Debug-Modus. Im Parameter pInsertionPoint wird die Speicherstelle übergeben, an die der Maschinencode geschrieben werden soll. pHandler ist ein Zeiger auf den Handler, für den der Callback-Point kompiliert werden soll. Schließlich enthält pModFlag die Speicheradresse des Flags, welches im gesetzten Zustand einen Callback auslöst.}, label={lst:compile-callback-point}]{./listings/06-compile-callback-point.cpp}
+%\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\chapter{Ergebnisse}
+\label{sec:outro}
+
+\input{06-outro.tex}
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+%\chapter{Ausblick}
+%\label{sec:futurework}
+
+%\begin{itemize}
+%	\item Was kann über den Prototypen hinaus mit dem Konzept erreicht werden und was nicht?
+%	\item Aspekte: Conditional Breakpoints (sehr effizient), Profiling (nur bedingt)
+%\end{itemize}
+
+%\begin{appendix}
+%\input{./appendix/tools.tex}
+%\end{appendix}
+%\clearpage
+
+%\listoffigures
+%\lstlistoflistings
+
+%--------------------------------------------------------------------------------------------------
+
+%\newgeometry{left=5cm, right=5cm}
+
+\chapter*{Glossar}
+\markboth{Glossar}{}
+\label{sec:glossary}
+
+\vspace{-1cm}
+\begin{longtable}{@{}>{\raggedright}p{0.4\textwidth} p{0.58\textwidth}@{}} 
+\input{07-glossary.tex}
+\end{longtable}
+
+\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\bibliographystyle{babalpha} %{nature}
+\bibliography{Diplomarbeit}
+
+\end{document}

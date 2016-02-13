@@ -1,0 +1,27 @@
+function beginLinkThen() {
+	currentBranch.lastThen = new tBranch(type = Then, parent = currentBranch) 
+	parentBranch = currentBranch
+	currentBranch = currentBranch.lastThen
+}
+
+function beginLinkElse() {
+	currentBranch.lastElse = new tBranch(type = Else, parent = currentBranch)
+	parentBranch = currentBranch
+	currentBranch = currentBranch.lastElse
+}
+
+function endLinkThen() {
+	if (currentBranch.neverHadSegments) parentBranch.lastThen = NULL	
+	parentBranch = parentBranch.parent
+	currentBranch = parentBranch
+}
+
+function endLinkElse() {
+	if (currentBranch.neverHadSegments) parentBranch.lastElse = NULL
+
+	parentBranch = parentBranch.parent
+	currentBranch = parentBranch
+
+	if (currentBranch.lastThen != NULL 
+	and currentBranch.lastElse != NULL) currentBranch.openSegment = NULL
+}

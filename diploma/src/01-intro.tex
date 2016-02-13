@@ -1,0 +1,78 @@
+
+Das englische Wort \emph{bug} ist als Bezeichnung für einen Defekt oder ein Fehlverhalten einer Maschine in einigen Bereichen des Ingenieurwesens bereits seit dem 19. Jahrhundert umgangssprachlich gebräuchlich. Einer der frühesten schriftlichen Belege dafür findet sich in einem Brief des Erfinders Thomas Edison an seinen Kollegen Puskas vom 13. November 1878 \cite{Hughes}.
+
+\begin{quote}
+\noindent
+It has been just so in all of my inventions. The first step is an intuition, and comes with a burst, then difficulties arise -- this thing gives out and {[}it is{]} then that 'Bugs' -- as such little faults and difficulties are called -- show themselves and months of intense watching, study and labor are requisite before commercial success or failure is certainly reached.
+\end{quote}
+
+\noindent
+Ein früher Beleg für die Verwendung des Begriffs im Bereich der Informationstechnik ist der berühmte Notizbucheintrag der Computerpionierin Grace Hopper\footnote{Grace Brewster Murray Hopper, geboren am 9. Dezember 1906 in New York, war ebenfalls die Entwicklerin des ersten Compilers \emph{A-0} im Jahre 1952. Darüber hinaus hat sie wesentliche Beträge zur weiteren Entwicklung der Programmiersprachen geleistet.} vom 9. September 1947. Nachdem einer der Techniker eine in einem Relais eingeklemmte Motte als Ursache des Fehlverhaltens des Mark II Computers identifiziert hatte, fixierte sie diese mit Klebeband in ihrem Notizbuch und notierte dazu folgenden Eintrag:
+
+\begin{quote}
+\noindent
+15:45 Relay \#70 Panel F (moth) in relay. First actual case of bug being found.
+\end{quote}
+
+\noindent
+Die Begriffe \emph{bug} und \emph{debug} verwurzelten sich in der Folgezeit schnell im Wortschatz der frühen Pioniere der Informatik und sind heute allgemein bekannte Fachbegriffe. Das Notizbuch mitsamt der Motte ist heute im Smithsonian National Museum of American History ausgestellt. Der Begriff des \emph{Debuggings}, also der Suche nach Fehlern in Computerprogrammen, wird von Christian Hermanns in \cite{JHyde} wie folgt definiert.
+
+\vspace{0.3cm}
+\begin{definition}[Debugging]
+In der Softwareentwicklung wird der Debugging-Prozess angestoßen, nachdem in der Testphase eine Fehlerwirkung entdeckt wurde. Das Debuggen von Software ist ein zweistufiger Prozess, der die genaue Bestimmung der Ursache und der Herkunft eines Programmfehlers sowie dessen Beseitigung umfasst.
+\end{definition}
+\vspace{0.3cm}
+
+\noindent
+Eine \emph{Fehlerwirkung} bezeichnet hierbei eine erkennbare Abweichung der Programmausführung vom erwarteten Verhalten. Die Ursache einer Fehlerwirkung wird als \emph{Defekt} bezeichnet. Häufig zeigt sich die Fehlerwirkung eines Defekts nicht sofort, sondern erst zu einem späteren Zeitpunkt der Ausführung. Für komplexe Programme bedeutet das oft, dass der für eine Fehlerwirkung verantwortliche Defekt nicht unmittelbar ausgemacht werden kann. Aus diesem Grund existieren spezielle Programmierwerkzeuge, sogenannte \emph{Debugger}, zur Unterstützung des Debugging-Prozesses. Eine Begriffsdefinition wird in \cite{JHyde} wie folgt gegeben.
+
+\vspace{0.3cm}
+\begin{definition}[Debugger]
+Ein Debugger ist ein Softwaretool zur Untersuchung und Überwachung des Programmablaufs, das verwendet wird, um Defekte in Programmen zu finden. Mithilfe eines Debuggers kann ein zu untersuchendes Programm direkt gestartet und observiert werden. Darüber hinaus bieten Debugger in der Regel weitere Funktionalitäten, die die Suche nach Defekten zusätzlich erleichtern bzw. beschleunigen.
+\end{definition}
+\vspace{0.3cm}
+
+\noindent
+Das mit Hilfe eines Debuggers untersuchte Programm wird als \emph{Prüfling} bezeichnet. Die Verfügbarkeit von Debuggern ist vor allem für kompilierte Programmiersprachen wichtig, da der Prüfling hier in Maschinencode vorliegt. Dieser wird direkt von der CPU ausgeführt und gestattet keine hinreichenden Rückschlüsse auf den ursprünglichen Quellcode, wenn zur Übersetzungszeit keine zusätzlichen Vorbereitungen getroffen werden. Im Gegensatz dazu kann das Anhalten der Ausführung und die Inspektion des Ausführungszustandes für interpretierte Sprachen vergleichsweise leicht vom jeweiligen Interpreter selbst bewerkstelligt werden. 
+
+%Alle Ausführungen in dieser Arbeit beziehen sich auf kompilierte Sprachen.
+
+Während heute für praktisch alle universellen Programmiersprachen Debugger existieren, die den Entwickler bei der Suche und der Korrektur von Defekten unterstützen, ist dies für domänenspezifische Programmiersprachen (\emph{Domain-Spe\-cific Language}, kurz \emph{DSL}) vielfach nicht der Fall. Damit vermindert sich der mit der Erstellung einer DSL angestrebte Effizienzgewinn für Entwicklungsaufgaben in der Zieldomäne. Die Gründe für das Fehlen geeigneter Debugger-Mechanismen liegen einerseits in der hohen und oft von der Ausführung entkoppelten Abstraktionsebene von DSLs und andererseits in den teils sehr unterschiedlichen Anforderungen verschiedener Domänen. Voraussetzung für eine brauchbare Untersuchung zur Realisierbarkeit von Debugging-Mechanismen für DSLs ist daher die Eingrenzung der Betrachtung auf eine konkrete Domäne. Im Rahmen dieser Arbeit werden DSLs zur Programmierung digitaler Signalverarbeitungsprozesse (\emph{Digital Signal Processing}, kurz \emph{DSP}) betrachtet. Aufgabe von DSP-Programmen ist die Verarbeitung digitaler, zeitdiskreter Signale in Echtzeit. Ein Teilgebiet der digitalen Signalverarbeitung ist die digitale Klangsynthese, die sich mit der Erzeugung und Transformation von Audiosignalen beschäftigt.
+
+%Die datenstromorientierte Charakter von DSP-Programmen begünstigt die Möglichkeit einer grafischen Notation. Der Verarbeitungsverlauf kann als gerichteter Graph dargestellt werden, dessen Knoten einzelne Verarbeitungsschritte (Module) repräsentieren. Die Verbindungen zwischen den Knoten des Graphen definieren die Abhängigkeiten zwischen den Modulen und legen damit die Reihenfolge der Verarbeitungsschritte fest. Die übersichtliche Darstellung der Signalverarbeitungsprozesse wird oft durch eine hierarchische Organisation der Modulstruktur erreicht. 
+
+%\noindent
+Der Sprachumfang von DSLs der DSP-Programmierung ist oft auf Konstrukte zur Erzeugung und Transformation digitaler Signale begrenzt. Aufgaben wie die Ein- und Ausgabe von Signaldaten, die grafische Darstellung von Benutzeroberflächen oder die Ansteuerung von Hardware werden von einer Ausführungsumgebung übernommen. Für die Durchführung der Signalverarbeitungsvorgänge erfolgt dann ein Aufruf der erstellten DSP-Programme durch die Ausführungsumgebung. 
+
+Die Erstellung von Softwareanwendungen erfolgt i.\,A. im Rahmen von Entwicklungsumgebungen, die alle für die Entwicklung benötigten Programmierwerkzeuge zusammenfassen. Die Entwicklung allgemeiner Softwareanwendungen basiert üblicherweise auf einem Edit-Com\-pile-Test Zyklus. In der DSP-Programmierung kommt hingegen oft der Ansatz der Con\-ti\-nu\-ous-Exe\-cu\-tion zum Einsatz, bei dem Kompilierung und Ausführung für den Benutzer transparent gehalten werden. Jede Änderung am Signalverarbeitungsprozess wirkt sich damit unmittelbar auf das Ergebnis aus. Dadurch wird auch während der Konstruktion von DSP-Programmen der Eindruck der kontinuierlichen Verarbeitung in Echtzeit erhalten. 
+
+%Die Nutzergruppe von DSLs für die DSP-Programmierung bilden vor allem Endbenutzer ohne allgemeine Programmierkenntnisse. In der digitalen Klangsynthese sind dies z.\,B. Instrumentenbauer und Sound-Designer. 
+
+%Das wirkt sich besonders auf die Gestaltung entsprechender Entwicklungsumgebungen aus. Statt dem in der Softwareentwicklung üblichen Edit-Com\-pile-Test Zyklus kommt für die 
+
+In der DSP-Programmierung ergibt sich damit oft eine sehr enge Verflechtung zwischen Entwicklungsumgebung, Ausführungsumgebung und erstelltem Programm. Eine Ausführung in verschiedenen Prozessen des Betriebssystems hätte ein hohes Kommunikationsaufkommen und häufige Prozesswechsel zur Folge. Derartige Operationen sind in den verbreiteten Betriebssystemen jedoch generell aufwändig und damit für die Zwecke der Echtzeitverarbeitung ungeeignet. Im Rückschluss werden DSP-Programme oft gemeinsam mit der Entwicklungsumgebung und der Ausführungsumgebung in demselben Prozess des Betriebssystems ausgeführt\footnote{Neben Reaktor \cite{Reaktor} sind auch LabVIEW \cite{Labview} und Max/MSP \cite{Max} bekannte Beispiele hierfür.}. 
+
+%Die Ausführung eines Debuggers muss dann ebenfalls in diesem Prozess erfolgen. 
+
+%Die hohen Performanzanforderungen an DSP-Programme legen ebenfalls eine Kompilierung in nativen Code nahe. Interpretative Ansätze sind für den professionellen Einsatz meist nicht geeignet. Diese Arbeit beschränkt sich daher auf die Betrachtung von Debugging-Mechanismen für kompilierte DSLs. 
+
+%Debugging-Mechanismen für interpretierte Sprachen sind zudem i.\,A. vergleichsweise leicht realisierbar.
+
+%Dem Interpreter unterliegen Ablaufsteuerung und Ausführungszustand direkt. Die Zuordnung zwischen einem notierten Befehl auf Sprachebene und den dafür auszuführenden Operationen ist ebenfalls in jedem Ausführungsschritt bekannt.
+
+%Die Ausführung von DSP-Programmen im Prozess des Betriebssystems 
+
+\noindent
+Dies hat besondere Auswirkungen auf die Möglichkeiten zur Realisierung von Debugg\-ing-Mechanismen. In der allgemeinen Anwendungsentwicklung sind Debugger meist Teil der Entwicklungsumgebung, während der Prüfling jedoch stets in einem separaten Prozess ausgeführt wird. Zur Manipulation und Inspektion des Prüflings stehen spezielle Hilfsmittel des Betriebssystems zur Verfügung. Als Voraussetzung für deren Verwendung hat sich die prozesstechnische Trennung von Debugger und Prüfling etabliert. Debugger, die dieser Trennung folgen, werden in einem technischen Bericht von Paxson und Anderson \cite{Paxson} als \emph{Separate-Process} Debugger bezeichnet. Sie bilden die überwiegende Mehrheit der heute verwendeten Debugger. Debugger, die direkt im Prozess des Prüflings ausgeführt werden, heißen \emph{Same-Process Debugger}. In den verbreiteten Betriebssystemen existiert keine Unterstützung für diese Form von Debuggern. 
+
+%\noindent
+Ziel dieser Arbeit ist es, im Kontext domänenspezifischer Sprachen der digitalen Signalverarbeitung Realisierungsmöglichkeiten für die manuelle Nachbildung von Debugging-Mechanismen für Same-Process Debugger zu finden. Im Mittelpunkt steht die Realisierung von Ablaufkontrollmechanismen unter den speziellen Anforderungen der Echtzeitverarbeitung in DSP-Programmen. 
+
+Die Gliederung der Arbeit gestaltet sich wie folgt. Kapitel \ref{sec:context} gibt zunächst eine Einführung in die verschiedenen Themenbereiche, die den Kontext der Arbeit bilden. In Kapitel \ref{sec:concept} wird ein allgemeines Konzept für die Realisierung eines integrierten, interaktiven Same-Process Debuggers erarbeitet. Kapitel \ref{sec:impl} stellt die Implementierung eines solchen Debuggers für die domänenspezifische Sprache Reaktor Core vor. Eine Zusammenfassung der Ergebnisse wird in Kapitel \ref{sec:outro} gegeben.
+
+
+%Demgegenüber gestaltet sich die Inspektion des Prüflings vergleichsweise leicht, da der Debugger direkten Zugriff auf dessen Adressbereich hat. 
+
+%Die üblichen Konstrukte zur Ablaufkontrolle und Inspektion können jedoch weitestgehend manuell realisiert werden, da der Debugger direkten Zugriff auf den Adressbereich des Prüflings hat. Die dafür grundlegenden Mechanismen wurden von Kessler in \cite{FastBreakpoints} bereits für eine SPARC Befehlssatzarchitektur beschrieben. Der SPARC Befehlssatz begünstigt die manuelle Realisierung von Haltepunkten durch gewöhnliche Verzweigungsoperationen, da alle Befehle dieselbe Länge haben. Ein temporäres Ersetzen von Befehlen wirkt damit stets atomar und birgt nicht die Gefahr der Beeinflussung von Folgebefehlen. 
+
+%Die enge Verflechtung zwischen Entwicklungsumgebung und erstelltem Programm stellt einen fundamentalen Unterschied zur allgemeinen Anwendungsentwicklung dar, bei der der Fokus auf der Erstellung eigenständiger Programme liegt. B

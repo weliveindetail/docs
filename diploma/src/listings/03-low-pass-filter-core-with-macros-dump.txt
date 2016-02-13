@@ -1,0 +1,40 @@
+Init Handler        Audio Handler       Event Handler
+08d16be0 In                             08d16be0 In
+0a97ecd8 In         0a97ecd8 In
+08d35320 In         08d35320 In
+0aaa7bc8 In         0aaa7bc8 In
+08ce6b20 Write      08ce6b20 Write
+08ce6950 Read       08ce6950 Read
+0a97ef58 Out        0a97ef58 Out
+0ab6bbe8 In         0ab6bbe8 In
+0ab6ca08 In         0ab6ca08 In
+0ab74dd8 Const
+0ab3ee08 /
+0ab380b8 *                              0ab380b8 *
+0ab6be58 In                             0ab6be58 In
+0ab6c798 In                             0ab6c798 In
+0ab6d050 Write                          0ab6d050 Write
+0ab6ce80 Read       0ab6ce80 Read
+0ab6cc88 Out        0ab6cc88 Out
+0ab6c268 *          0ab6c268 *
+0ab6c110 Out        0ab6c110 Out
+0ab4d600 In         0ab4d600 In
+0ab4d9d8 Read       0ab4d9d8 Read
+0ab4d880 Out        0ab4d880 Out
+0ab63468 In         0ab63468 In
+0ab64288 In         0ab64288 In
+0ab75db0 Const
+0ab45b08 -                              0ab45b08 -
+0ab636d8 In                             0ab636d8 In
+0ab64018 In                             0ab64018 In
+0ab648d0 Write                          0ab648d0 Write
+0ab64700 Read       0ab64700 Read
+0ab64508 Out        0ab64508 Out
+0ab63ae8 *          0ab63ae8 *
+0ab63990 Out        0ab63990 Out
+0ab54f28 +          0ab54f28 +
+0ab5bc78 Merge      0ab5bc78 Merge
+0ab4d390 In         0ab4d390 In
+0ab4dd60 DN Cancel  0ab4dd60 DN Cancel
+0ab4dba8 Write      0ab4dba8 Write
+08d1abb8 Out        08d1abb8 Out

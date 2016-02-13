@@ -1,0 +1,58 @@
+
+% Formatierung von Hyperlinks
+\usepackage{url}
+
+% Inidividualisierbare Zitatumgebung
+%\usepackage{quoting}
+
+% Angepasste Darstellung von Zitaten (zentriert, Breite 90%)
+%\quotingsetup{vskip=0cm, leftmargin=0.05\textwidth, rightmargin=0.05\textwidth, indentfirst=false}
+
+% Standardumgebungen f¸r Theoreme
+\usepackage{amsthm}
+
+\newtheoremstyle
+{defStyle}	% Name
+{}					% Space above
+{}					% Space below 
+{}					% Body font
+{}					% Indent amount (empty = no indent, \parindent = normal paragraph indent)
+{\bf}				% Theorem head font
+{}					% Punctuation after theorem head
+{\newline}	% Space after theorem head
+{}					% Theorem head spec (can be left empty, meaning `normal')
+
+% Angepasste Darstellung von Definitionen (zentriert, Breite 90%)
+\theoremstyle{defStyle}
+\newtheorem{defBase}{Definition}[section]
+\newenvironment{definition}[1][]
+{
+\begin{center}
+	\begin{minipage}{0.86\textwidth}
+		\begin{defBase}[#1]
+}
+	{
+		\end{defBase}
+	\end{minipage}
+\end{center}
+}
+
+% Eineinhalbzeiliger Abstand im Text (weiterhin einzeilig in Fuﬂnoten etc.)
+\usepackage{setspace}
+\onehalfspacing
+
+% Standard Kopf- und Fuﬂzeile
+\pagestyle{headings}
+
+% Nummerierung in 4 Stellen (auch subsubsections)
+\setcounter{secnumdepth}{4}
+
+% Klickbare Verweise im PDF Dokument
+\usepackage[plainpages=false,pdfpagelabels,pagebackref]{hyperref}
+
+% Bildunterschrift umflieﬂt Name
+\usepackage[format=plain,font={footnotesize},labelfont=bf,labelsep=space]{caption}
+
+% Fuﬂnoten nie auf mehrere Seiten verteilen
+%\interfootnotelinepenalty=10000
+%\usepackage[bottom]{footmisc}

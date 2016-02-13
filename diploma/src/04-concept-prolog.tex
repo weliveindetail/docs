@@ -1,0 +1,45 @@
+
+Unter domänenspezifischen Sprachen der digitalen Signalverarbeitung (Digital Signal Processing, \emph{DSP}) ist eine starke Verflechtung zwischen Entwicklungsumgebung, Ausführungsumgebung und erstelltem Programm sehr verbreitet. Im Rückschluss erfolgt deren Ausführung oft in einem gemeinsamen Prozess des Betriebssystems. Aufwändige Prozesswechsel können damit vermieden werden. Ein integrierter Debugger kann in dieser Situation nur nach dem Same-Process Ansatz realisiert werden. In den verbreiteten Betriebssystemen existiert keine Unterstützung für diese Form von Debuggern. Ziel des Konzeptes ist es, möglichst weitreichend einsetzbare Realisierungsmöglichkeiten für die manuelle Nachbildung von Debugging-Mechanismen in Same-Process Debuggern zu finden. Im Mittelpunkt steht die Realisierung von Ablaufkontrollmechanismen unter den speziellen Anforderungen der Echtzeitverarbeitung in DSP-Programmen. 
+
+%Die Realisierung eines Debuggers 
+%, denn der gemeinsame Adressbereich ermöglicht es dem erstellten Programm, die Hilfsmittel der Entwicklungsumgebung unmittelbar zu verwenden. 
+
+\subsection{Ausgangssituation}
+\label{sec:concept-prolog-preface}
+
+\enlargethispage{0.3cm}
+Betrachtet wird eine Situation, in der Programme oder Programmfragmente zur digitalen Signalverarbeitung innerhalb einer Entwicklungsumgebung erstellt werden können. Diese Entwicklungsumgebung soll um einen integrierten, interaktiven Debugger erweitert werden, der über Ablaufkontrollmechanismen verfügt, die eine Inspektion erstellter Programme ermöglicht. Ein zu inspizierendes Programm wird als \emph{Prüfling} bezeichnet. Die Entwicklungsumgebung enthält einen Compiler, der den Quellcode des Prüflings vor dessen Ausführung vollständig in Maschinencode der jeweiligen Plattform übersetzt. Als Plattform wird eines der verbreiteten Betriebssysteme, wie z.\,B. Mac OS X oder Windows, auf Basis einer x86 Befehlssatzarchitektur verwendet. Die Verwendung des Debuggers erfordert eine spezielle Kompilierung des Prüflings. Dafür wird im Compiler ein Debug-Modus eingerichtet.
+
+\noindent
+Der Aufgabenbereich der betrachteten Programme begrenzt sich auf die Erzeugung und Transformation digitaler Signale. Alle weiteren Aufgaben, wie die Ein- und Ausgabe von Signaldaten oder die Darstellung grafischer Oberflächen übernimmt eine Ausführungsumgebung. Für die Zwecke der Signalverarbeitung wird der kompilierte Programmcode der erstellen Programme von der Ausführungsumgebung aufgerufen. Dies erfolgt in einem separaten, speziell priorisierten \emph{Echtzeit-Thread}. Für die Ausführung im Echtzeit-Thread existieren fest vorgegebene Zeitschranken (\ref{sec:context-dsp-realtime}).
+
+% Die Entwicklungsumgebung bildet gleichzeitig die Ausführungsumgebung der Programme. Der Benutzer kann die Parametrisierung von Programmen über die Ausführungsumgebung regeln. 
+
+% Entwicklungsumgebung und erstellte Programme werden in verschiedenen Threads innerhalb eines Prozesses des Betriebssystems ausgeführt. Die Echtzeitverarbeitung findet in einem speziell priorisierten \emph{Echtzeit-Thread} statt. Zur Laufzeit erreicht die Ausführung des Echtzeit-Threads, z.\,B. ausgehend von einem speziellen Gerätetreiber, zunächst die Ausführungsumgebung. Für die Durchführung von Signalverarbeitungsvorgängen wird von hier aus der kompilierte Code der erstellten Programme aufgerufen.
+
+\subsection{Grundlegende Problematik und Zielstellung}
+
+Die herkömmlichen Ansätze zur Realisierung von Debuggern (\ref{sec:context-debugging-separate}) sind in einer solchen Situation nicht anwendbar, da sie stets nur die Unterbrechung eines ganzen Prozesses des Betriebssystems ermöglichen. Dadurch wäre auch die Entwicklungsumgebung selbst während einer Unterbrechung nicht bedienbar. Für die Konzeption eines integrierten Debuggers (\ref{sec:context-debugging-classes}) kommt damit nur ein Ansatz in Frage, der die Inspektion einzelner Threads innerhalb des eigenen Prozesses erlaubt. Die Implementierung des zugrunde liegenden Verfahrens wurde von Kessler in \cite{FastBreakpoints} bereits für eine SPARC Befehlssatzarchitektur beschrieben (\ref{sec:context-debugging-same}). 
+
+Im Zuge des vorliegenden Konzepts soll in Abschnitt \ref{sec:concept-sameprocess} eine Übertragung dieses Ansatzes auf die heute verbreitete x86 Befehlssatzarchitektur vorgenommen werden. Im Konzept sollen die grundlegenden Konstrukture zur Ablaufsteuerung in strukturierten Programmiersprachen berücksichtigt werden. Konkret handelt es sich dabei um die sequenzielle Befehlsausführung, bedingte Verzweigungen des Kontrollflusses und Schleifen. Die Unterbrechung und Inspektion des Prüflings soll ausgehend von Interaktionen des Benutzers mit der Entwicklungsumgebung ermöglicht werden. Die Problematiken, die sich in diesem Zusammenhang aus der Echtzeitfähigkeit des Verarbeitungsprozesses ergeben, werden in Abschnitt \ref{sec:concept-realtime} behandelt. 
+
+
+%Entwicklungsumgebung, Ausführungsumgebung, Debugger und Prüfling werden dann im selben Prozess des Betriebssystems ausgeführt. Für die Verwendung des Debuggers muss die Kompilierung des Prüflings in einem speziellen Debug-Modus erfolgen. 
+
+%* Es gibt eine IDE.
+%* Die IDE und der Prüfling laufen im selben Prozess.
+%* Der Quellcode wird komplett vor Programmstart kompiliert (und dabei müssen
+%  schon die entsprechenden Anpassungen für den Debugger berücksichtigt werden).
+%* Die Zielarchitektur ist x86.
+%* Es wird Echtzeitfähigkeit erwartet. Die Echtzeitverarbeitung findet durch
+%  einen separaten Thread statt.  
+%* Der Nutzer kann Breakpoints in der IDE setzen.
+%* Welche Interaktionen IDE <-> Debugger <-> Prüfling gibt es? Speziell: wer
+%  ruft wen wann, wie und wo auf? Dies ist mir im ganzen Abschnitt 4.3 nicht
+%  vollkommen klar geworden.
+%* Der Compiler stellt dem Debugger Programmdaten bereit (welche?). 
+
+\subsection{Wahl des Debugging-Verfahrens}
+\label{sec:concept-prolog-approach}
+
+Die betrachteten domänenspezifischen Sprachen begünstigen die Realisierung eines Om\-niscient-Debuggers (\ref{sec:context-debugging-others}). Ihr hohes Abstraktionsniveau verringert die Anzahl der im Quellcode verfügbaren Inspektionspunkte. Im Gegensatz zu universellen Programmiersprachen müsste ein Omniscient-Debugger den Ausführungszustand des Prüflings hier also seltener zwischenspeichern. Ihre begrenzte Mächtigkeit verringert die Vielfalt und Kombinierbarkeit verfügbarer Konstrukte zur Ablaufkontrolle. Der Maschinencode erstellter Programme weist damit häufiger ähnliche Strukturen auf als im Falle universeller Programmiersprachen. Für die Aufzeichnung des Kontrollflusses genügt dann i.\,A. eine deutlich geringere Menge von Laufzeitdaten. Trotz dieser Vereinfachungen und den Vorteilen des Omniscient-Debugging, kann es im Kontext dieser Arbeit nicht angewendet werden. Dies hat folgende Ursachen. Die zusätzlichen Speicherzugriffe zur Aufzeichnung der Laufzeitdaten sind durchgängig -- und insbesondere unabhängig von expliziten Unterbrechungen -- nötig. Das könnte die Ausführungsgeschwindigkeit des Prüflings erheblich verringern und die Echtzeitfähigkeit des Verarbeitungsvorgangs gefährden. Im Falles eines Trace-Debuggers (\ref{sec:context-debugging-trace}) hingegen ist die Interaktion mit dem Prüfling minimal, solange es nicht zu einer expliziten Unterbrechung kommt. Des Weiteren könnte ein Omniscient-Debugger die Weiterentwicklung der Sprache begrenzen. Beispielsweise könnte eine Ergänzung weiterer Konstrukte zur Ablaufkontrolle zu einer Vervielfachung der aufzuzeichnenden Laufzeitdaten führen. Die Auswirkungen auf die Echtzeitfähigkeit würden die Ergänzung der neuen Konstrukte möglicherweise verhindern. Eine solche Einschränkung ist trotz der Vorteile von Omniscient-Debuggern nicht akzeptabel. Die Konzeption zielt daher auf die Realisierung eines gewöhnlichen Trace-Debuggers.

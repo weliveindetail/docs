@@ -1,0 +1,720 @@
+% This file was created with JabRef 2.8.1.
+% Encoding: UTF-8
+
+@BOOK{Compiler,
+  title = {Compiler: Prinzipien, Techniken und Werkzeuge},
+  publisher = {Pearson Deutschland GmbH},
+  year = {2008},
+  author = {Aho, A.V. and Sethi, R. and Lam, M.S. and others}
+}
+
+@ARTICLE{Replay,
+  author = {Alpern, B. and Ngo, T. and Choi, J.D. and Sridharan, M.},
+  title = {DejaVu: deterministic Java replay debugger for Jalape{\~n}o Java
+	virtual machine},
+  journal = {Proceedings of OOPSLA 2000--Addendum},
+  year = {2000},
+  pages = {165--166}
+}
+
+@ARTICLE{VaxDebug,
+  author = {Beander, Bert},
+  title = {VAX DEBUG: an interactive, symbolic, multilingual debugger},
+  journal = {SIGSOFT Softw. Eng. Notes},
+  year = {1983},
+  volume = {8},
+  pages = {173--179},
+  number = {4},
+  month = mar,
+  address = {New York, NY, USA},
+  issn = {0163-5948},
+  issue_date = {August 1983},
+  numpages = {7},
+  publisher = {ACM}
+}
+
+@INPROCEEDINGS{Bell,
+  author = {F. Bellegarde and F. Bellegarde and J. Hook and R. B. Kieburtz and
+	A. Kotov and J. Lewis and L. Mckinney and D. P. Oliva and T. Sheard
+	and L. Tong and L. Walton and T. Zhou},
+  title = {Software Design for Reliability and Reuse: A Proof-of-Concept Demonstration},
+  booktitle = {In Conference on TRI-Ada 94},
+  year = {1994},
+  pages = {396--404},
+  publisher = {ACM, ACM Press}
+}
+
+@MISC{Audio101,
+  author = {Ross Bencina},
+  title = {Real-time audio programming 101: time waits for nothing},
+  month = {August},
+  year = {2011},
+  url = {http://www.rossbencina.com/code/real-time-audio-programming-101-time-waits-for-nothing}
+}
+
+@MISC{Realtime,
+  author = {Robert Bristow-Johnson},
+  title = {Comp.realtime: Frequently Asked Questions (Version 3.5)},
+  month = {Juli},
+  year = {1998},
+  url = {http://www.faqs.org/faqs/realtime-computing/faq/}
+}
+
+@BOOK{Duden,
+  title = {Duden. Informatik. Ein Fachlexikon f{\"u}r Studium und Praxis.},
+  publisher = {Bibliographisches Institut, Mannheim},
+  year = {2003},
+  author = {Claus, Volker and Schwill, Andreas},
+  keywords = {duden informatik}
+}
+
+@BOOK{DslsVisualStudio,
+  title = {Domain-Specific Development with Visual Studio DSL Tools},
+  publisher = {Addison-Wesley Professional},
+  year = {2007},
+  author = {Cook, Steve and Jones, Gareth and Kent, Stuart and Wills, Alan},
+  isbn = {9780321398208}
+}
+
+@INPROCEEDINGS{DomainExpertDev,
+  author = {Costabile, Maria F. and Fogli, Daniela and Letondal, Catherine and
+	Mussio, Piero and Piccinno, Antonio},
+  title = {Domain-Expert Users and their Needs of Software Development},
+  booktitle = {UAHCI Conference},
+  year = {2003},
+  pages = {232--236},
+  address = {Crete},
+  month = jun
+}
+
+@ARTICLE{EndUserDevEnv,
+  author = {Maria Francesca Costabile and Daniela Fogli and Piero Mussio and
+	Antonio Piccinno},
+  title = {Software environments for end-user development and tailoring},
+  journal = {Psychnology},
+  year = {2004},
+  volume = {2},
+  pages = {99--122}
+}
+
+@BOOK{GenerativeProgramming,
+  title = {Generative programming: methods, tools and applications},
+  publisher = {ACM Press/Addison-Wesley Publishing Co.},
+  year = {2000},
+  author = {Czarnecki, Krzysztof and Eisenecker, Ulrich W.},
+  address = {New York, NY, USA},
+  isbn = {0-201-30977-7}
+}
+
+@BOOK{sql,
+  title = {A Guide to the SQL Standard},
+  publisher = {Addison-Wesley Reading (Ma) et al.},
+  year = {1987},
+  author = {Date, C.J. and Darwen, H.},
+  volume = {3}
+}
+
+@ARTICLE{Deursen,
+  author = {Arie van Deursen and Paul Klint},
+  title = {Domain-Specific Language Design Requires Feature Descriptions},
+  journal = {Journal of Computing and Information Technology},
+  year = {2001},
+  volume = {10},
+  pages = {2002},
+  url = {http://homepages.cwi.nl/~paulk/publications/features.pdf}
+}
+
+@ARTICLE{DslBib,
+  author = {van Deursen, Arie and Klint, Paul and Visser, Joost},
+  title = {Domain-specific languages: an annotated bibliography},
+  journal = {SIGPLAN Not.},
+  year = {2000},
+  volume = {35},
+  pages = {26--36},
+  number = {6},
+  month = jun,
+  issn = {0362-1340},
+  issue_date = {June 2000},
+  numpages = {11},
+  publisher = {ACM}
+}
+
+@MASTERSTHESIS{DslCaseStudy,
+  author = {Aran Donohue},
+  title = {Debugging Domain-Specific Languages},
+  school = {University of Toronto},
+  year = {2010}
+}
+
+@BOOK{DosDebug,
+  title = {Advanced MS-DOS Programming},
+  publisher = {Microsoft Press},
+  year = {1988},
+  author = {Duncan, R.}
+}
+
+@INPROCEEDINGS{Subtext,
+  author = {Edwards, J.},
+  title = {Subtext: uncovering the simplicity of programming},
+  booktitle = {ACM SIGPLAN Notices},
+  year = {2005},
+  volume = {40},
+  number = {10},
+  pages = {505--518},
+  organization = {ACM}
+}
+
+@ARTICLE{atmol,
+  author = {van Engelen, Robert A.},
+  title = {ATMOL: A domain-specific language for atmospheric modeling.},
+  journal = {Journal of Computing and Information Technology (CIT)},
+  year = {2001},
+  volume = {9},
+  pages = {289-303},
+  number = {4},
+  issn = {1330-1136},
+  publisher = {University Computing Centre, Zagreb}
+}
+
+@MISC{LanguageWorkbenches,
+  author = {Martin Fowler},
+  title = {Language Workbenches: The Killer-App for Domain Specific Languages?},
+  month = {Juni},
+  year = {2005},
+  url = {http://martinfowler.com/articles/languageWorkbench.html}
+}
+
+@MISC{rake,
+  author = {Martin Fowler},
+  title = {Using the Rake Build Language},
+  month = {August},
+  year = {2005},
+  url = {http://martinfowler.com/articles/rake.html}
+}
+
+@BOOK{gof,
+  title = {Entwurfsmuster},
+  publisher = {Pearson Deutschland GmbH},
+  year = {2009},
+  author = {Gamma, E. and Helm, R. and Vlissides, J. and Johnson, R.}
+}
+
+@MISC{Guyer04broadway:a,
+  author = {Samuel Z. Guyer and Calvin Lin},
+  title = {Broadway: A Compiler for Exploiting the Domain-Specific Semantics
+	of Software Libraries},
+  year = {2004}
+}
+
+@MASTERSTHESIS{Klangsynthese,
+  author = {Henri Hagenow},
+  title = {Digitale Synthese komplexer Wellenformen zur Simulation akustischer,
+	elektrischer und optischer Eigenzust{\"a}nde mehrdimensionaler Systeme},
+  school = {Optisches Institut der Technischen Universit{\"a}t Berlin},
+  year = {2001},
+  url = {http://www.brothers-in-music.de/klangsynthese/Klangsynthese&PhysicalModeling_HH.pdf}
+}
+
+@BOOK{JHyde,
+  title = {Entwicklung und Implementierung eines hybriden Debuggers f{\"u}r
+	Java},
+  publisher = {Westf{\"a}lische Wilhelms-Universit{\"a}t},
+  year = {2011},
+  author = {Herrmanns, C.},
+  series = {Wissenschaftliche Schriften der WWU M{\"u}nster / 4}
+}
+
+@BOOK{Hughes,
+  title = {American genesis: a century of invention and technological enthusiasm,
+	1870-1970},
+  publisher = {University of Chicago Press},
+  year = {2004},
+  author = {Hughes, T.P.}
+}
+
+@TECHREPORT{DslEclipse,
+  author = {Jeff Gray, Hui Wu, Marjan Mernik},
+  title = {Debugging Domain-Specific Languages in Eclipse},
+  institution = {University of Alabama at Birmingham, University of Maribor},
+  year = {2004}
+}
+
+@BOOK{DbgGen,
+  title = {Debugger Generation in a Compiler Generation System},
+  publisher = {University of Colorado},
+  year = {1998},
+  author = {Kadhim, B.M.},
+  url = {http://books.google.de/books?id=OMryNwAACAAJ}
+}
+
+@TECHREPORT{FastDataBreakpoints,
+  author = {Keppel, D.},
+  title = {Fast Data Breakpoints},
+  institution = {University of Washington},
+  year = {1993},
+  number = {TR-93-04-06}
+}
+
+@ARTICLE{FastBreakpoints,
+  author = {Kessler, Peter B.},
+  title = {Fast breakpoints: design and implementation},
+  journal = {SIGPLAN Not.},
+  year = {1990},
+  volume = {25},
+  pages = {78--84},
+  number = {6},
+  month = jun,
+  address = {New York, NY, USA},
+  issn = {0362-1340},
+  issue_date = {Jun. 1990},
+  numpages = {7},
+  publisher = {ACM}
+}
+
+@INPROCEEDINGS{DslRequirements,
+  author = {Kolovos, Dimitrios S. and Paige, Richard F. and Kelly, Tim and Polack,
+	Fiona A. C.},
+  title = {Requirements for {Domain-Specific} Languages},
+  booktitle = {Proc. 1st ECOOP Workshop on Domain-Specific Program Development (DSPD
+	2006)},
+  year = {2006},
+  address = {Nantes, France},
+  month = jul
+}
+
+@ARTICLE{ComparingGplsAndDsls,
+  author = {Kosar, Toma\v{z} and Oliveira, Nuno and Mernik, Marjan and Pereira,
+	Maria J. V. and \v{C}repin\v{s}ek, Matej and da Cruz, Daniela and
+	Henriques, Pedro R.},
+  title = {Comparing General-Purpose and Domain-Specific Languages: An Empirical
+	Study},
+  journal = {Computer Science and Information Systems},
+  year = {2010},
+  volume = {7},
+  pages = {247--264},
+  number = {2},
+  month = may,
+  isbn = {1820-0214},
+  priority = {2},
+  publisher = {ComSIS Consortium}
+}
+
+@MISC{Labview,
+  author = {LabVIEW, National Instruments Webseite},
+  month = {Dezember},
+  year = {2012},
+  url = {http://www.ni.com/labview/d/}
+}
+
+@TECHREPORT{LLVM,
+  author = {Lattner, Chris
+	
+	Adve, Vikram},
+  title = {The LLVM Instruction Set and Compilation Strategy},
+  institution = {University of Illinois at Urbana-Champaign},
+  year = {2002},
+  url = {citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.58.40&rep=rep1&type=pdf}
+}
+
+@INPROCEEDINGS{Instrumentation,
+  author = {Laurenzano, Michael and Tikir, Mustafa M. and Carrington, Laura and
+	Snavely, Allan},
+  title = {PEBIL: Efficient static binary instrumentation for Linux.},
+  booktitle = {ISPASS},
+  year = {2010},
+  pages = {175-183},
+  publisher = {IEEE Computer Society},
+  date = {2010-04-23},
+  isbn = {978-1-4244-6022-9},
+  url = {http://cseweb.ucsd.edu/users/mlaurenzano/publications.html}
+}
+
+@ARTICLE{DbgBackwardsInTime,
+  author = {Lewis, Bil},
+  title = {Debugging Backwards in Time},
+  journal = {CoRR},
+  year = {2003},
+  volume = {cs.SE/0310016}
+}
+
+@INPROCEEDINGS{InstrumentationDetails,
+  author = {Chi-Keung Luk and Robert Cohn and Robert Muth and Harish Patil and
+	Artur Klauser and Geoff Lowney and Steven Wallace and Vijay Janapa
+	and Reddi Kim Hazelwood},
+  title = {Pin: Building customized program analysis tools with dynamic instrumentation},
+  booktitle = {In Programming Language Design and Implementation},
+  year = {2005},
+  pages = {190--200},
+  publisher = {ACM Press}
+}
+
+@TECHREPORT{EditAndContinue,
+  author = {M. Eaddy, S. Feiner},
+  title = {Multi-Language Edit-and-Continue for the Masses},
+  institution = {Columbia University Department of Computer Science},
+  year = {2005},
+  url = {http://www.cs.columbia.edu/techreports/cucs-015-05.pdf}
+}
+
+@BOOK{NullObjectPattern,
+  title = {Pattern languages of program design 3},
+  publisher = {Addison-Wesley},
+  year = {1998},
+  author = {Martin, R.C. and Riehle, D. and Buschmann, F.}
+}
+
+@MISC{Max,
+  author = {Max/MSP, Cycling'74 Webseite},
+  month = {Dezember},
+  year = {2012},
+  url = {http://cycling74.com/}
+}
+
+@ARTICLE{SuperCollider,
+  author = {McCartney, J.},
+  title = {Rethinking the computer music language: SuperCollider},
+  journal = {Computer Music Journal},
+  year = {2002},
+  volume = {26},
+  pages = {61--68},
+  number = {4},
+  publisher = {MIT Press}
+}
+
+@ARTICLE{Mernik05,
+  author = {Mernik, Marjan and Heering, Jan and Sloane, Anthony M.},
+  title = {When and how to develop domain-specific languages},
+  journal = {ACM Comput. Surv.},
+  year = {2005},
+  volume = {37},
+  pages = {316--344},
+  number = {4},
+  month = dec,
+  address = {New York, NY, USA},
+  issn = {0360-0300},
+  issue_date = {December 2005},
+  numpages = {29},
+  publisher = {ACM}
+}
+
+@INPROCEEDINGS{Heisenbug,
+  author = {Musuvathi, Madanlal and Qadeer, Shaz and Ball, Thomas and Basler,
+	Gerard and Nainar, Piramanayagam Arumuga and Neamtiu, Iulian},
+  title = {Finding and reproducing Heisenbugs in concurrent programs},
+  booktitle = {Proceedings of the 8th USENIX conference on Operating systems design
+	and implementation},
+  year = {2008},
+  series = {OSDI'08},
+  pages = {267--280},
+  address = {Berkeley, CA, USA},
+  publisher = {USENIX Association},
+  acmid = {1855760},
+  location = {San Diego, California},
+  numpages = {14}
+}
+
+@TECHREPORT{Paxson,
+  author = {Vern Paxson and Prof Anderson},
+  title = {A Survey of Support For Implementing Debuggers},
+  institution = {Lawrence Berkeley Laboratory, Berkeley CA},
+  year = {1990}
+}
+
+@INPROCEEDINGS{JavaCrossCompiler,
+  author = {Puder, Arno},
+  title = {A cross-language framework for developing AJAX applications},
+  booktitle = {Proceedings of the 5th international symposium on Principles and
+	practice of programming in Java},
+  year = {2007},
+  series = {PPPJ '07},
+  pages = {105--112},
+  address = {New York, NY, USA},
+  publisher = {ACM},
+  isbn = {978-1-59593-672-1},
+  keywords = {AJAX, cross-compiler, web applications},
+  location = {Lisboa, Portugal},
+  numpages = {8}
+}
+
+@MISC{Reaktor,
+  author = {Reaktor, Native Instruments Webseite},
+  month = {Dezember},
+  year = {2012},
+  url = {http://www.native-instruments.com/\#/de/products/producer/reaktor-5/}
+}
+
+@MISC{Simulink,
+  author = {Reaktor, Native Instruments Webseite},
+  month = {Dezember},
+  year = {2012},
+  owner = {staehff},
+  timestamp = {2012.12.20},
+  url = {http://www.native-instruments.com/\#/de/products/producer/reaktor-5/}
+}
+
+@BOOK{HowDebuggersWork,
+  title = {How debuggers work: algorithms, data structures, and architecture},
+  publisher = {John Wiley \& Sons, Inc.},
+  year = {1996},
+  author = {Rosenberg, Jonathan B.},
+  address = {New York, NY, USA},
+  isbn = {0-471-14966-7}
+}
+
+@BOOK{WinInternals,
+  title = {Windows Internals},
+  publisher = {Microsoft Press},
+  year = {2009},
+  author = {Russinovich, M.E. and Solomon, D.A. and Ionescu, A.},
+  isbn = {9780735637962},
+  url = {http://books.google.de/books?id=VgjAQjsc6g8C}
+}
+
+@ARTICLE{AlgorithmicDebug,
+  author = {Shapiro, E.Y.},
+  title = {Algorithmic program debugging.},
+  journal = {Dissertation Abstracts International Part B: Science and Engineering},
+  year = {1982},
+  volume = {43},
+  pages = {1982},
+  number = {5}
+}
+
+@MISC{DegreesOfFreedom,
+  author = {Charles Simonyi},
+  title = {Notations and Programming Languages},
+  month = {May},
+  year = {2005},
+  url = {http://www.intentsoft.com/notations_and_p/}
+}
+
+@INPROCEEDINGS{InterntionalSoftware,
+  author = {Simonyi, Charles and Christerson, Magnus and Clifford, Shane},
+  title = {Intentional software},
+  booktitle = {Proceedings of the 21st annual ACM SIGPLAN conference on Object-oriented
+	programming systems, languages, and applications},
+  year = {2006},
+  series = {OOPSLA '06},
+  pages = {451--464},
+  address = {New York, NY, USA},
+  publisher = {ACM},
+  isbn = {1-59593-348-4},
+  location = {Portland, Oregon, USA},
+  numpages = {14}
+}
+
+@BOOK{SloaneGdb,
+  title = {The Structure of the GNU Debugger},
+  publisher = {Department of Computer Science, University of Colorado},
+  year = {1991},
+  author = {Sloane, A.M.},
+  series = {Technical report CU-CS},
+  url = {http://books.google.de/books?id=aRwBHQAACAAJ}
+}
+
+@ARTICLE{Spinellis,
+  author = {Spinellis, Diomidis},
+  title = {Notable design patterns for domain-specific languages},
+  journal = {J. Syst. Softw.},
+  year = {2001},
+  volume = {56},
+  pages = {91--99},
+  number = {1},
+  month = feb,
+  address = {New York, NY, USA},
+  issn = {0164-1212},
+  issue_date = {Feb 1,2001},
+  numpages = {9},
+  publisher = {Elsevier Science Inc.}
+}
+
+@INPROCEEDINGS{LightweightLangs,
+  author = {Spinellis, Diomidis and Guruprasad, V.},
+  title = {Lightweight Languages as Software Engineering Tools.},
+  booktitle = {DSL},
+  year = {1997},
+  pages = {67-76},
+  publisher = {USENIX},
+  date = {2007-05-07}
+}
+
+@INBOOK{Steiner,
+  chapter = {Building your own instrument with Pd},
+  pages = {72-79},
+  title = {bang pure data},
+  publisher = {Wolke Verlag},
+  year = {2006},
+  author = {Hans-Christoph Steiner},
+  url = {http://puredata.info/groups/pd-graz/label/book01}
+}
+
+@TECHREPORT{Kosten,
+  author = {Tassey, G.},
+  title = {The Economic Impacts of Inadequate Infrastructure for Software Testing},
+  institution = {National Institute of Standards and Technology},
+  year = {2002},
+  url = {http://www.nist.gov/director/planning/upload/report02-3.pdf}
+}
+
+@ARTICLE{ReverseExecution,
+  author = {Tolmach, A. and Appel, A.W.},
+  title = {A debugger for Standard ML},
+  journal = {Journal of Functional Programming},
+  year = {1995},
+  volume = {5},
+  pages = {155--200},
+  number = {02},
+  publisher = {Cambridge Univ Press}
+}
+
+@ARTICLE{ToolsFuerDsls,
+  author = {Markus V{\"o}lter},
+  title = {Werkzeuge zur Erstellung und Verarbeitung von DSLs},
+  journal = {Heise Developer Channel},
+  year = {2009},
+  url = {http://heise.de/-227190}
+}
+
+@MANUAL{DwarfFormat,
+  title = {DWARF Debugging Information Format},
+  author = {Suchitra Venugopal and Adarsh Thampan},
+  organization = {IBM},
+  month = {Juli},
+  year = {2011},
+  url = {http://public.dhe.ibm.com/software/dw/opensource/os-debugging/os-debugging-pdf.pdf}
+}
+
+@ARTICLE{mps,
+  author = {Voelter, M. and Solomatov, K.},
+  title = {Language modularization and composition with projectional language
+	workbenches illustrated with MPS},
+  journal = {Software Language Engineering, SLE},
+  year = {2010}
+}
+
+@INPROCEEDINGS{Wang,
+  author = {Wang, Ge and Cook, Perry},
+  title = {ChucK: a programming language for on-the-fly, real-time audio synthesis
+	and multimedia},
+  booktitle = {Proceedings of the 12th annual ACM international conference on Multimedia},
+  year = {2004},
+  series = {MULTIMEDIA '04},
+  pages = {812--815},
+  address = {New York, NY, USA},
+  publisher = {ACM},
+  isbn = {1-58113-893-8},
+  location = {New York, NY, USA},
+  numpages = {4}
+}
+
+@ARTICLE{Ward,
+  author = {Ward, M.P.},
+  title = {Language-oriented programming},
+  journal = {Software - Concepts and Tools},
+  year = {1994},
+  volume = {15},
+  pages = {147--161},
+  number = {4}
+}
+
+@ARTICLE{Wu08,
+  author = {Wu, Hui and Gray, Jeff and Mernik, Marjan},
+  title = {Grammar-driven generation of domain-specific language debuggers},
+  journal = {Softw. Pract. Exper.},
+  year = {2008},
+  volume = {38},
+  pages = {1073--1103},
+  number = {10},
+  month = aug,
+  address = {New York, NY, USA},
+  issn = {0038-0644},
+  issue_date = {August 2008},
+  numpages = {31},
+  publisher = {John Wiley \& Sons, Inc.}
+}
+
+@BOOK{FilterDesign,
+  title = {The Art of VA Filter Design},
+  publisher = {Native Instruments},
+  year = {2012},
+  author = {Vadim Zavalishin},
+  url = {http://images-l3.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_1.0.3.pdf}
+}
+
+@INPROCEEDINGS{Watchpoints,
+  author = {Zhao, Q. and Rabbah, R. and Amarasinghe, S. and Rudolph, L. and Wong,
+	W.F.},
+  title = {How to do a million watchpoints: Efficient debugging using dynamic
+	instrumentation},
+  booktitle = {Compiler Construction},
+  year = {2008},
+  pages = {147--162},
+  organization = {Springer}
+}
+
+@MANUAL{AlignedAlloc,
+  title = {Dokumentation zur Verwendung der Funktion \_aligned\_malloc der Windows
+	API},
+  organization = {Microsoft},
+  month = {Oktober},
+  year = {2012},
+  url = {http://msdn.microsoft.com/en-us/library/8z34s9c6\%28VS.80\%29.aspx}
+}
+
+@MANUAL{DebuggerWindows,
+  title = {Writing the Debugger's Main Loop},
+  organization = {Microsoft},
+  month = {Juli},
+  year = {2012},
+  url = {http://msdn.microsoft.com/en-us/library/windows/desktop/ms681675\%28v=vs.85\%29.aspx}
+}
+
+@MANUAL{Intel2,
+  title = {Intel 64 and IA-32 Architectures Software Developer's Manual Volume
+	2: Instruction Set Reference},
+  organization = {Intel},
+  edition = {043},
+  month = {Mai},
+  year = {2012}
+}
+
+@MANUAL{Intel3,
+  title = {Intel 64 and IA-32 Architectures Software Developer's Manual Volume
+	3: System Programming Guide},
+  organization = {Intel},
+  edition = {043},
+  month = {Mai},
+  year = {2012}
+}
+
+@MANUAL{MacRealtime,
+  title = {Mac Developer Library, Kernel Programming Guide: Mach Scheduling
+	and Thread Interfaces},
+  organization = {Apple Inc.},
+  month = {Februar},
+  year = {2012},
+  url = {https://developer.apple.com/library/mac/\#documentation/Darwin/Conceptual/KernelProgramming/scheduler/scheduler.html\#//apple_ref/doc/uid/TP30000905-CH211-TPXREF108}
+}
+
+@MANUAL{VirtualAllocProtect,
+  title = {Dokumentation zur Verwendung der Funktionen VirtualAlloc und VirtualProtect
+	der Windows API},
+  organization = {Microsoft},
+  month = {Oktober},
+  year = {2012},
+  url = {http://msdn.microsoft.com/en-us/library/windows/desktop/aa366887\%28v=vs.85\%29.aspx}
+}
+
+@MANUAL{CoreReference,
+  title = {Reaktor 5 Core Reference},
+  organization = {Native Instruments},
+  year = {2010}
+}
+
+@MANUAL{Sparc,
+  title = {The SPARC Architecture Manual},
+  organization = {SPARC International},
+  edition = {Version 8},
+  year = {1992}
+}
+

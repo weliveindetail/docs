@@ -1,0 +1,74 @@
+%-----------------------------------------------------------------------------%
+%                                                                             %
+% Usage of the custom styles defined in this file. The following approaches   %
+% create exactly the same output.                                             %
+%                                                                             %
+% (1) Use with direct input:                                                  %
+%                                                                             %
+%   \begin{lstverbatim}[caption={The caption text},                           %
+%   label={lst:unique-label}, keywords={words,to,be,formatted,bold}]          %
+%   This is a simple mono-spaced text in its own environment. But it's        %
+%   still easily customizable has the caption and the formatting of some      %
+%   words may indicate.                                                       %
+%   \end{lstverbatim}                                                         %
+%                                                                             %
+% (2) Use with input from external file:                                      %
+%                                                                             %
+%   \lstinputlisting[style=verbatimstyle, caption={The caption text},         %
+%   label={lst:unique-label}, keywords={words,to,be,formatted,bold}]          %
+%   {./listings/the-external-file.txt}                                        %
+%                                                                             %
+%-----------------------------------------------------------------------------%
+
+% Package for Syntax-Highlighting
+\usepackage{listings}
+
+% Load language definitions for C++ and dialect 'Visual Studio'
+\lstloadlanguages{[Visual]C++}
+
+% Style for C++ source code
+\lstdefinestyle{cppstyle}
+{
+  language          = [Visual]C++,
+  tabsize            = 2,
+  frame              = none,
+  breaklines        = false,
+  basicstyle        = \ttfamily\footnotesize,
+  commentstyle      = \bfseries\upshape,
+  keywordstyle      = \bfseries,
+  columns            = fixed, %fullflexible,
+  showstringspaces  = false,
+  captionpos        = b,
+  numbers            = left,
+  numbersep          = 10pt,
+  numberstyle        = \tiny,
+  emphstyle          = \itshape
+}
+
+% Style for simple mono-spaced listings
+\lstdefinestyle{verbatimstyle}
+{
+  tabsize            = 2,
+  frame              = none,
+  basicstyle        = \ttfamily\footnotesize,
+  keywordstyle      = \bfseries,
+  columns            = fixed,
+  showstringspaces  = false,
+  captionpos        = b,
+  numbers            = none,
+  numbersep          = 10pt,
+  numberstyle        = \tiny,
+  emphstyle          = \itshape
+}
+
+% Create custom environments to be used with \begin{} .. \end{}
+\lstnewenvironment{lstverbatim}[1][] { \lstset{style=verbatimstyle, #1} }{}
+\lstnewenvironment{lstcpp}[1][] { \lstset{style=cppstyle, #1} }{}
+
+% Create inline shortcut to be used like |verbatim text| and §source code§
+\lstMakeShortInline[style=verbatimstyle, basicstyle=\ttfamily\small,]|
+\lstMakeShortInline[style=verbatimstyle, basicstyle=\ttfamily\normalsize,]§
+
+% Create shortcut for inline comment to be used like 2+3 = °9+°5
+\catcode`\°=\active
+\def°#1°{}

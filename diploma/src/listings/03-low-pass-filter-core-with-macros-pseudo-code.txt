@@ -1,0 +1,9 @@
+function LowPassFilter(In, F_i, F_i-1, SR_R)
+{
+	a := In
+	b := F_i * (6,28319 / SR_R)
+	c := F_i-1 * (1 - b)
+	
+	Out := a * b + c	
+	return Out
+}

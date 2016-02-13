@@ -1,0 +1,36 @@
+
+Ziel der Implementierung des Prototypen ist es, einen Machbarkeitsnachweis für die in Kapitel \ref{sec:concept} erarbeiteten Grundfunktionalitäten zu erbringen. Dafür wurde die Realisierung des in \ref{sec:concept-sameprocess-stepping} beschriebenen Verfahrens zur Ausführung des Prüflings in Einzelschritten gewählt. Die Anbindung der Benutzeroberfläche gestaltet sich damit einfach. Die Ausführung eines Source-Level-Steps kann vom Benutzer durch das Betätigen einer Funktionstaste der Tastatur erfolgen. Die Implementierung kann sich damit auf die Umsetzung der Kernfunktionalitäten konzentrieren. Da die Einzelschrittausführung auf der Verwendung von Breakpoints basiert, demonstriert sie die Funktionsweise aller grundlegenden Mechanismen zur Ablaufkontrolle eines Trace-Debuggers. Die Einzelschrittausführung soll zunächst nur für den Audio-Handler (\ref{sec:context-core-execution}) des Prüflings verfügbar sein. Im Audio-Handler findet die Signalverarbeitung in Echtzeit statt. Auch im Hinblick auf die Problematik der Echtzeitverarbeitung werden damit alle Schwerpunkte abgedeckt.
+
+Mit einem als \emph{Wire-Debugging} bezeichneten Mechanismus steht in Reaktor Core zudem bereits eine einfache Möglichkeit zur Inspektion des Prüflings zur Verfügung. Er soll zu den zu erstellenden Ablaufkontrollmechanismen kompatibel sein. Die Implementierung des Prototypen soll zukünftige Ergänzungen ermöglichen. Dazu zählen explizite Breakpoints auf beliebigen Modulen, Step-Out und Step-Over Funktionalitäten für Macros, das Debugging mehrerer Core Cells zugleich sowie die Modifikation von Laufzeitwerten. 
+
+%Unter Verwendung des erarbeiteten Konzepts nicht realisierbar sind asynchrone Unterbrechungen der Ausführung. 
+
+%Anregungen zur spezifischen Erweiterung dieses Inspektionsmechanismus' finden sich im Ausblick in Kapitel \ref{sec:conclusion}. 
+
+%\begin{itemize}
+
+%  \item nur einfaches Stepping im AudioHandler
+  
+%  \item Planung soll künftige Ergänzungen berücksichtigen, z.B.:
+%  \begin{itemize}
+%    \item Debugging beliebiger Handler (speziell des Init-Handlers)
+%    \item Breakpoints auf beliebigen Modulen oder Ports (Inputs/Outputs)
+%    \item Resume nach Breakpoint oder Einzelschritt
+%    \item Step-Out und Step-Over für Macros (Voraussetzung: Debug-Modus für gesamte Core Cell, damit bei Änderung der Ansicht keine Neukompilierung nötig ist)
+%    \item Core-Cell-übergreifendes Debugging
+%    \item Änderung von Laufzeitwerten (Werte für Wire-Debugging müssten nicht nur als Kopie herausgeschrieben sondern auch zur Weiterverwendung wieder eingelesen werden)
+%  \end{itemize}
+  
+%  \item Im aktuellen Konzept nicht vorgesehen/möglich sind:
+%  \begin{itemize}
+%    \item asynchrones Anhalten der Ausführung (wie "`Pause"' in Visual Studio), da Debug-Trap des Prozessors nicht verfügbar
+%    \item omniscient Debugging (nicht Future-Proof)
+%  \end{itemize}
+  
+%  \item Vorerst ausgeklammert.
+%	\begin{itemize}
+%  	\item Inspektion mehrerer / verschiedener Core Cells gleichzeitig
+%  	\item Behandlung von Haltepunkten im GUI-Thread
+%	\end{itemize}
+
+%\end{itemize}

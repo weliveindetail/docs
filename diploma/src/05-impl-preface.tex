@@ -1,0 +1,142 @@
+
+Bei der Implementierung des Debuggers muss der Aufbau und die Arbeitsweise des bestehenden Projekts berücksichtigt werden. Aufbauend auf der Einführung in Reaktor Core in Abschnitt \ref{sec:context-core} soll hier auf die Aspekte zur technischen Realisierung eingegangen werden.
+
+% Im Folgenden wird zunächst die Integration der Debugging-Funktionalitäten in die bestehende Organisation des Quellcodes und die Arbeitsweise des Reaktor Core Projekts vorgestellt.
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Eigenschaften von Reaktor Core Programmen}
+\label{sec:impl-preface-properties}
+
+Aufgrund der eingeschränkten Mächtigkeit von Reaktor Core eignet sich die Programmiersprache nur für die Implementierung von Anwendungsteilen, die von einer Ausführungsumgebung verwendet werden. Reaktor Core Programme sind also keine eigenständigen Anwendungen. Diese Eigenschaft findet sich unter domänenspezifischen Sprachen häufig. Ein Reaktor Core Programm liegt in Form mehrerer \emph{Handler} vor. Ein Handler ist eine einfache Funktion, die von der Ausführungsumgebung aufgerufen werden kann. Innerhalb eines Handlers erfolgen keine weiteren Funktionsaufrufe. 
+
+In Reaktor Core existiert kein Schleifenkonstrukt. Ein Handler wird damit auf eine Abfolge sequenzieller Befehle und verschachtelter Verzweigungen reduziert. Alle Sprünge im Maschinencode der Programme erfolgen stets in Richtung der Ausführung. Abbildung \ref{fig:successor-diagram} auf Seite 68 zeigt die typische Struktur eines Reaktor Core Programms in Pseudocode.
+
+%Bei der Ausführung eines Handlers werden damit die Register des Prozessors zur Verwaltung des Aufrufstacks frei. Die Werte der Register werden zu Beginn der Ausführung auf dem auf dem Stack gesichert und am Ende wiederhergestellt. Während der Ausführung können diese Register daher als zusätzliche General-Purpose-Register verwendet werden. 
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Architektur}
+\label{sec:impl-preface-architecture}
+
+Reaktor Core ist in C++ geschrieben und liegt als Programmbibliothek vor (\emph{Reaktor Core Library}), die von der Ausführungs- und Entwicklungsumgebung Reaktor verwendet wird. Reaktor ist ein Softwareprogramm, das mit der Zeit gewachsen ist und keine durchgängige Quellcodestruktur aufweißt. Der Quellcode von Reaktor Core hingegen ist stark strukturiert. Er unterteilt sich in mehrere Module, die über eine einheitliche Schnittstelle mit Reaktor kommunizieren. Der Programmcode des Debuggers soll hier in Form eines zusätzlichen Moduls ergänzt werden. Abbildung \ref{fig:integration-srs} zeigt die Organisation der Module und deren Abhängigkeiten.
+
+%\begin{remark}
+%An welchen Stellen wird Debugging-Mechanismus in Reaktor eingebaut?
+%\end{remark}
+
+%\begin{itemize}
+%	\item GUI: Benutzerinteraktion
+%	\item Kompilierung: Sammeln von Programmdaten
+%	\item Ausführung: das eigentliche Debugging
+%\end{itemize}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.25]{06-projects-with-srs.png} %[width=\textwidth]
+  \caption{Integration des Moduls SRS in die bestehende Projektarchitektur. Die Kommunikation mit der grafischen Benutzeroberfläche erfolgt über das Schnittstellenmodul \emph{SDI}. }
+  \label{fig:integration-srs}
+\end{figure}
+
+Das Herzstück der Reaktor Core Library bildet der Reaktor Core Compiler. Der Quellcode des Compilers ist im Modul |SEC| (Synth Engine Compiler) gekapselt. Neukompilierungen werden implizit durch Änderungen der Datenbasis im Modul |SD| (Synth Data) initiiert. Kommt es zur Übersetzungszeit zu weiteren Änderungen, wird die Kompilierung abgebrochen und neu gestartet. Nach Abschluss des Übersetzungsvorgangs erfolgt eine Benachrichtigung der Ausführungsumgebung über das Modul |SDI| (Synth Data Interface). |SDI| bildet die einheitliche Schnittstelle der Reaktor Core Library. Sie reglementiert den gesamten Kommunikationsfluss. Damit sind nicht alle Zugriffsmöglichkeiten, die sich die Module der Reaktor Core Library untereinander gewähren, auch nach außen verfügbar. Für den Quellcode des Debuggers ist das Modul |SRS| (Synth Runtime Services) hinzugekommen. Außerhalb der Reaktor Core Library steht die Entwicklungsumgebung im Modul |SDE| (Synth Data Editor) und die Ausführungsumgebung Reaktor (Primary).
+ 
+%Die Schnittstelle zur Reaktor Library bildet das Modul |SDI| (Synth Data Interface). Die Module der Reaktor Core Library untereinander mehr Funktionen zur Verfügung stellen müssen, als für die Verwendung der Bibliothek nach außen nötig sind, stellt sie ermöglicht einen dezidierten Zugriff auf die 
+
+%\begin{figure}[ht!]
+%  \centering
+%  \includegraphics[width=\textwidth]{06-integration-srs-classes.png} %[scale=0.25]
+%  \caption{Anbindung der Klassen des Moduls SRS. ..Details..}
+%  \label{fig:integration-srs-classes}
+%\end{figure}
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Arbeitsweise von Reaktor Core}
+
+Die Ausführungsumgebung Reaktor arbeitet mit Ensembles. Ein Ensemble kann beliebig viele Instrumente enthalten. Innerhalb eines solchen Reaktor-Instruments können wiederum beliebig viele Core Cells verwendet werden. Wie in Abschnitt \ref{sec:context-core-env} beschrieben wurde, dienen Core Cells als Container für die mit Reaktor Core entwickelten Grundschaltelemente. Als Vereinfachung wird für die Entwicklung des Prototypen davon ausgegangen, dass zunächst nur eine einzige Core Cell existiert. Die Core Cell ist im Quellcode als Instanz der Klasse |SD::Instrument| repräsentiert. Neben einer Reihe von Eigenschaften enthält |SD::Instrument| Listen ihrer Ein- und Ausgabeports sowie direkt enthaltener Module (Instanzen der Klasse |SD::Module|). |SD::Module| dient als Basisklasse für alle Arten von Modulen. Macros sind spezielle Module, die ihrerseits wieder Module enthalten können. Damit ist die hierarchische Struktur der Core Cell in der Datenbasis repräsentiert. 
+
+%\noindent
+Änderungen der Datenbasis, wie das Laden eines Ensembles in Reaktor oder die Modifikation der Core Cell durch den Benutzer, führen zur Neukompilierung der Core Cell. Der Ablauf der Kompilierung wird in Abschnitt \ref{sec:impl-preface-compilation} genauer betrachtet. Nach der Kompilierung liegt der ausführbare Maschinencode der Core Cell im Speicher bereit. Ist zu diesem Zeitpunkt noch ein Sample-Puffer in Bearbeitung, wird dieser Vorgang zunächst abgeschlossen. Für die Freischaltung des neuen Programmcodes genügt die Anpassung einiger Funktionszeiger in Reaktor, sodass die Ausführung bei der Verarbeitung des nächsten Sample-Puffers den neuen Programmcode verwendet. Der Speicherbereich des alten Programmcodes kann dann freigegeben werden.
+
+%Beim Laden eines Ensembles in Reaktor wird die Datenstruktur der enthaltenen Core Cell wiederhergestellt. Dies entspricht einer 
+
+%Eine Instanz der Klasse wird dafür als Stackvariable angelegt. Ein Abbruch der Übersetzung kann dann durch das Verlassen des Gültigkeitsbereichs der Stackvariable erreicht werden. Zu diesem Zweck wird in den von |SEC::Instrument| ausgehenden Funktionsaufrufen in Abständen ein Abbruchflag überprüft. Ist es gesetzt, kehren die Funktionen vorzeitig zurück. Diese Konstruktion verringert den Anteil dynamisch allozierten Speicherplatzes für die Bestandteile des Compilers. 
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Ablauf der Kompilierung}
+\label{sec:impl-preface-compilation}
+
+Da es sich bei Reaktor Core um eine datenstromorientierte, grafische Programmiersprache handelt, ist kein Parsing im klassischen Sinne nötig. Die in Reaktor Core erstellten Datenflussgraphen entsprechen einem abstrakten Syntaxbaum bereits in vielerlei Hinsicht. Die Übersetzung einer Core Cell in Maschinencode erfolgt in drei Schritten. Der gesamte Übersetzungsvorgang wird von der Klasse |SEC::Instrument| kontrolliert. Nachfolgend wird auf jeden der Schritte im Einzelnen eingegangen.
+
+\subsubsection{Vorbereitungsphase}
+\label{sec:impl-preface-compilation-prolog}
+
+Jede im Folgenden betrachtete Core Cell hat mindestens einen Port für die Ausgabe der transformierten Signalwerte\footnote{Es existieren auch spezielle Event Core Cells, die nicht über einen solchen Port verfügen. Auf sie soll im Folgenden jedoch nicht gesondert eingegangen werden, da sie für die Echtzeitverarbeitung keine Rolle spielen.}. Davon ausgehend werden über eine Tiefensuche nach und nach alle Module bestimmt, die an der Berechnung der transformierten Signalwerte direkt teilhaben. Wird eine Core Cell als Datenflussgraph betrachtet, beginnt die Tiefensuche also an dessen Senke und erfolgt gegen die Flussrichtung. Die Grenzen von Macros werden dabei nicht beachtet, denn in Reaktor Core werden Macros nicht als Funktionen realisiert. Stattdessen wird der Code eines Macros für jede Instanz separat erzeugt. In gewisser Weise ähnelt dies der Funktionsweise von Präprozessormacros in universellen Programmiersprachen wie C oder C++. Die Tiefensuche endet u.\,a. an Leseoperationen von Speicherzellen, welche z.\,B. in Latches (siehe \ref{sec:context-core-example}) verwendet werden. Die Module die aus Sicht der Tiefensuche hinter diesen Speicherzellen liegen, müssen -- sofern die Speicherzelle die einzige Verbindung darstellt -- nicht Teil der Echtzeitverarbeitung sein. Sie werden zu einem späteren Zeitpunkt in einen Event-Handler (\ref{sec:context-core-execution}) aufgenommen. Auf diese Weise wird die Zuordnung der Module zum späteren Audio-Handler bestimmt. Der Audio-Handler enthält den Teil des Maschinencodes, der die Audioausgabe in Echtzeit berechnet. 
+
+\emph{Router} sind spezielle Module. In Abhängigkeit von einem booleschen Wert, wie dem Ergebnis einer Vergleichsoperation, wird die Ausführung entweder am oberen oder am unteren Ausgang des Moduls fortgesetzt. Sie stellen die einzige Möglichkeit zur Verzweigung des Kontrollflusses dar und spielen daher eine zentrale Rolle. Das Pedant des Routers ist das \emph{Merge} Modul, welches den Kontrollfluss aus verschiedenen Verzweigungen zusammenfasst. Eine Verzweigung entspricht stets einer Laufzeitbedingung (\emph{Condition}). Die Module die im Verarbeitungsfluss hinter einem Router liegen, werden in Abhängigkeit zu dessen Laufzeitbedingung ausgeführt. Die Menge der Laufzeitbedingungen, unter denen ein Modul zur Ausführung kommt, wird als \emph{Condition-Stack} bezeichnet. Für jedes Modul der Core Cell wird ein solcher Condition-Stack aufgebaut. Im Tiefensuchbaum aufeinanderfolgende Module mit äquivalentem Condition-Stack werden zu \emph{Terminal-Instances} zusammengefasst (|SEC::ConditionTerminalInstance|). Als Stellvertreter der Module der Datenbasis kommen hier Instanzen der Klasse |SEC::Module| zum Einsatz. Ein |SEC::Module| enthält übersetzungsspezifische Daten sowie eine Referenz auf das zugehörige |SD:Module|. Router gehören zu keiner Terminal-Instance. Für jeden Router wird eine Node-Instance (|SEC::ConditionNodeInstance|) erzeugt, die zwei Nachfolger in Form von Node- oder Terminal-Instances haben kann. Damit wird die Verzweigungsstruktur des Kontrollflusses zur Übersetzungszeit abgebildet.
+
+Innerhalb der Terminal-Instances existiert bereits eine feste Reihenfolge der Module. Hier besteht aber noch Optimierungspotenzial. Für ein gegebenes Modul im Audio-Handler einer Core Cell sind einerseits ab einem bestimmten Ausführungszeitpunkt des Handlers alle nötigen Eingabewerte verfügbar. Andererseits gibt es ab einem bestimmten Ausführungszeitpunkt des Handlers keine anderen Module mehr, die unabhängig vom Ergebnis der Operation des Moduls ausgeführt werden können. Für die Positionierung des Moduls bleibt dem Compiler dieser Spielraum für Optimierungen. 
+
+%Eine solche Positionierungsentscheidung besteht prinzipiell für alle Module, ist aber für Router besonders vorrangig. Denn Router repräsentieren Verzweigungen und unterteilen den Maschinencode damit in sogenannte \emph{lineare Segmente}. 
+
+Die Zuordnung der Module zu Handlern und die Unterteilung der Handler in Node- und Terminal-Instances bildet die erste Phase der Kompilierung. Die Koordination der dafür nötigen Schritte wird im Quellcode durch die Klasse |SEC::MRSCompiler| abgebildet. Für die Integration des Debuggers spielt diese Phase nur eine untergeordnete Rolle. %Weitere Details sollen hier nicht näher beleuchtet werden.
+
+%Der Großteil der Funktionalität zur Verrichtung dieser Aufgaben ist im Quellcode in der Klasse |SEC::MRSCompiler| gekapselt. Für die Integration des Debuggers spielt diese Phase eine untergeordnete Rolle. Sie soll daher nicht näher beleuchtet werden.
+
+\subsubsection{Compilezeit}
+\label{sec:impl-preface-compilation-compile}
+
+\enlargethispage{0.2cm}
+Während der zweiten, auch als \emph{Compilezeit} bezeichneten Phase der Kompilierung findet die tatsächliche Übersetzung der Module in Maschinenbefehle statt. Die Klasse |SEC::BCBCompiler| ist die abstrakte Basisklasse des Compiler-Backends und stellt u.\,a. Hilfsmittel für die Registerallokation und das sequenzielle Schreiben von Maschinencode bereit. Die konkrete Übersetzung von Befehlen wird über rein virtuelle Funktionen an abgeleitete Klassen delegiert. |SEC::BCBCompilerSSE| ist eine solche abgeleitete Klasse für Systeme die die SSE-Erweiterungen des x86 Befehlssatzes unterstützen. Die Auswahl des konkreten Compiler-Backends erfolgt bereits beim Start von Reaktor auf Grundlage verschiedener Systemeigenschaften.
+
+\noindent
+Zu Beginn der zweiten Phase liegen die relevanten Module der Core Cell als Instanzen der Basisklasse |SEC::Module| und gruppiert in Terminal-Instances vor. Alle Terminal-Instances werden nun durchlaufen und deren Module in Maschinencode übersetzt. Für jeden Modultyp existiert eine eigene Ableitung von |SEC::Module|. Die Basisklasse delegiert den Funktionsaufruf zur Übersetzung eines Moduls durch eine virtuelle Funktion an die abgeleiteten Klassen. In den abgeleiteten Klassen ist bekannt, welchem Maschinenbefehl bzw. welchen Maschinenbefehlen der jeweilige Modultyp entspricht. Für die strukturierte Übersetzung werden die entsprechenden rein virtuellen Funktionen des Compiler-Backends aufgerufen. Die tatsächliche Verarbeitung erfolgt dann in der jeweiligen befehlssatzspezifischen Instanz (z.\,B. |SEC::BCBCompilerSSE|). 
+
+Im Anschluss liegt der Binärcode jeder Terminal-Instance des Handlers vor. Diese binären Codeblöcke werden als \emph{lineare Segmente} bezeichnet. Sie bilden ein zentrales Konzept im weiteren Übersetzungsvorgang und spielen eine wichtige Rolle für die spätere Realisierung von Breakpoints. Lineare Segmente enthalten keine Sprunganweisungen. Sprungziel kann in einem linearen Segment darüber hinaus ausschließlich die erste Operation sein. Lineare Segmente bilden damit die Grundblöcke in Reaktor Core Programmen\footnote{Die vollständige Bedeutung von Grundblöcken erhalten lineare Segmente erst zur Linkzeit durch die Ergänzung von Sprungbefehlen an deren Ende.}. 
+
+%gleichen damit dem allgemeinen Konzept von Grundblöcken im Compilerbau \cite{Compiler} mit der Ausnahme, dass in einem linearen Segment auch der letzte Befehl kein Sprungbefehl sein kann. 
+
+%Lineare Segmente nehmen jedoch keinerlei Einfluss auf den Kontrollfluss und können damit im Gegensatz zu den Grundblöcken im Compilerbau nicht für die Zwecke Kontrollflussanalyse verwendet werden.
+
+%Lineare Segmente enthalten ausschließlich Operationen, die für die Realisierung des Signalverarbeitungsvorgangs relevant sind. 
+
+%Die Terminal-Instances eines Handlers werden zunächst separat übersetzt. Dafür wird die Übersetzungsfunktion für jedes |SEC::Module| in der vorgegebenen Reihenfolge der Terminal-Instance ausgerufen. 
+
+%Es folgen entsprechende Aufrufe zur Übersetzung der Befehle an das Compiler-Backends. Das Ergebnis wird dann von der befehlssatzspezifischen Instanz des Compiler-Backends zurückgegeben.
+%Diese Gruppen entsprechen den späteren linearen Segmenten. 
+
+\subsubsection{Linkzeit}
+\label{sec:impl-preface-compilation-link}
+
+In der dritten, auch als \emph{Linkzeit} bezeichneten Phase der Kompilierung werden die zur Compilezeit erstellten linearen Segmente zwischen Sprunganweisungen eingebettet, die den Kontrollfluss regeln. Zu diesem Zeitpunkt ist die Gesamtgröße des Programmcodes bereits bekannt. Zu Beginn der Linkzeit wird ein entsprechender Speicherbereich alloziert. Die Größe des Speicherbereichs entspricht einem Vielfachen der Größe einer Speicherseite des Betriebssystems. Die Speicherseiten sind zunächst editierbar, können aber zu einem späteren Zeitpunkt über entsprechende Funktionen des Betriebssystems als ausführbar markiert werden\footnote{Unter Windows kann dies beispielsweise über die API Funktion VirtualProtect erreicht werden. Der betreffende Speicherbereich muss dafür zuvor über die API Funktion VirtualAlloc alloziert worden sein \cite{VirtualAllocProtect}.}. Zur Linkzeit wird der Maschinencode der Core Cell in diesem Speicherbereich zusammengefügt. Dieser Vorgang wird von der Klasse |SEC::BCBLinker| koordiniert. Den Ausgangspunkt bildet die abstrakte Klasse |SEC::BCBElement|. Für sie existieren die beiden abgeleiteten Klassen |SEC::BCBRawCode| und |SEC::BCBFork|. Zu den Instanzen der Klasse |SEC::BCBRawCode| gehören die bereits übersetzten linearen Segmente. Daneben liegt zur Linkzeit auch der Maschinencode zur Auswertung der Laufzeitbedingungen als Instanzen dieser Klasse vor. Durch die Instanzen der Klasse |SEC::BCBFork| werden die Verzweigungen des Kontrollflusses abgebildet. Ein solches Fork besteht aus einem Prolog, einem Then-Zweig, einem Else-Zweig und einem Epilog. Jeder dieser Teile kann wiederum eine beliebige Anzahl von Instanzen der Klasse |SEC::BCBElement| enthalten (also auch leer sein). Die Informationen für die Verschachtelung der Forks gehen aus den Node-Instances der Compilezeit hervor. 
+
+Ausgehend von einem ersten Fork, das eine stets erfüllte Verzweigungsbedingung darstellt, werden im Zuge des Link-Prozesses eines Handlers alle Elemente sequenziell in den Zielspeicher kopiert. Zwischen Prolog und Then-Zweig sowie zwischen Then- und Else-Zweig werden die nötigen bedingten Sprungbefehle eingefügt. Im Falle von verschachtelten Forks erfolgt ein rekursiver Aufruf des Link-Prozesses. Alle Sprungdistanzen sind zur Linkzeit bekannt. Sie ergeben sich als Summe der Länge der zu überspringenden linearen Segmente und der Länge der dazwischen nötigen Sprungbefehle. 
+
+%Eine detaillierte Beschreibung des Link-Prozesses würde den Rahmen dieser Arbeit sprengen und ist für die Realisierung der Debugging-Funktionalitäten nicht relevant.
+
+Nach Abschluss der dritten Phase liegt der ausführbare Maschinencode der Core Cell im Zielspeicher bereit. Danach wird der verwendete Speicherbereich als ausführbar markiert. Die Echtzeitverarbeitung im Audio-Handler kann nach der einmaligen Ausführung des Init-Handlers beginnen.
+
+%Der Ablauf des Link-Prozesses eines Handlers gestaltet sich wie folgt. Im Prolog erfolgt in den meisten Fällen nur die Auswertung der Laufzeitbedingung für die Elemente in Then- und Else-Zweig. Ein entsprechender bedingter Sprung kann direkt im Anschluss hinter dem Prolog in den Speicher geschrieben werden, da die Sprungdistanz zu diesem Zeitpunkt bereits bekannt ist. Handelt es sich beim Then-Zweig um ein lineares Segment, kann der bestehende Maschinencode einfach in den Speicher kopiert werden.  zwischen Prolog und Then-Zweig benötigt werden. 
+
+%für konkrete befehlssatzspezifische Implementierungen und
+%Im Gegensatz zum Konzept der Grundblöcke im Compilerbau 
+
+%Der Übersetzungvorgang selbst wird in Abschnitt \ref{} genauer betrachtet. Der Maschinencode liegt in Form mehrerer Handler vor, die von der Ausführungsumgebung wie gewöhnliche Funktionen aufgerufen werden können (\ref{sec:context-core-env}). Unmittelbar nach der Übersetzung wird der Init-Handler ausgeführt. 
+
+%Ihre Zuordnung zu den jeweiligen Reaktor-Instrumenten und -Ensembles wird im Quellcode von Reaktor Core durch die Klassen |SD::Studio| und |SD::Database| abgebildet. 
+
+%\begin{remark}
+%Alle nötigen Begriffe und Abläufe erklären die wichtig werden
+%\end{remark}
+
+%\begin{remark}
+%Zu welchen bestehenden Funktionen muss das Debugging kompatibel sein?
+%\end{remark}
+
+%\begin{itemize}
+%	\item on-Demand Kompilierung
+%	\item Signal- und Ereignisverarbeitung in verschiedenen Handlern
+%	\item Wire-Debugging
+%\end{itemize}
+

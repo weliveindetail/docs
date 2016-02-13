@@ -1,0 +1,182 @@
+Segment Code
+------- -----------------------------------------------------------------
+   0    movss       xmm4,dword ptr ds:[0C60D48h] 
+        comiss      xmm0,xmm4 
+        
+        if(BoolRnd11) 
+        {
+   1        nop              
+            movss    xmm4,dword ptr ds:[0C60D4Ch] 
+            comiss   xmm7,xmm4 
+            
+            if(BoolRnd21) 
+            {
+   2            nop              
+                movss    xmm7,dword ptr ds:[0C60D50h] 
+                comiss   xmm6,xmm7 
+                
+                if(BoolRnd31) 
+                {
+   3                nop              
+                    movss    xmm7,dword ptr ds:[0C60D54h] 
+                    comiss   xmm5,xmm7 
+                    
+                    if(BoolRnd41) 
+                    {
+   4                    nop              
+                        mov      eax,dword ptr [esi-6Ch] 
+                        mov      dword ptr [esi-68h],eax 
+                        add      eax,1 
+                        mov      dword ptr [esi-64h],eax 
+                        cvtsi2ss xmm7,eax 
+                        movss    dword ptr [esi-60h],xmm7 
+                        mov      dword ptr [esi-6Ch],eax 
+                        nop      dword ptr [eax+eax] 
+                    }
+                    else 
+                    {
+   5                    mov      eax,0FFFFFFFFh 
+                        mov      dword ptr [edi-70h],eax 
+                        mov      eax,dword ptr [edi-74h] 
+                        mov      dword ptr [edi-6Ch],eax 
+                        lea      eax,[edi-70h] 
+                        mov      dword ptr [edi-74h],eax 
+                        nop           
+                        nop      dword ptr [eax+eax] 
+                    }
+                    nop      dword ptr [eax+eax] 
+                }
+                else 
+                {
+  6                 mov      eax,0FFFFFFFFh 
+                    mov      dword ptr [edi-68h],eax 
+                    mov      eax,dword ptr [edi-74h] 
+                    mov      dword ptr [edi-64h],eax 
+                    lea      eax,[edi-68h] 
+                    mov      dword ptr [edi-74h],eax 
+                    nop           
+                    nop      dword ptr [eax+eax]             
+                }
+                nop      dword ptr [eax+eax] 
+            }
+            else 
+            {    
+   7            mov      eax,0FFFFFFFFh 
+                mov      dword ptr [edi-60h],eax 
+                mov      eax,dword ptr [edi-74h] 
+                mov      dword ptr [edi-5Ch],eax 
+                lea      eax,[edi-60h] 
+                mov      dword ptr [edi-74h],eax 
+                nop           
+                nop      dword ptr [eax+eax] 
+            }
+            nop      dword ptr [eax+eax] 
+        }
+        else 
+        {
+   8        nop           
+            movss    xmm7,dword ptr ds:[0C60D58h] 
+            comiss   xmm1,xmm7 
+            
+            if(BoolRnd22) 
+            {
+   9            mov      eax,0FFFFFFFFh 
+                mov      dword ptr [edi-58h],eax 
+                mov      eax,dword ptr [edi-74h] 
+                mov      dword ptr [edi-54h],eax 
+                lea      eax,[edi-58h] 
+                mov      dword ptr [edi-74h],eax 
+                nop           
+                nop      dword ptr [eax+eax] 
+            }
+            else 
+            {
+  10            nop           
+                movss    xmm7,dword ptr ds:[0C60D5Ch] 
+                comiss   xmm2,xmm7 
+                
+                if(BoolRnd33) 
+                {
+  11                mov      eax,0FFFFFFFFh 
+                    mov      dword ptr [edi-50h],eax 
+                    mov      eax,dword ptr [edi-74h] 
+                    mov      dword ptr [edi-4Ch],eax 
+                    lea      eax,[edi-50h] 
+                    mov      dword ptr [edi-74h],eax 
+                    nop           
+                    nop      dword ptr [eax+eax] 
+                }
+                else
+                {
+  12                nop           
+                    movss    xmm7,dword ptr [edi+1Ch] 
+                    movss    xmm6,dword ptr ds:[0C60D60h] 
+                    comiss   xmm7,xmm6 
+                    
+                    if (BoolRnd44)
+                    {
+  13                    jbe      00C609CF 
+                        mov      eax,0FFFFFFFFh 
+                        mov      dword ptr [edi-48h],eax 
+                        mov      eax,dword ptr [edi-74h] 
+                        mov      dword ptr [edi-44h],eax 
+                        lea      eax,[edi-48h] 
+                        mov      dword ptr [edi-74h],eax 
+                        nop           
+                        nop      dword ptr [eax+eax] 
+                    }
+                    else
+                    {
+  14                    nop           
+                        mov      eax,dword ptr [esi+1Ch] 
+                        mov      dword ptr [esi+20h],eax 
+                        add      eax,1 
+                        mov      dword ptr [esi+24h],eax 
+                        cvtsi2ss xmm7,eax 
+                        movss    dword ptr [esi+28h],xmm7 
+                        mov      dword ptr [esi+1Ch],eax 
+                        nop      dword ptr [eax+eax] 
+                    }
+                    nop      dword ptr [eax+eax] 
+                }
+                nop      dword ptr [eax+eax] 
+            }
+            nop      dword ptr [eax+eax] 
+        }
+    
+  15    mov      eax,dword ptr [edi-60h] 
+        or       eax,dword ptr [edi-58h] 
+    
+        if(Merge21/22) 
+        {
+  16        nop           
+            movss    xmm7,dword ptr ds:[0C60D64h] 
+            comiss   xmm3,xmm7 
+            
+            if(BoolRnd32) 
+            {
+  17            mov      eax,0FFFFFFFFh 
+                mov      dword ptr [edi-40h],eax 
+                mov      eax,dword ptr [edi-74h] 
+                mov      dword ptr [edi-3Ch],eax 
+                lea      eax,[edi-40h] 
+                mov      dword ptr [edi-74h],eax 
+                nop        
+                nop      dword ptr [eax+eax] 
+            }
+            else
+            {
+  18            mov      eax,0FFFFFFFFh 
+                mov      dword ptr [edi-38h],eax 
+                mov      eax,dword ptr [edi-74h] 
+                mov      dword ptr [edi-34h],eax 
+                lea      eax,[edi-38h] 
+                mov      dword ptr [edi-74h],eax 
+                nop             
+                nop      dword ptr [eax+eax]         
+            }
+            nop      dword ptr [eax+eax] 
+        }
+    
+  19    movss    xmm3,dword ptr ds:[0C60D48h] 
+        comiss   xmm0,xmm3

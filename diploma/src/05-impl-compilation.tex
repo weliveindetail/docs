@@ -1,0 +1,64 @@
+
+%Es wird auch dargestellt, wie die nötigen Programmdaten zum Prfling während der Übersetzung gesammelt und dem Debugger übergeben werden. %Zudem müssen während der Übersetzung verschiedene Daten zum Prüfling gesammelt werden. 
+
+\subsection{Anpassungen des Prüflingsprogramms}
+\label{sec:impl-buildtime-compilerchanges}
+
+Nach dem in Kapitel \ref{sec:concept} erarbeiteten Konzept erfordert die Verwendung eines Same-Process Debuggers eine spezielle Kompilierung des Prüflings. In diesem Abschnitt werden die dafür nötigen Anpassungen am Reaktor Core Compiler beschrieben. Da alle Sprünge im Maschinencode von Reaktor Core Programmen in Richtung der Ausführung erfolgen (\ref{sec:impl-preface-properties}), kann die Korrektur von Sprunganweisungen (\ref{sec:concept-sameprocess-stepping-loops}) bei der Kompilierung des Prüflings entfallen. Zudem sollen die Mechanismen zur Ablaufkontrolle zunächst nur für den Audio-Handler verfügbar sein. Die Anpassungen am Reaktor Core Compiler begrenzen sich damit auf das Einfügen von Puffern vor jedem Sprungziel im Audio-Handler und die Ergänzung eines Callback-Points an dessen Beginn.
+
+%Darüber hinaus widmet sich Abschnitt \ref{sec:impl-buildtime-compilerchanges-stackregister} einem weiteren Problem, das durch die Optimierung von Reaktor Core Programmen entsteht.
+
+\subsubsection{Einfügen von Puffern vor jedem Sprungziel}
+\label{sec:impl-buildtime-compilerchanges-buffer}
+
+Gemäß Abschnitt \ref{sec:concept-sameprocess-overwriting-blocks} der Konzeption ist das Einfügen von Puffern zwischen den dort definierten sequenziellen Befehlsblöcken nötig. Ein sequenzieller Befehlsblock beginnt an einem Sprungziel und umfasst alle Maschinenbefehle bis zum nächsten Sprungziel. In Reaktor Core Programmen können nur die jeweils ersten Maschinenbefehle von linearen Segmenten Sprungziele sein. Das ist jedoch nicht für jedes lineare Segment der Fall. Demnach können lineare Segmente nur Teilstücke sequenzieller Befehlsblöcke sein. Die Zuordnung gestaltet sich wie folgt. Ein lineares Segment bildet den Anfang eines sequenziellen Befehlsblocks, wenn es das erste lineare Segment im Maschinencode ist, oder wenn dessen erster Befehl ein Sprungziel ist. Andernfalls gehört das lineare Segment zum gleichen sequenziellen Befehlsblock wie sein direkter Vorgänger im Maschinencode. Anhand des Beispiels aus Abbildung \ref{fig:successor-diagram} wird das ersichtlich. Da hier nur die Segmente 4, 6, 7 und 10 Sprungziele sind, bilden die folgenden Gruppen linearer Segmente jeweils einen sequenziellen Befehlsblock: (0,\,1,\,2,\,3), (4,\,5), (6), (7,\,8,\,9) und (10). Anhand der bei der Kontrollflussanalyse gewonnen Daten könnte nun ermittelt werden, welche linearen Segmente ein Sprungziel enthalten. Vor diesen Segmenten könnten dann Puffer eingefügt werden\footnote{Tatsächlich wären dafür zusätzliche Änderungen notwendig gewesen, da die Kontrollflussinformationen zu einem Segment erst bekannt sind, wenn das Segment bereits gelinkt \emph{wurde}.}.
+
+%Ein lineares Segment bildet das Ende eines sequenziellen Befehlsblocks, wenn es das letzte lineare Segment im Maschinencode ist, oder wenn an dem im Maschinencode direkt nachfolgenden Segment ein neuer sequenzieller Befehlsblock beginnt (also dessen erster Befehl ein Sprungziel ist). Alle anderen linearen Segmente sind Mittelstücke eines sequenziellen Befehlsblocks. 
+
+Aufgrund der einfachen Struktur von Reaktor Core Programmen lässt sich die Frage, an welchen Stellen Puffer notwenig werden, jedoch wie folgt vereinfachen. Sprungziele existieren nur an den Stellen des Prüflingscodes, an denen direkt zuvor ein Teil des Maschinencodes übersprungen werden kann. In Reaktor Core Programmen kann es sich dabei nur um Then- und Else-Zweige handeln. Das Einfügen eines Puffers \emph{hinter} dem letzten linearen Segment von Then- und Else-Zweigen erfüllt im Rückschluss dieselbe Funktion, wie das Einfügen eines Puffers \emph{vor} jedem Sprungziel. Im Falle des Beispielprogramms aus Abbildung \ref{fig:successor-diagram} wird jeweils hinter den linearen Segmenten 3, 5, 6 und 9 ein Puffer nötig. 
+
+Der konkrete Einfügevorgang erfolgt bei der Verarbeitung der verschachtelten Struktur der Forks zur Linkzeit (\ref{sec:impl-preface-compilation-link}). Hier werden alle Then- und Else-Zweige entsprechend ihrer Reihenfolge im Prüflingscode durchlaufen. Hinter jedem letzten linearen Segment eines solchen Zweigs wird als Puffer ein Multi-Byte-NOP\footnote{Bei einer Adressbreite von 32 Bit ist ein Call Befehl fünf Byte lang. Dann kommt z.\,B. die Bytefolge \emph{0F 1F 44 00} zum Einsatz \cite{Intel2}.} der Länge eines Call Befehls in den Zielspeicherbereich geschrieben. Auf die gleiche Weise wird die Länge und die Position aller Puffer auch in die Berechnung von Sprungdistanzen und die Berechnung der Gesamtlänge des Prüflingscodes einbezogen.
+
+ %vor welchen linearen Segmenten tatsächlich Puffer notwendig sind, kann wie folgt vereinfacht werden.
+ 
+% Um zu ermitteln, vor welchen linearen Segmenten Puffer nötig sind, müssen sie sequenziellen Befehlsblöcken zugeordnet werden. 
+
+%Zur Vereinfachung wird die Terminologie im Folgenden auf das Segment übertragen: ein lineares Segment \emph{ist} ein Sprungziel, wenn dessen erster Befehl ein Sprungziel ist. 
+
+%Das Einfügen von Puffern vor Sprungzielen gestaltet sich im Falle des Reaktor Core sehr einfach
+
+%Vielmehr sind lineare Segmente Ausschnitte sequenzieller Befehlsblöcke. 
+
+%Da das  zur Linkzeit  Damit gestaltet sich auch der konkrete Vorgang des Einfügens einfach, . Das Einfügen der Puffer gestaltet sich im Falle des Reaktor Core Compilers sehr einfach. Zur Linkzeit werden die linearen Segmente in der Reihenfolge ihrer Abfolge im Prüflingscode in die Zielspeicherbereich kopiert. Zu diesem Zeitpunkt können leicht Puffer zwischen den linearen Segmenten eingefügt werden. Als Puffer kommen die in \cite{Intel2} vorgeschlagenen Befehle zur Darstellung von Multi-Byte-NOPs zum Einsatz\footnote{Bei einer Adressbreite von 32 Bit kommt z.\,B. die Bytefolge \emph{0F 1F 44 00} zum Einsatz.}. Die Länge und Position aller Puffer ist im Vorfeld bekannt und fließt in die Berechnung von Sprungdistanzen und in die Berechnung der Gesamtlänge des Prüflingscodes ein.
+
+%\noindent
+%Zunächst ist jedoch zu beachten, dass nicht jedes lineare Segment ein Sprungziel sein kann. So stellen im Falle des Beispielprogramms aus Abbildung \ref{fig:successor-diagram} nur die Segmente 4, 6, 7 und 10 Sprungziele dar. Die Frage, vor welchen linearen Segmenten tatsächlich Puffer notwendig sind, kann wie folgt vereinfacht werden. Sprungziele existieren nur an Stellen des Prüflingscodes, an denen direkt zuvor ein Teil des Maschinencodes übersprungen wird. In Reaktor Core Programmen kann es sich dabei nur um Then- und Else-Zweige handeln. Folglich genügt es, das jeweils letzte lineare Segment von Then- und Else-Zweigen um einen Puffer zu erweitern. Im Falle des Beispielprogramms aus Abbildung \ref{fig:successor-diagram} handelt es sich dabei um die Segmente 3, 5, 6 und 9. Bei der Berechnung von Sprungdistanzen und der Gesamtlänge des Prüflingscodes wird analog verfahren. 
+
+%Dies wird während des Linking-Processes bei der Verarbeitung eines Forks (\ref{sec:impl-preface-compilation-link}) realisiert. 
+
+\subsubsection{Kompilierung des Callback-Points}
+\label{sec:impl-buildtime-compilerchanges-callbackpoint}
+
+Der Maschinencode des Callback-Points wird von einer Routine des \emph{Memory-Backends} des Moduls |SRS| erzeugt. Das Memory-Backend ist durch die Klasse |SRS::MemoryBack| |end| repräsentiert. Die Implementierung folgt dem für das Compiler-Backend in der Klasse |SEC::BCBCompiler| gewählten Spezialisierungsansatz (\ref{sec:impl-preface-compilation-compile}). |SRS::MemoryBackend| kann somit leicht für beliebige Architekturen überladen werden. Im Rahmen der Implementierung des Prototyps wurde zunächst nur eine Variante für x86 Architekturen mit 32 Bit Adressbreite und SSE-Unterstützung erstellt. 
+
+Die Struktur eines Callback-Points ist immer gleich. Listing \ref{lst:callback-point} zeigt den Maschinencode. Für die Adresse des Callback-Flags (|pCallbackFlag|), den Wert für die Identifizierung des zugehörigen Handlers (|pHandler|), die Adresse zur Fortsetzung der Ausführung im Nicht-Callback-Fall (|continue|) und die Adresse der Behandlungsroutine (|pCallee|) wurden hier Platzhalter verwendet. Diese Werte sind bereits zur Übersetzungszeit bekannt und werden direkt in den Maschinencode geschrieben. 
+
+\lstinputlisting[float=h, style=verbatimstyle, morekeywords={mov,cmp,je,push,call,pop}, emph={pCallbackFlag,pHandler,pCallee,continue}, numbers=left, caption={Maschinencode eines Callback-Points. Die Werte der kursiv dargestellten Variablen sind zur Übersetzungszeit bekannt und werden direkt in den Maschinencode geschrieben. In den Zeilen 2 und 3 wird der Wert des globalen Callback-Flags ausgelesen. Ist es gesetzt, wird der Zeiger auf den jeweiligen Handler in Zeile 7 als Funktionsparameter auf den Stack gelegt. Der Aufruf der Behandlungsroutine erfolgt in Zeile 8. In der überwiegenden Mehrheit der Durchläufe ist kein Callback nötig. Der Mehraufwand ist dann auf drei Maschinenbefehle begrenzt.}, label={lst:callback-point}]{./listings/05-callback-point.txt}
+
+\noindent
+Zunächst wird in Zeile 2 der Wert des Callback-Flags gelesen und in Zeile 3 mit Null verglichen. Im Gleichheitsfall ist kein Callback erforderlich. Der Sprungbefehl in Zeile 4 wird dann ausgeführt. Es folgt die reguläre Verarbeitung des Prüflingscodes. Andernfalls kommt es zur Ausführung des Callbacks. Die Register ECX und EDX enthalten zu diesem Zeitpunkt u.\,U. bereits wichtige Werte, wie z.\,B. Parameter für die Ausführung des Audio-Handlers. Bei der Ausführung der Behandlungsroutine des Callbacks werden diese Registerwerte jedoch nicht garantiert geschützt. In den Zeilen 5 und 6 werden die Werte von ECX und EDX daher auf dem Stack gesichert. Für die Identifikation des Handlers wird der Zeiger auf das in den Programmdaten für den Handler angelegte Objekt in Zeile 7 als Funktionsparameter auf den Stack gelegt. Der Aufruf der Behandlungsroutine erfolgt in Zeile 8. Nach der Rückkehr der Ausführung werden die Werte von ECX und EDX in den Zeilen 10 und 11 wiederhergestellt. In der überwiegenden Mehrheit der Durchläufe ist kein Callback nötig. Der Mehraufwand ist dann auf die Ausführung der drei Maschinenbefehle für Abfrage, Vergleich und bedingtem Sprung begrenzt. 
+Der Maschinencode wird zu Beginn des Linking-Prozesses des Audio-Handlers angefordert und noch vor dem ersten linearen Segment in den Prüflingscode eingefügt.
+
+%\subsubsection{Verwendung von Stackregistern}
+%\label{sec:impl-buildtime-compilerchanges-stackregister}
+
+%Wie in Abschnitt \ref{sec:impl-preface-properties} beschrieben wurde, erfolgen innerhalb von Reaktor Core Programmen keine Funktionsaufrufe. Im Rückschluss werden die Stackregister des Prozessors zu Optimierungszwecken als General-Purpose-Register verwendet. Diese Optimierung wird im Debug-Modus deaktiviert, da das in Abschnitt \ref{sec:impl-runtime-stackforging} beschriebene Verfahren zur Realisierung von Unterbrechungen andernfalls nicht anwendet werden könnte.
+
+%An dieser Stelle ergibt sich eine neue Problematik. Einige Modultypen in Reaktor Core haben nur eine Ordnungsfunktion und sind nicht im Maschinencode des Prüflings enthalten. Ein Beispiel hierfür ist das Modul Merge. Als Pedant des Router-Moduls fasst es den Kontrollfluss aus verschiedenen Verzweigungen zusammen. Aus Sicht des Benutzers ist es fester Bestandteil des Verarbeitungsablaufes. Es kann jedoch keiner Operation im Maschinencode zugeordnet werden. Eine zusätzliche Anpassung des Compilers muss für die betroffenen Module also die Erzeugung eines NOPs erzwingen. Darauf wird in Aschnitt \ref{} zur Anpassung der Kompilierung des Prüflings näher eingegangen.
+
+%Einige Modultypen in Reaktor Core führen zur Erzeugung von Befehlscode an verschiedenen Stellen des Prüflingscodes. Dies betrifft die sogenannten \emph{Non-Solid Macros}\footnote{Die Module von Non-Solid Macros . Dies ist in erster Linie für die Auflösung von Feedback-Schleifen erforderlich. Für detaillierte Informationen hinzu wird an die Reaktor Core Referenz verwiesen \cite{CoreReference}}. Ein Beispiel hierfür ist 
+
+%Compiler Anpassungen:
+%  Puffer einfügen
+%  Callback Point
+%  mindestens NOP für jedes Modul

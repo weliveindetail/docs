@@ -1,0 +1,28 @@
+function addRawCodeElement(tSegment Segment)
+{
+	if (currentBranch.neverHadSegments)	{
+		currentBranch.neverHadSegments = false
+		if (currentBranch.type != TopLevel)	{
+			parentBranch.openSegment.addSuccessor(Segment)
+		}
+	}
+	else {
+		finalizePreviousNestedBranches(currentBranch, Segment)
+	}
+	currentBranch.openSegment = Segment
+}
+
+function finalizePreviousNestedBranches(tBranch branch, tSegment Segment)
+{
+	if (branch.lastThen != NULL) {
+		finalizePreviousNestedBranches(branch.lastThen, Segment)
+		branch.lastThen = NULL
+	}		
+	if (branch.lastElse != NULL) {
+		finalizePreviousNestedBranches(branch.lastElse, Segment)
+		branch.lastElse = NULL
+	}		
+	if (branch.openSegment != NULL) {
+		branch.openSegment.addSuccessor(Segment)
+	}
+}

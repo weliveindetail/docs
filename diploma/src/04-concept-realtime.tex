@@ -1,0 +1,144 @@
+
+In der digitalen Signalverarbeitung bildet die Echtzeitverarbeitung die Grundlage des beobachtbaren Verhaltens des Prüflings und ist damit Voraussetzung für das Erkennen einer Fehlerwirkung\footnote{Im Falle der digitalen Klangsynthese kann eine Fehlerwirkung z.\,B. ein Knacksen in der Audioausgabe sein.}. Der verantwortliche Defekt wiederum kann nur anhand seiner Fehlerwirkung identifiziert werden. Eine zentrale Anforderung stellt daher die Erhaltung der Echtzeitverarbeitung bei der Verwendung des Debuggers dar. Ausnahmen bilden explizite Unterbrechungen zu Inspektionszwecken. Die Echtzeitverarbeitung muss möglichst unmittelbar nach einer solchen Unterbrechung wieder aufgenommen werden können.
+% (z.\,B. durch einen Breakpoint)
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Ablauf der Echtzeitverarbeitung}
+\label{sec:concept-realtime-conditions}
+
+Die Ausführung von Echtzeitprogrammen erfolgt in speziell priorisierten \emph{Echtzeit-Threads} des Betriebssystems. Für diese Threads wird in machen Betriebssystemen ein kooperatives Scheduling-Verfahren angewendet. Echtzeit-Threads müssen dafür bestimmte Bedingungen erfüllen, wie z.\,B. die Einhaltung einer vorgegebenen \emph{Zeitschranke} (\ref{sec:context-dsp-realtime}). Ein Verstoß gegen diese Bedingungen wird i.\,A. mit einer Herabstufung der Prozesspriorität geahndet \cite{MacRealtime}. Eine derartige Herabstufung muss in Programmen der digitale Signalverarbeitung in jedem Fall vermieden werden. Eine Überschreitung der Zeitschranke könnte zudem von der Ausführungsumgebung als Fehler gewertet werden und in nachgeschalteten Verarbeitungsschritten oder angeschlossenen Hardware-Geräten kritische Folgefehler nach sich ziehen. 
+
+Die Ausführung der Echtzeitverarbeitung wird in vorgegebenen Zeitabständen vom Betriebssystem oder einem speziellen Gerätetreiber gestartet. Dies erfolgt durch eine Benachrichtigung der Ausführungsumgebung, eine vorgegebene Anzahl digitaler Signalwerte zu berechnen. Die Ausführungsumgebung übernimmt alle nötigen Verwaltungsaufgaben und ruft das DSP-Programm für die Berechnung der einzelnen Signalwerte auf. Die Berechnung eines einzelnen Signalwertes durch ein DSP-Programm wird im Folgenden als \emph{Verarbeitungsdurchlauf} bezeichnet. Die Berechnung aller Signalwerte muss vor Ablauf der Zeitschranke abgeschlossen sein. Der Verarbeitungsvorgang gilt als abgeschlossen, sobald die Ausführung im Echtzeit-Thread zum Betriebssystem zurückkehrt.
+% durch die Ausführungsumgebung
+
+Im Falle der digitalen Klangsynthese werden einzelne Signalwerte als \emph{Samples} bezeichnet. Bei jedem Aufruf der Ausführungsumgebung muss eine bestimmte Anzahl von Samples berechnet werden. Die Datenstruktur zur Speicherung dieser Samples heißt \emph{Sample-Puffer}.
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Einfügen von Breakpoints zur Laufzeit}
+\label{sec:concept-realtime-breakpointinsertion}
+
+Das Einfügen von Software Breakpoints erfordert einen Schreibzugriff im Speicherbereich des Prüflingscodes (\ref{sec:context-debugging-separate-breakpoints}). In herkömmlichen Debuggern können Breakpoints im Maschinencode des Prüflings implementiert werden, wenn der Prüflingsprozess das nächste Mal vom Dispatcher des Betriebssystems in den Wartezustand versetzt wird. Same-Process Debugger können dieser Verfahrensweise nicht folgen, da sie im Prozess des Prüflings ausgeführt werden (\ref{sec:context-debugging-same}). Damit stellt sich die Frage, wie Breakpoints zur Laufzeit des Prüflings implementiert werden können. Im folgenden Abschnitt soll dafür zunächst eine weitere Problematik betrachtet werden, die sich aus der Echtzeitfähigkeit des Verarbeitungsprozesses im Prüfling ergibt.
+
+%\footnote{In den verbreiteten Betriebssystemen existiert ein spezieller Wartezustand für diesen Zweck.}
+
+%\footnote{Zudem könnte die Ausführung des Prüflingsprozesses erst nach Abschluss der Ersetzungsvorgänge fortgesetzt werden. Die dafür erforderlichen Koordinationsoperationen könnten zusätzliche Verzögerungen beim Scheduling hervorrufen, die die Echtzeitverarbeitung gefährden könnten.}. 
+
+\subsubsection{Problematik blockierender Anweisungen}
+\label{sec:concept-realtime-breakpointinsertion-locking}
+
+Eine Lösung könnte die Verwendung blockierender Anweisungen darstellen. Der Prüflingscode für die Echtzeitverarbeitung würde dann innerhalb eines kritischen Abschnittes ausgeführt. Eine atomare Anweisung zu Beginn des Verarbeitungsvorgangs würde beispielsweise auf die Freigabe eines Mutex' warten. Wird dieser Mutex vom Thread des Debuggers gehalten, wäre sichergestellt, dass der Prüflingscode zu diesem Zeitpunkt nicht ausgeführt wird und ein Schreibzugriff erfolgen kann. Nach Abschluss der Ersetzungsvorgänge zum Einfügen von Breakpoints, würde der Mutex vom Debugger freigegeben und die Ausführung des Prüflingscodes fortgesetzt. 
+
+In den verbeiteten Betriebssystemen kann die Dauer der Verzögerung, die durch die Ausführung blockierender Anweisungen entsteht, jedoch im Vorfeld nicht sicher bestimmt werden. Gemäß den in Abschnitt \ref{sec:context-dsp-synth} vorgestellten Bedingungen für die zuverlässige Durchführung der Echtzeitverarbeitung können blockierenden Anweisungen daher nicht verwendet werden.
+
+%Blockierende Anweisungen erfordern jedoch eine Involvierung des Betriebssystems. Die Dauer der damit verbundenen Verzögerung wäre also vom Scheduling des Betriebssystems abhängig. Sie kann also nicht im Vorfeld bestimmt werden. 
+%Für die Zwecke der Echtzeitverarbeitung ist dieser Ansatz daher nicht geeignet (\ref{sec:context-dsp-synth}).
+
+\subsubsection{Lösung durch Callback-Points}
+\label{sec:concept-realtime-breakpointinsertion-callbackpoint}
+
+Unter der Voraussetzung, dass es innerhalb des Verarbeitungsprozesses nur einen Echtzeit-Thread gibt, der den zu inspizierenden Programmcode verarbeitet, stellt das Einfügen von Breakpoints durch den Echtzeit-Thread selbst eine adäquate Lösung dar. Zu Beginn eines Verarbeitungsvorgangs könnte vom Prüfling selbst ermittelt werden, ob das Einfügen von Breakpoints erforderlich ist. Der dafür nötige Programmcode wird im Folgenden als \emph{Callback-Point} bezeichnet. Er muss zur Übersetzungszeit vom Compiler erzeugt werden. Da Debugger und Prüfling im Same-Process Fall über einen gemeinsamen Speicherbereich verfügen, kann für die Koordinierung ein einfaches Flag verwendet werden. Solange dieses \emph{Callback-Flag} nicht gesetzt ist, wird die Echtzeitverarbeitung wie gewohnt fortgesetzt. In diesem Fall ist der entstehende Laufzeitoverhead moderat. Er begrenzt sich im Wesentlichen auf die Ausführung eines Speicherzugriffs und eines bedingten Sprungs. Andernfalls wird eine Routine des Debuggers aufgerufen, die das Callback-Flag zurücksetzt und die nötigen Ersetzungsvorgänge im Programmcode des Prüflings vornimmt. Alle nötigen Daten sollten bereits im Vorfeld vom Debugger vorbereitet worden sein. Im Optimalfall fallen für jeden einzufügenden Breakpoint nur wenige Speicher\-operationen an. Diese begrenzen sich auf das Zwischenspeichern des ursprünglichen Maschinencodes und das Einfügen eines Call Befehls. Die Sicherung und Wiederherstellung des Ausführungszustandes des Prüflings kann entfallen, da sich der Callback-Point vor der ersten Anweisung des Verarbeitungscodes befindet. Zudem kann von Seiten des Debuggers sichergestellt werden, dass das Callback-Flag nur zu bestimmten Zeitpunkten oder in bestimmten Abständen gesetzt wird. In der digitalen Klangsynthese könnte das Callback-Flag beispielsweise nur nach Abschluss der Berechnung aller Samples des Sample-Puffers gesetzt werden. Die Ausführung von Ersetzungsvorgängen würde dann pro Sample-Puffer maximal einmalig erfolgen. Dies begrenzt den erforderlichen Mehraufwand im Worst-Case.
+
+%\subsubsection{Synchronität des Callback-Flags}
+%\label{sec:concept-realtime-breakpointinsertion-sync}
+
+%Der Zugriff auf das Callback-Flag kann von verschiedenen Threads aus geschehen und muss daher synchron erfolgen. Die Synchronität des Callback-Flags ist hier jedoch implizit gewährleistet. Einerseits ist der Zugriff stark reglementiert: der Debugger-Thread kann das Flag nur setzen, während der Prüflings-Thread das Flag nur lesen und zurücksetzen kann. Andererseits existieren für das Flag nur die zwei Zustände "`gleich Null"' und "`ungleich Null"'. Selbst wenn die verwendeten Speicheroperationen also nicht atomar ausgeführt werden, kann es nicht zu Uneindeutigkeiten kommen.
+
+%\begin{remark}
+%Ausführung des Echtzeit-Threads darf nicht unterbrochen werden (keine blockierenden Anweisungen!). Aber das Einfügen eines ersten Breakpoints erfordert Schreibzugriff.
+%\end{remark}
+
+%\begin{itemize}
+%	\item Lösungen: Locking vs. Callback-Point am Einsprungpunkt (Setzen eines Flags veranlasst Einfügen eines Breakpoints im Echtzeit-Thread selbst)
+%	\item Aspekte: Performanz im Nicht-Callback-Fall, Echtzeitfähigkeit, Synchronizität des Flag-Zugriffs
+%\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Unterbrechung der Echtzeitverarbeitung}
+\label{sec:concept-realtime-break}
+
+Eine wesentliche Problematik stellt die Unterbrechung der Echtzeitverarbeitung zur Inspektion des Prüflings dar. Unterbrechungen erfolgen innerhalb eines Verarbeitungsdurchlaufs. Der Ausführungszustand des Prüflings zum Zeitpunkt der Unterbrechung muss dabei erhalten bleiben. Im Anschluss muss die Ausführung an der Stelle der Unterbrechung fortgesetzt werden können. 
+
+\subsubsection{Problembeschreibung}
+\label{sec:concept-realtime-break-problem}
+
+Die Ausführung im Echtzeit-Thread muss vor Ablauf der vorgegebenen Zeitschranke zurückkehren. Die für die nötigen Berechnungsaufgaben verfügbare Zeitspanne liegt i.\,A. im Millisekundenbereich. Würden Unterbrechungen zur Inspektion des Prüflings mit Hilfe blockierender Anweisungen realisiert, würde sich die Rückkehr des Echtzeit-Threads um die Dauer der Unterbrechung verzögern. Die vorgegebene Zeitschranke würde damit in jedem Fall überschritten. Ein Blockieren der Echtzeitverarbeitung ist daher als Lösung ungeeignet.
+
+%Zudem wird die Echtzeitverarbeitung i.\,A. in speziell priorisierten \emph{Echtzeit-Threads} des Betriebssystems ausgeführt. stellt daher keine geeignete Lösung dar.
+
+\subsubsection{Lösungsansatz}
+\label{sec:concept-realtime-break-method}
+
+Eine akzeptable Lösung muss also zunächst gewährleisten, dass die Rückkehr der Ausführung im Echtzeit-Thread durch eine Unterbrechung nicht wesentlich verzögert wird. Für die Zwecke der späteren Inspektion könnte der Ausführungszustand des Prüflings an der Stelle der Unterbrechung gesichert und der begonnene Verarbeitungsdurchlauf regulär abgeschlossen werden. Nachfolgend getroffene Breakpoints könnten entweder ignoriert oder ebenso behandelt werden. Die Sicherung des Ausführungszustandes würde eine Post-Mortem-Inspektion (\ref{sec:context-debugging-classes}) eines Verarbeitungsdurchlaufs des Prüflings ermöglichen. Die Unterbrechung und anschließende Fortsetzung der Ausführung ist jedoch nicht möglich. Der Lösungsansatz eignet sich in dieser Form daher noch nicht für die Realisierung eines interaktiven Debuggers. 
+
+Die Fortsetzung eines zuvor unterbrochenen Verarbeitungsdurchlaufs wird erst durch eine Manipulation des Rücksprungverhaltens der Ausführung an der Stelle der Unterbrechung möglich. Abbildung \ref{fig:stack-manipulation} soll die Idee hinter dem in Abschnitt \ref{sec:concept-realtime-break-concept} vorgestellten Verfahren illustrieren. 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{04-stack-manipulation.png} %[scale=0.25]
+  \caption{Manipulation des Rücksprungverhaltens von Funktionen. Im linken Teil ist der gewöhnliche Ausführungsablauf bei der Verwendung von Funktionen dargestellt. Er folgt der Symmetrie von Funktionsaufruf und -rücksprung. Im rechten Teil ist ein Ausführungsablauf zu sehen, der in \ref{sec:concept-realtime-break-concept} durch die Manipulation des Rücksprungverhaltens von Funktionen erreicht werden soll.}
+  \label{fig:stack-manipulation}
+\end{figure}
+
+\noindent
+In der linken Hälfte der Abbildung ist eine gewöhnliche Ausführungsabfolge von Funktionen dargestellt\footnote{Die Benennung der Funktionen erfolgt in Anlehnung an die betrachtete Situation. Die vergebenen Namen repräsentieren Funktionen, werden aber im Folgenden wie die Elemente des Signalverarbeitungssystems verwendet.}. Ausgehend von einer Funktion |Ereignisschleife| werden sukzessive Funktionen aufgerufen, die selbst weitere Funktionen aufrufen. Damit erreicht die Ausführung nacheinander die Funktionen |Ausführungsumgebung|, |Prüfling| und |Behelfs-| |funktion|. Innerhalb der Behelfsfunktion erfolgt kein weiterer Funktionsaufruf. Es folgt eine Rückkehr zur Funktion Prüfling. Dort wird die Ausführung an dem Befehl fortgesetzt, der auf den Befehl zum Aufruf der Behelfsfunktion folgt. Nach der Abarbeitung von Prüfling kommt es auf dieselbe Weise zur Rückkehr zur Ausführungsumgebung und schließlich zur Ereignisschleife. Klar zu erkennen ist hier die \emph{Symmetrie von Funktionsaufruf und -rücksprung}. Dabei handelt es sich um eine grundlegende Eigenschaft des Ablaufkontrollkonstruktes der \emph{Funktion} in der Informatik. In der rechten Hälfte der Abbildung sind die gleichen Funktionen dargestellt. Sie werden ebenfalls in der gleichen Reihenfolge erreicht wie im vorherigen Fall. Der entscheidende Unterschied zur Ausführungsabfolge im linken Teil besteht im Rücksprungverhalten der Behelfsfunktion. Statt zum Prüfling zurückzukehren erfolgt hier ein direkter Rücksprung zur Ausführungsumgebung. Damit wird die Symmetrie der Funktionsaufrufe durchbrochen. Alle Befehle die im Prüfling hinter der Stelle des Aufrufs der Behelfsfunktion stehen, wurden nicht verarbeitet.
+
+Diese Idee bildet die Grundlage des im folgenden Abschnitt vorgestellten Konzepts zur Unterbrechung der Echtzeitverarbeitung im Prüfling. Der Rücksprungbefehl ist der letzte Befehl im Programmcode des Prüflings. Wird dieser nicht ausgeführt, kommt es auch nicht zum Abbau des Stackframes der Funktion im Aufrufstack. Durch den direkten Rücksprung zur Ausführungsumgebung wird der Zustand der Stackframes aller danach aufgerufenen Funktionen eingefroren. Darauf aufbauend kann die Ausführung zu einem späteren Zeitpunkt fortgesetzt werden. Die Ausführung im Echtzeit-Thread hingegen kann unter Einhaltung der vorgegeben Zeitschranke zurückkehren. Damit sind alle Voraussetzungen für die Realisierung von Unterbrechungen der Echtzeitverarbeitung erfüllt.
+
+%der Eine bessere Lösung kann durch die Manipulation des Aufrufstacks des Echtzeit-Threads erreicht werden. 
+
+%aus einer \emph{höheren} Ebene der Aufrufhierarchie bilden. Der zurückbleibende Ausschnitt des Aufrufstacks könnte im Anschluss von einem Behelfs-Thread übernommen werden, der die Verarbeitung des Prüflingscodes an der Stelle der Unterbrechung fortsetzt.
+
+%Eine bessere Lösung würde die Rückkehr des Echtzeit-Threads aus einer \emph{höheren} Ebene der Aufrufhierarchie bilden. Der zurückbleibende Ausschnitt des Aufrufstacks könnte im Anschluss von einem Behelfs-Thread übernommen werden, der die Verarbeitung des Prüflingscodes an der Stelle der Unterbrechung fortsetzt.
+
+%Alle folgenden Verarbeitungsdurchläufe müssten umgeleitet werden. Im Falle der digitalen Klangsynthese könnte dann z.\,B. stets ein leeres Sample zurückgegeben werden\footnote{Als \emph{leer} wird hier ein Sample bezeichnet, dessen Wert Null ist. Bei der Ausgabe des Samples wird dann kein Ton erzeugt.}. 
+
+\subsubsection{Konkretes Lösungskonzept}
+\label{sec:concept-realtime-break-concept}
+
+%Um eine Rückkehr des Funktionsaufrufs aus einer höheren Ebene der Aufrufhierarchie zu ermöglichen, könnte 
+
+Zunächst wird vor jedem Verarbeitungsdurchlauf des Prüflings der Aufrufstack des Echt\-zeit-Threads in einen separaten Speicherbereich umgeleitet. Dieser Speicherbereich heißt \emph{separater Stackspeicher}. Demgegenüber wird der Speicherbereich, der normalerweise für die Aufnahme der Stackframes eines Threads vorgesehen ist, als \emph{regulärer Stackspeicherbereich} bezeichnet. Diejenige Funktion in der Ausführungsabfolge des Echtzeit-Threads, an der die Umleitung des Aufrufstacks stattfindet, heißt \emph{Entkopplungspunkt}. Im Beispiel aus Abbildung \ref{fig:stack-manipulation} handelt es sich bei der Funktion |Ausführungsumgebung| um den Entkopplungspunkt. Die Stackframes aller Funktionsaufrufe bis einschließlich dem Entkopplungspunkt liegen im regulären Stackspeicherbereich des Echtzeit-Threads. Für die Durchführung der Umleitung genügt es im Wesentlichen, die Werte der Stackregister\footnote{Unter dem Begriff \emph{Stackregister} sollen hier die Register für Stack-Pointer und Base-Pointer des Prozessors zusammengefasst werden.} des Prozessors am Entkopplungspunkt mit geeigneten Speicheradressen des separaten Stackspeichers zu überschreiben. Die Stackframes aller nachfolgenden Funktionsaufrufe werden dann im separaten Stackspeicher aufgebaut. Um den Aufrufstack später wieder auf den regulären Stackspeicherbereich zurückführen zu können, werden die ursprünglichen Werte der Stackregister zuvor gesichert.
+
+%\noindent
+Wird während der Verarbeitung des Prüflingsprogramms kein Breakpoint getroffen, muss die Verarbeitung des Prüflings nicht unterbrochen werden. In diesem Fall kehrt die Ausführung im Echtzeit-Thread regulär zum Entkopplungspunkt zurück. An dieser Stelle wird wieder der Beginn des separaten Stackspeichers erreicht. Die Werte der Stackregister müssen nun aus den am Entkopplungspunkt gesicherten Werten wiederhergestellt werden. Die Ausführung im Echtzeit-Thread wird regulär abgeschlossen.
+
+Wenn andernfalls während der Verarbeitung des Prüflingscodes ein Breakpoint getroffen wird, erfolgt ein Aufruf der Behandlungsroutine für Breakpoints im Debugger. Diese Funktion entspricht der Behelfsfunktion in Abbildung \ref{fig:stack-manipulation}. Hier werden die am Entkopplungspunkt gesicherten Werte der Stackregister unmittelbar übernommen. Bei der Ausführung des Rücksprungbefehls der Behandlungsroutine wird nun nicht die Rücksprungadresse aus deren Stackframe im separaten Stackspeicher verwendet, sondern die Rücksprungadresse des Stackframes der Funktion am Entkopplungspunkt. Der Abbau der im separaten Stackspeicher aufgebauten Stackframes wird damit übersprungen. Diese Manipulation des Rücksprungverhaltens wird als \emph{Entkopplung} bezeichnet. Infolge der Entkopplung wird die Ausführung im Echtzeit-Thread in der Funktion vor dem Entkopplungspunkt fortgesetzt. Die Ausführung wird von hier aus regulär abgeschlossen. Die Ausführung des Prüflings ist zu diesem Zeitpunkt unterbrochen. Sein Ausführungszustand kann inspiziert werden.
+
+Ab dem Zeitpunkt der Entkopplung ist die Echtzeitverarbeitung im Prüfling unterbrochen. Die Verarbeitung eingehender Signale ist in dieser Zeit nicht möglich. Die Ausführung im Echtzeit-Thread wird von der Ausführungsumgebung umgeleitet. Im Falle der digitalen Klangsynthese könnten beispielsweise die Werte aller Samples auf Null gesetzt werden. Bei der Ausgabe dieser Samples wird dann kein Ton erzeugt. 
+
+Die Fortsetzung der Ausführung kann in einem Behelfs-Thread erfolgen. Zu diesem Zweck müssen die Werte der Stackregister ebenfalls in der Behandlungsroutine für Breakpoints gesichert werden. Werden diese Werte innerhalb einer Funktion im Behelfs-Thread wiederhergestellt, bewirkt dies eine Umschaltung des Stackframes der Funktion auf den letzen, bis zu diesem Zeitpunkt eingefrorenen Stackframe im separaten Stackspeicher. Bei der Ausführung des Rücksprungbefehls der Funktion erfolgt ein Rücksprung zum ersten Befehl hinter dem Funktionsaufruf im Programmcode des Prüflings. Auf diese Weise wird die Ausführung des Prüflings fortgesetzt. Weitere Unterbrechungen können analog realisiert werden. Eine Entkopplung des Aufrufstacks ist dann nicht mehr erforderlich. Eine vollständige Beschreibung zur technischen Realisierung dieses Verfahrens findet sich im Kapitel zur Implementierung des Same-Process Debuggers in Abschnitt \ref{sec:impl-runtime-stackforging}.
+
+%Die im separaten Stackspeicher verbleiben Stackframes bilden den \emph{entkoppelten Stack}.
+
+%Beim nächsten Rücksprungbefehl wird dem Echtzeit-Thread damit vorgetäuscht vom Funktionsaufruf des Entkopplungspunkts zurückzukehren. 
+
+% Sie dienen der Realisierung von Stackframes für Funktionsaufrufe.° In der x86 Befehlssatzarchitektur sind diese durch ESP und EBP (bei 32 Bit Adressbreite) bzw. RSP und RBP (bei 64 Bit Adressbreite) repräsentiert. Der SP zeigt stets auf die nächste unbelegte Speicheradresse am Ende des Stacks. Bei einem Funktionsaufruf wird zunächst der Wert des BP auf dem Stack gesichert und mit dem Wert des SP überschrieben, bevor Rücksprungadresse und Funktionsparameter auf den Stack gelegt werden.°
+
+%Die Werte von ESP und EBP der nächsthöheren Aufrufebene können nun nicht wie gewöhnlich dem Stack entnommen werden. Stattdessen müssen sie aus den bei der Umleitung zwischengespeicherten Werten wiederhergestellt werden.
+
+\subsubsection{Anmerkungen}
+\label{sec:concept-realtime-break-remarks}
+
+Die Änderung der Ausführungsabfolge von Funktionen durch die Manipulation der Stackregister des Prozessors gehört nicht zu den konventionellen Programmiertechniken, da sie die Symmetrie von Funktionsaufruf und -rückkehr durchbricht. Die Funktionen, die diese Manipulationen durchführen, kehren nicht zum Aufrufenden zurück. In der Folge kommt es schnell zu einem schwer verständlichen Ausführungsverhalten und einer hohen Fehleranfälligkeit. Für die Unterbrechung der Echtzeitverarbeitung stellt das Verfahren jedoch eine adäquate Lösung dar. 
+
+Der damit einhergehende permanente Laufzeitoverhead begrenzt sich auf die Umleitung des Aufrufstacks vor und nach jedem Verarbeitungsdurchlauf. Insgesamt werden dafür vier Austauschoperationen zwischen Stackregistern und Speicher erforderlich. Die resultierende Verzögerung ist akzeptabel und gestattet die Beibehaltung der Verarbeitung in Echtzeit. Der separate Stackspeicher muss nur einmal angelegt werden. Er wird für jeden Umschaltvorgang wiederverwendet. 
+
+%Für den separaten Stackspeicher kann immer derselbe Speicherbereich verwendet werden. Er muss nur einmal alloziert werden, da im Echtzeit-Thread keine Speicherallokationen erfolgen sollten (\ref{sec:context-dsp-synth}).
+
+Im Unterbrechungsfall erfolgt die Entkopplung des Aufrufstacks. Damit wird die Verarbeitung des Prüflings unterbrochen und kann zu einem späteren Zeitpunkt von einem Behelfs-Thread fortgesetzt werden. Die Rückkehr des Echtzeit-Threads wird nur durch die Sicherung des Ausführungszustandes des Prüflings und die Wiederherstellung des ursprünglichen Maschinencodes verzögert (siehe Abschnitt \ref{sec:concept-sameprocess-overwriting-conclusion} zur Realisierung von Breakpoints). Dies ist in jedem Fall vor Ablauf der Zeitschranke des Echtzeit-Threads realisierbar.
+
+ %Im Zweifel kann die Wiederherstellung des ursprünglichen Maschinencodes des Prüflings auch im Nachhinein vom Behelfs-Thread vorgenommen werden und so bei der Rückkehr des Echtzeit-Threads Zeit gespart werden. Im Gegenzug verkompliziert sich jedoch der Quellcode des Debuggers, da die Operationen zum Entfernen bzw. Wiedereinfügen der gesetzten Breakpoints nicht mehr pauschal symmetrisch vor bzw. nach dem Aufruf der Routine zur Einleitung einer Unterbrechung ausgeführt werden können.
+
+%\begin{remark}
+%Echtzeitverarbeitung in eigenem Thread im selben Prozess. Unterbrechung nicht direkt möglich, da Aufruf in Echtzeit zurückkehren muss.
+%\end{remark}
+
+%\begin{itemize}
+%	\item Lösungen: Stack-Forging für Thread-Wechsel (2- vs. 3-Thread Ansatz)
+%	\item Aspekte: Synchronisationsaufwand, Deadlock-Problematik, (Kompatibilität zu Legacy-System)
+%\end{itemize}
+
+

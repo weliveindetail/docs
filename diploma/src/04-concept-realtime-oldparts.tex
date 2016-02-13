@@ -1,0 +1,61 @@
+Die Darstellung des darauf aufbauenden Verfahrens soll im Folgenden anhand der fünf möglichen Fälle erfolgen. Die Abbildungen \ref{fig:stack-forgery-00} bis \ref{fig:stack-forgery-04} enthalten je eine schematische Darstellung der Aufrufabfolge für jeden Fall. Zum Zweck der Vergleichbarkeit der Abbildungen weisen sie alle dieselbe Struktur auf. Abbildungsteile, die in einem Fall nicht relevant sind, sind jeweils ausgegraut dargestellt. Alle beschiebenen Manipulationsoperationen können im Quellcode des Debuggers symmetrisch um die jeweiligen Funktionsaufrufe herum implementiert werden. Dazu zählen die Austauschoperationen zwischen den Stackregistern des Prozessors und zwischengespeicherten Werten, die Sicherung und Wiederherstellung des Ausführungszustandes des Prüflings und das Entfernen und Wiedereinfügen von Breakpoints im Maschinencode des Prüflings. Da die Ausführung dieser Symmetrie nicht folgt, wird eine ausführliche Beschreibung der einzelnen Schritte gegeben.
+
+Eine schematische Darstellung der Aufrufabfolge ist in Abbildung \ref{fig:stack-forgery-00} grafisch dargestellt. Die ausgegrauten Teile der Abbildung sind hier nicht relevant und dienen nur zu Vergleichszwecken gegenüber den folgenden Abbildungen \ref{fig:stack-forgery-01} bis \ref{fig:stack-forgery-04}. 
+
+\subsubsection{Ausführliche Beschreibung}
+\label{sec:concept-realtime-break-stackforgery}
+
+Zuerst soll die Ausgangssituation betrachtet werden. Dabei wird während der Verarbeitung des Prüflingscodes kein Breakpoint getroffen. Abbildungen \ref{fig:stack-forgery-00} zeigt die schematische Darstellung der Aufrufabfolge. Der Funktionsaufruf im Echtzeit-Thread hat seinen Ursprung im Betriebssystem. Er gelangt zunächst zur Ausführungsumgebung, die den Aufrufstack in den separaten Stackspeicher umleitet. Da der Stack zu diesem Zeitpunkt nicht entkoppelt ist, wird mit der Verarbeitung des Prüflingscodes begonnen. Im betrachteten Szenaro wird während der Verarbeitung kein Breakpoint getroffen, sodass die im separaten Stackspeicher in Folge von Funktionsaufrufen aufgebauten Stackframes mit jedem Rücksprung einer Funktion auch wieder abgebaut werden. Schließlich wird der Aufrufstack von der Ausführungsumgebung wieder auf den regulären Stackspeicherbereich des Echtzeit-Threads zurückgeführt. Der Funktionsaufruf im Echtzeit-Thread kann ohne Unterbrechung zurückkehren.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{04-stack-forgery-00.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Aufrufabfolge ohne Entkopplung des Aufrufstacks. Die Verarbeitung des Prüflingscodes wird von der Ausführungsumgebung initiiert und erfolgt im Echtzeit-Thread. Während der Verarbeitung wird kein Breakpoint getroffen, sodass die Ausführung regulär zum Betriebssystem zurückkehrt.}
+  \label{fig:stack-forgery-00}
+\end{figure}
+
+%\footnote{Handelt es sich im Falle der digitalen Klangsynthese beispielsweise um ein Eingabesignal aus einer externen Quelle, könnte der tatsächliche Ursprung ein entsprechender Gerätetreiber sein. Für eine schematische Darstellung ist jedoch die Betrachtung ab dem Hardware Abstraction Layer (HAL) des Betriebssystems ausreichend.}
+
+\noindent
+Wird bei der Ausführung des Prüflings ein Breakpoint getroffen, wird die Entkopplung des Aufrufstacks nötig. Dies ist in Abbildung \ref{fig:stack-forgery-01} dargestellt. Die Ausführung erreicht den Prüflingscode wie im vorherigen Fall. Am Breakpoint wird eine Behandlungsroutine des Debuggers aufgerufen. Wie in \ref{sec:context-debugging-same} beschrieben, wird hier zunächst der Ausführungszustand des Prüflings gesichert und der ursprüngliche Maschinencode des Prüflings wiederhergestellt. Im Anschluss wird eine spezielle Routine aufgerufen, die die Entkopplung des Aufrufstacks vornimmt. Der für diese Routine im separaten Stackspeicher angelegte Stackframe wird im Folgenden als \emph{Unterbrechungspunkt} bezeichnet. Zunächst müssen jedoch die Werte der Stackregister am Unterbrechungspunkt gesichert werden. Dies ist für die spätere Fortsetzung der Ausführung erforderlich. Danach kann die Entkopplung erfolgen (Überschreiben der Stackregister des Prozessors mit den am Entkopplungspunkt zwischengespeicherten Werten). Beim nächsten Rücksprungbefehl kehrt die Ausführung des Echtzeit-Threads damit nicht zur Breakpoint-Routine im Debugger zurück, sondern direkt zum letzten Funktionsaufruf der Ausführungsumgebung vor dem Entkopplungspunkt. Daraufhin erfolgt die Rückkehr des Echtzeit-Threads zum Betriebssystem wie im Falle der Ausgangssituation. Dabei werden alle Stackframes im regulären Stackspeicherbereich des Echtzeit-Threads abgebaut. Der entkoppelte Stack verbleibt im separaten Stackspeicher. Die Ausführung des Prüflings ist zu diesem Zeitpunkt unterbrochen. Sein Ausführungszustand kann inspiziert werden.
+ 
+\begin{figure}[htb!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{04-stack-forgery-01.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Aufrufabfolge beim erstmaligen Erreichen eines Breakpoints. Infolge der Entkopplung des Aufrufstacks kehrt die Ausführung des Echtzeit-Threads zunächst direkt zur Ausführungsumgebung und schließlich zum Betriebssystem zurück. Die Ausführung des Prüflings ist unterbrochen. Da der entkoppelte Stack im separaten Stackspeicher verbleibt und die Werte der Stackregister am Unterbrechungspunkt gesichert wurden, kann die Ausführung nach der Unterbrechung fortgesetzt werden.}
+  \label{fig:stack-forgery-01}
+\end{figure}
+
+\noindent
+Ab dem Zeitpunkt der Entkopplung des Aufrufstacks werden alle Funktionsaufrufe im Echtzeit-Thread von der Ausführungsumgebung umgeleitet. Die Verarbeitung eingehender Signale ist in dieser Zeit nicht möglich. Nach der Unterbrechung wird die Ausführung des Prüflings von einem Behelfs-Thread fortgesetzt. Der Ablauf ist in Abbildung \ref{fig:stack-forgery-02} dargestellt. Ausgehend von einer Benutzerinteraktion oder einer Benachrichtigung der Entwicklungsumgebung erfolgt ein Aufruf des Debuggers, der die Fortsetzung der Ausführung des Prüflings über eine spezielle Routine einleitet. Innerhalb dieser Routine werden die Werte der Stackregister des Prozessors mit den am Unterbrechungspunkt zwischengespeicherten Werten vertauscht. Am Rücksprungbefehl der Routine kehrt die Ausführung damit nicht zum Debugger zurück, sondern zur Behandlungsroutine für Breakpoints. Der Behelfs-Thread arbeitet von diesem Zeitpunkt an auf dem entkoppelten Stack des Prüflings. Bevor die Ausführung des Prüflings fortgesetzt wird, müssen die gesetzten Breakpoints zunächst wieder im Maschinencode des Prüflings implementiert und dessen Ausführungszustand wiederhergestellt werden.
+
+\begin{figure}[htb!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{04-stack-forgery-02.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Aufrufabfolge zur Fortsetzung der Ausführung. Der Austausch zwischen den aktuellen Werten der Stackregister des Prozessors und den am Unterbrechungspunkt gesichert Werten, ermöglicht eine Wiederaufnahme der Ausführung des Prüflings durch einen Behelfs-Thread.}
+  \label{fig:stack-forgery-02}
+\end{figure}
+
+\noindent
+Nachfolgende Unterbrechungen der Ausführung können vergleichsweise leicht realisiert werden. Abbildung \ref{fig:stack-forgery-03} zeigt die Aufrufabfolge für diesen Fall. Die Behandlungsroutine für Breakpoints ruft wieder die Routine zur Einleitung einer Unterbrechung auf. Diesmal erfolgt auch hier ein Austausch zwischen den aktuellen Werten der Stackregister des Prozessors und den in der Routine zur Fortsetzung der Ausführung zwischengespeicherten Werten. Der Rücksprungbefehl der Routine bewirkt nun eine Rückkehr des Funktionsaufrufs zum Debugger. Der Behelfs-Thread arbeitet wieder auf dem Aufrufstack in seinem regulären Stackspeicherbereich. Die Sicherung des Ausführungszustandes und das Wiederherstellen des ursprünglichen Maschinencodes des Prüflings sind auch hier nötig. Die erneute Fortsetzung der Ausführung kann wie im vorherigen Fall erfolgen.
+
+%Wird bei der Fortsetzung der Verarbeitung ein weiterer Breakpoint getroffen, muss die Ausführung des Prüflings erneut unterbrochen werden. Dafür genügt es
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{04-stack-forgery-03.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Aufrufabfolge zur erneuten Unterbrechung des Ausführung. Da der Aufrufstack des Prüflings bereits entkoppelt ist, genügt der Austausch zwischen den aktuellen Werten der Stackregister des Prozessors und den bei der letzten Fortsetzung der Ausführung gesichert Werten. Die erneute Fortsetzung der Ausführung kann wieder wie in Abbildung \ref{fig:stack-forgery-02} erfolgen.}
+  \label{fig:stack-forgery-03}
+\end{figure}
+
+\noindent
+Erreicht die Ausführung das Ende des Prüflingscodes, werden die Stackframes im entkoppelten Stack nach und nach abgebaut, bis schließlich der Entkopplungspunkt erreicht wird. An dieser Stelle folgt ein letzter Austausch der Werte der Stackregister. Der Funktionsaufruf im Behelfs-Thread kehrt daraufhin zum Debugger und schließlich zum Betriebssystem zurück. Die Aufrufabfolge ist in Abbildung \ref{fig:stack-forgery-04} dargestellt. Die Ausführung des Prüflings ist damit beendet. Die Echtzeitverarbeitung kann ab diesem Zeitpunkt wieder aufgenommen werden.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{04-stack-forgery-04.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Aufrufabfolge beim Verlassen des Prüflingscodes. Beim Erreichen des Entkopplungspunkts wurde der entkoppelte Stack vollständig abgearbeitet. Die bei der letzten Fortsetzung der Ausführung gesicherten Werte der Stackregister werden nun in die Stackregister des Prozessors geschrieben. Damit kehrt die Ausführung des Behelfs-Threads zum Betriebssystem zurück. Die Echtzeitverarbeitung kann wieder aufgenommen werden.}
+  \label{fig:stack-forgery-04}
+\end{figure}
+
+

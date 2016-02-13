@@ -1,0 +1,326 @@
+
+\subsection{Voraussetzungen}
+\label{sec:impl-runtime-preface}
+
+Alle zur Laufzeit des Prüflings anfallenden Arbeitsschritte werden von einer Instanz der Klasse |SRS::Debugger| realisiert. Sie hat Zugriff auf die Datenbasis der Core Cell des Prüflings und ist zudem über die Schnittstelle |SDI| der Reaktor Core Library mit der Entwicklungsumgebung |SDE| verbunden. Innerhalb der Entwicklungsumgebung existiert nur eine einzige solche Instanz. Sie wird im Folgenden als \emph{Debugger} bezeichnet. 
+
+Bei der Übersetzung des Prüflingsprogramms wurden alle nötigen Anpassungen zur Verwendung eines Same-Process Debuggers vorgenommen. Zudem wurden die von der Debug-Data-Factory gesammelten Programmdaten nach Abschluss des Übersetzungsvorgangs dem Debugger übergeben.
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Breakpoints}
+\label{sec:impl-runtime-breakpoints}
+
+Das Einzelschrittverfahren des Debuggers basiert auf der Verwendung temporärer Breakpoints. In diesem Abschnitt wird die Realisierung des dafür nötigen Breakpoint-Mecha\-nismus' im Prototyp des Debuggers für Reaktor Core Programme vorgestellt.
+
+%Ein sequenzieller Befehlsblock beginnt an einem Sprungziel und umfasst alle Maschinenbefehle bis zum nächsten Sprungziel.
+
+%Die Grundlage für den in Abschnitt \ref{sec:concept-sameprocess-overwriting-blocks} der Konzeption beschriebenen Breakpoint-Mechanismus bilden sequenzielle Befehlsblöcke. Ein sequenzieller Befehlsblock beginnt an einem Sprungziel und umfasst alle Maschinenbefehle bis zum nächsten Sprungziel. In Abschnitt \ref{sec:impl-buildtime-compilerchanges-buffer} wurde bereits beschrieben, dass sequenzielle Befehlsblöcke in Reaktor Core Programmen Gruppen aufeinanderfolgender linearer Segmente entsprechen. Beispielsweise bilden die linearen Segmente 0 bis 3 in Abbildung \ref{fig:successor-diagram} einen sequenziellen Befehlsblock.
+
+%Die in Abschnitt \ref{sec:concept-sameprocess-overwriting-blocks} . 
+
+\subsubsection{Vereinfachungen für die Einzelschrittausführung}
+\label{sec:impl-runtime-breakpoints-simplification}
+
+Für die Implementierung des Prototypen kann das Verfahren aus Abschnitt \ref{sec:concept-sameprocess-overwriting-blocks} der Konzeption vereinfacht werden. Denn für das Einzelschrittverfahren werden zunächst nur temporäre Breakpoints benötigt. Diese müssen nach einer Unterbrechung nicht erneut implementiert werden. Da es in Reaktor Core Programmen zudem keine Sprünge entgegen der Ausführungsrichtung gibt, kann es nicht zur gegenseitigen Überlappung temporärer Breakpoints nach \ref{sec:concept-sameprocess-stepping-loops} kommen. Demzufolge können die jeweils nötigen Breakpoints ohne die Gefahr einer Änderung der Programmsemantik stets an den Stellen der möglichen Folgebefehlen implementiert werden. Im Hinblick auf die zukünftige Weiterentwicklung wurden die Mechanismen zur Verwaltung und sukzessiven Implementierung von Breakpoints aber bereits für den allgemeinen Fall implementiert.
+
+%bilden sequenzielle Befehlsblöcke auch die Grundlage für den Breakpoint-Mechanismus aus Abschnitt \ref{sec:concept-sameprocess-overwriting-blocks} der Konzeption. Sequenzielle Befehlsblöcke sind in Reaktor Core Programmen als Gruppen aufeinanderfolgender linearer Segmente repräsentiert. 
+%Bei der Implementierung könnten diese Gruppen als Grundlage des Breakpoint-Mechanismus' dienen. 
+
+%Das in \ref{sec:concept-sameprocess-overwriting-blocks} beschriebene Verfahren zur Realisierung von Breakpoints erfordert eine spezielle Behandlung des ersten Breakpoints in einem sequenziellen Befehlsblock. Das wurde notwendig, weil angenommen wurde, dass die Ausführung den Befehlsblock zu beliebigen Zeitpunkten verlassen kann. Werden bei der Implementierung nun die \emph{Gruppen} linearer Segmente als Grundlage des Breakpoint-Mechanismus' verwendet, trifft die Annahme zu, da es zwischen den linearen Segmenten Sprungbefehle geben kann, über die die Ausführung den Befehlsblock möglicherweise verlässt. Im Falle des eingangs erwähnten Beispiels aus Abbildung \ref{fig:successor-diagram} sind das die Sprungbefehle der Laufzeitbedingungen c1 bis c3. 
+
+%Eine entscheidende Vereinfachung kann jedoch getroffen werden, wenn die \emph{einzelnen} linearen Segmente als Grundlage des Breakpoint-Mechanismus' dienen. Dies ist möglich, da es zwischen den linearen Segmenten zwar Sprungbefehle geben kann, weiterhin aber nur der erste Maschinenbefehl des ersten Segments ein Sprungziel sein kann. Im Beispiel aus Abbildung \ref{fig:successor-diagram} wird von den Segmenten 1, 2 und 3 beispielsweise stets zuerst Segment 0 erreicht.
+
+%zusammengefassten Gruppen linearer Segmente angewendet werden. Es hat sich jedoch als günstiger erwiesen, die linearen Segmente separat zu betrachten. Gegenüber... lässt sich dann eine entscheidende Vereinfachung wie folgt treffen.
+
+%Gegenüber der allgemeinen Konzeption in \ref{sec:concept-sameprocess-overwriting-blocks} lässt sich die Realisierung von Breakpoints in Reaktor Core Programmen vereinfachen. Konkret kann die Sonderstellung des ersten Breakpoints in einem linearen Segment ignoriert werden. Dies ist möglich, weil innerhalb von linearen Segmenten keine Sprungbefehle existieren. Dadurch werden alle für ein lineares Segment registrierten Breakpoints gemäß ihrer Reihenfolge garantiert getroffen, nachdem der erste Breakpoint getroffen wurde. Der erste Breakpoint wird im Zuge der Unterbrechung am letzten Breakpoint eines linearen Segments erneut implementiert. In jedem linearen Segment, für das mindestens ein Breakpoint registeriert wurde, ist damit stets genau ein Breakpoint implementiert. Es sind keine impliziten Einzelschritte nötig.
+
+\subsubsection{Verwaltung von Breakpoints}
+\label{sec:impl-runtime-breakpoints-management}
+
+Die Verwaltung von Breakpoints erfolgt durch die Klasse |SRS::RTDSegment|. Zur Laufzeit existiert je eine Instanz dieser Klasse für jedes lineare Segment des Prüflingscodes, für das mindestens ein Breakpoint gesetzt ist. Die Instanzen werden im Folgenden als \emph{RTDSegment} bezeichnet\footnote{Das Präfix RTD steht für \emph{Runtime-Data}.}. Breakpoints werden hier zunächst nur registriert und gemäß ihrer Reihenfolge im linearen Segment sortiert. Die Implementierung von Breakpoints im Maschinencode des Prüflings wird in Abschnitt \ref{sec:impl-runtime-breakpoints-implemetation} erläutert. Da für jedes RDTSegment immer nur ein Breakpoint implementiert sein kann, erfolgt die Zwischenspeicherung des ursprünglichen Maschinencodes ebenfalls in der Datenstruktur des zugehörigen RTDSegments. Der zu diesem Zweck allozierte Speicherbereich wird im Folgenden als \emph{Swap-Speicher} bezeichnet.
+
+%kann bei der Fortsetzung der Ausführung der jeweils nächste Breakpoint direkt implementiert werden, ohne dass implizite Einzelschritte nötig werden. 
+
+Wird einem RTDSegment ein Breakpoint hinzugefügt, wird zunächst überprüft ob er vor dem zu diesem Zeitpunkt implementierten Breakpoint liegt. Ist das der Fall, muss der aktuell implementierte Breakpoint entfernt und der neu hinzugefügte Breakpoint implementiert werden. Für diesen Zweck wird das Callback-Flag gesetzt, sodass die nötigen Änderungen am Maschinencode des Prüflings beim nächsten Durchlauf des Callback-Points vorgenommen werden. Liegt der neu hinzugefügte Breakpoint hinter dem aktuell implementierten Breakpoint, genügt die einfache Registrierung des Breakpoints. Das Entfernen von Breakpoints erfolgt analog dazu. Wurden alle Breakpoints eines linearen Segments entfernt, wird auch das zugehörige RTDSegment gelöscht.
+
+\subsubsection{Implementierung im Maschinencode}
+\label{sec:impl-runtime-breakpoints-implemetation}
+
+Für die Implementierung von Breakpoints im Maschinencode des Prüflings kommt, wie bereits für die Kompilierung von Callback-Points in \ref{sec:impl-buildtime-compilerchanges-callbackpoint}, das Memory-Backend zum Einsatz. Die Aufrufabfolge der im Folgenden beschriebenen Routinen wird vom jeweils verantwortlichen RTDSegment vorgegeben und muss bei der Ausführung der Behandlungsroutine des Callback-Points eingehalten werden.
+
+Die Implementierung eines Breakpoints wird von der Methode |insertCall| realisiert. Als Parameter wird ihr der Zeiger auf das zugehörige RTDSegment, die Speicherstelle des Breakpoints und die Adresse des zu verwendenden Swap-Speichers übergeben. Zuerst wird der ursprüngliche Maschinencode an der Stelle des Breakpoints in den Swap-Speicher kopiert. Dann wird die Distanz zwischen der Speicherstelle des Breakpoints und dem Einstiegspunkt der Behandlungsroutine berechnet. Innerhalb der Behandlungsroutine werden verschiedene architekturspezifische Low-Level-Operationen nötig. Sie liegt daher ebenfalls im Memory-Backend (siehe \ref{sec:impl-runtime-breakpoints-onhitbreakpoint}). Der Maschinencode des Breakpoints besteht aus dem Opcode des Call-Befehls (1 Byte) und der zuvor berechneten relativen Sprungdistanz (4 Byte). Die Werte werden direkt hintereinander in den Speicher geschrieben. Abschließend wird eine Referenz auf das für den Breakpoint verantwortliche RTDSegment in einer Map-Struktur im Memory-Backend abgelegt\footnote{Konkret kommt hier die Klasse \emph{std::map} der C++ Standard Template Library zum Einsatz. Eine einzige solche Map genügt für alle Handler und Core Cells, da die Speicheradressen, die als Schlüssel verwendet werden, stets eindeutig sind.}. Als Schlüssel dient die Adresse des Breakpoints. Die Zuordnung zwischen einer solchen Speicheradresse im Prüflingscode und dem dafür verantwortlichen RTDSegment ist stets eindeutig. Innerhalb der Behandlungsroutine für Breakpoints wird damit das Auffinden des zugehörigen RTDSegments beschleunigt. Bei $n$ implementierten Breakpoints liegt die Laufzeitkomplexität für das Auffinden des korrekten RTDSegment im Worst-Case bei $\landau(log(n))$.
+
+Das Entfernen eines Breakpoints aus dem Maschinencode des Prüflings erfolgt in der Methode |restoreOriginalCode| des Memory-Backends. Als Parameter sind hier nur die Adressen von Breakpoint und Swap-Speicher anzugeben. Innerhalb der Methode wird der Inhalt des Swap-Speichers einfach zurück in den Maschinencode des Prüflings kopiert und der zugehörige Eintrag in der Map-Struktur zur Zuordnung der jeweils verantwortlichen RTDSegments gelöscht.
+
+\subsubsection{Die Funktion onHitBreakpoint}
+\label{sec:impl-runtime-breakpoints-preparation}
+
+Zur Unterbrechungen der Ausführung kommt es beim Erreichen eines Breakpoints im Maschinencode des Prüflings. Dies kann zu einem beliebigen Zeitpunkt der Ausführung geschehen. Für einige Bestandteile des Ausführungszustandes des Prüflings besteht die Gefahr während einer Unterbrechung verändert zu werden. Für die Werte in den Registern des Prozessors ist dies sogar unausweichlich. Die betroffenen Bestandteile des Ausführungszustandes müssen daher im Vorfeld einer Unterbrechung gesichert und im Nachhinein wiederhergestellt werden. Bei der Implementierung in Reaktor Core erfolgt dies in der Behandlungsroutine für Breakpoints |onHitBreakpoint| im Memory-Backend.
+
+Bei der Funktion |onHitBreakpoint| handelt es sich um eine statische Funktion in einer von |SRS::MemoryBackend| abgeleiteten Klasse. Die folgenden Betrachtungen beziehen sich auf die Implementierung in |SRS::MemoryBackendSSE|. Die Funktion soll stets nach der Aufrufkonvention \emph{stdcall} kompiliert werden. Damit kann sichergestellt werden, dass die Funktion nach ihrer Ausführung die Bereinigung des Stacks selbst übernimmt. Andere Aufrufkonventionen wie z.\,B. \emph{cdecl} überlassen dies dem Aufrufenden, was im Falle der Behandlungsroutine für Breakpoints ungeeignet wäre. Um eine Kompilierung nach stdcall zu erzwingen wurde bei der Definition von |onHitBreakpoint| das Attribut |__stdcall| angegeben. 
+
+Eine weitere Besonderheit ist hinsichtlich des Schutzes aller Prozessorregister beim Aufruf der Funktion zu beachten. Da unter der stdcall-Konvention der Rückgabewert einer Funktion im Register EAX übergeben wird, muss dieses beim Aufruf nicht garantiert geschützt werden. Im Falle von |onHitBreakpoint| ist der Schutz von EAX jedoch zwingend erforderlich, um den unveränderten Ausführungszustand des Prüflings sichern zu können. Konkret problematisch sind spezielle Validierungsbefehle die vom Compiler automatisch im Funktions-Header generiert werden können. Die Generierung derartiger Validierungsbefehle wird unterbunden, wenn es sich wie im Falle von |onHitBreakpoint| beim ersten Befehl im Funktionsrumpf um einen Inline-Assembler-Befehl handelt. Dies ist eine allgemeine Konvention in C++ Compilern.
+
+\subsubsection{Implementierung der Funktion onHitBreakpoint}
+\label{sec:impl-runtime-breakpoints-onhitbreakpoint}
+
+Im Funktionsrumpf von |onHitBreakpoint| werden die folgenden Arbeitsschritte in der hier angegebenen Reihenfolge ausgeführt.
+Zuerst werden die General-Purpose-Register des Prozessors auf dem Stack gesichert. Im x86 Befehlssatz existiert hierfür der Befehl |pushad|. Damit werden die Werte der Register EAX, ECX, EDX, EBX, ESP, EBP, ESI und EDI in dieser Reihenfolge auf den Stack gelegt\footnote{Im Falle des Stack-Pointers ESP handelt es sich um den Wert \emph{vor} der Ausführung des pushad Befehls.}. Das FLAGS Register gehört nicht zum Ausführungszustand von Reaktor Core Programmen und kann ignoriert werden.
+	
+Danach erfolgt die Sicherung des erweiterten Registersatzes des Prozessors. Hierbei handelt es sich um die Register für Gleitkommaarithmetik sowie die XMM-Register von SSE-Erweiterungen. Sie werden mit dem Assemblerbefehl |fxsave| in einem 512 Byte großen Speicherbereich des Hauptspeichers gesichert. Zu beachten ist, dass der verwendete Speicherbereich bereits vor dem Aufruf von |fxsave| alloziert und an einer 16-Byte-Grenze ausgerichtet sein muss \cite{Intel2}. Für die Allokation derart ausgerichteter Speicherbereiche existieren in den verbreiteten Betriebssystemen spezielle Funktionen. Unter Windows handelt es sich dabei beispielsweise um die Funktion |_aligned_malloc| \cite{AlignedAlloc}. Derartige Funktionen können in diesem Fall jedoch nicht verwendet werden, da sie in einigen Fällen dazu führen, dass der erste vom Compiler registrierte Befehl im Funktionsrumpf kein Inline-Assembler-Befehl mehr ist. Damit könnten vom Compiler erneut Validierungsbefehle im Funktions-Header generiert werden, die den Wert des Registers EAX verfälschen. Stattdessen wird der Speicherbereich als statische Variable der Funktion deklariert und manuell ausgerichtet. Der Speicherbereich wird damit bereits beim Start von Reaktor im Datensegment der Anwendung angelegt.
+
+Im nächsten Schritt wird die Rücksprungadresse der Funktion korrigiert. Das ist nötig, da nach der Rückkehr der Funktion der ursprüngliche Maschinenbefehl an der Stelle des Breakpoints ausgeführt werden soll. Die Rücksprungadresse wird dafür an der Adresse |EBP+4| aus dem Stackframe der Funktion gelesen, um die Länge eines Call-Befehls dekrementiert und wieder zurückgeschrieben.
+
+Im Anschluss muss das für den Breakpoint verantwortliche RTDSegment gefunden werden. Dafür wird der bei der Implementierung des Breakpoints angelegte Eintrag in der Map-Struktur des Memory-Backends anhand der Adresse des Breakpoints ermittelt. Wurde das RTDSegment gefunden, wird abschließend noch der Speicherbereich des Prüflingscodes als editierbar markiert (siehe \ref{sec:impl-preface-compilation-link}), bevor die weitere Behandlung der Unterbrechung durch eine Routine des RDTSegment erfolgt. Diese Routine initiiert die Unterbrechung der Echtzeitverarbeitung nach \ref{sec:impl-runtime-stackforging}, die vollständige Wiederherstellung des ursprünglichen Prüflingscodes und die Darstellung des Ausführungszustandes in der Entwicklungsumgebung. In der Folge ist die Inspektion des Prüflings durch den Benutzer möglich.
+
+Wird die Ausführung des Prüflings fortgesetzt, kehrt der Funktionsaufruf der Routine des RTDSegment zur Funktion |onHitBreakpoint| zurück. Zunächst werden nun alle nötigen Breakpoints erneut implementiert, bevor der Speicherbereich des Prüflingscode wieder als ausführbar markiert wird. Danach werden zuerst die Werte des erweiterten Registersatzes mit Hilfe der Assembleranweisung |fxrstor| und schließlich die Werte der General-Purpose-Register mit |popad| wiederhergestellt\footnote{Die Wiederherstellung in der entgegengesetzten Reihenfolge der Speicherung erfolgt hier automatisch.}. Der Rücksprungbefehl von |onHitBreakpoint| veranlasst die Bereinigung des Stacks und führt dazu, dass die Ausführung mit dem ursprünglichen Maschinenbefehl an der Stelle des Breakpoints fortgesetzt wird.
+
+
+%\begin{remark}
+%Das ist ein Kernthema und zudem noch recht interessant: Auslesen und Korrigieren der Rücksprungadresse, Alignment der XmmSaveArea, Adresse als \textbf{statisch} eindeutiger Schlüssel für Segment, etc.
+%\end{remark}
+
+%\begin{remark}
+%Erklären evtl. anhand Pseudo-Code Auszug?
+%\end{remark}
+
+%\begin{remark}
+%Todo: Die konzeptionellen Aspekte sollten schon im Konzept-Teil untergebracht werden. Hier darauf eingehen, wie das Konzept in Reaktor realisiert wurde.
+%\end{remark}
+
+%\noindent
+%Voraussetzungen:
+%\begin{itemize}
+%  \item Same-Process Debugger (wurde schon besprochen)
+%  \item Paddings vor jedem Jump-Target (wurde schon besprochen)
+%  \item Routine zur Behandlung im Debugger darf Entfernung von $2^{31}$ Byte relativ zum Sprungbefehl nicht überschreiten (hier erwähnen?)
+%\end{itemize}
+
+%\noindent
+%Realisierung:
+%\begin{itemize}
+%  \item Einfügen des Calls durch MemoryBackend (derzeit nur MemoryBackendSSE)
+%  \item jedes RTDSegment hat Swap-Speicher (es gibt max. einen aktiven Breakpoint pro Segment)
+%\end{itemize}
+  
+%\noindent
+%Breakpoint implementieren:  
+%\begin{itemize}
+%  \item Speicherbereich des Maschinencodes umschalten: ausführbar -> editierbar
+%  \item Originalquellcode an Adresse in Swap des RTDSegment kopieren
+%  \item relative Distanz der Adresse von Behandlungsroutine im Debugger berechnen
+%  \item Opcode für relativen Sprung + relative Distanz an Adresse schreiben
+%  \item Zuordnung (Adresse -> Segment) speichern
+%  \item Speicherbereich des Maschinencodes umschalten: editierbar -> ausführbar
+%\end{itemize}
+%\clearpage
+  
+%\noindent
+%Breakpoint auslösen:
+%\begin{itemize}
+%  \item Prozessor-Register sichern
+%  \item FP-, SSE- und MMX-Register sichern (AlignedXmmSaveArea als statische Stack-Variable!)
+%  \item Return-Adresse vom Stack holen, korrigieren (um Größe der Sprunganweisung dekrementieren) und lokal speichern
+%  \item Return-Adresse im Stack durch korrigierte Return-Adresse ersetzen
+%  \item Segment aus gespeicherter Zuordnung (Adresse -> Segment) ermitteln
+  
+%  \item Speicherbereich des Maschinencodes umschalten: ausführbar -> editierbar
+%  \item Originalquellcode aus Swap des RTDSegment zurück an Adresse kopieren (für alle Breakpoints des registierten MultiBreakpoint)
+%  \item Unterbrechung auslösen
+%  \item ggf. Folge-Breakpoint des Segments implementieren, nächsten TracePoint setzen, etc.
+%  \item Speicherbereich des Maschinencodes umschalten: editierbar -> ausführbar
+  
+%  \item FP-, SSE- und MMX-Register wieder herstellen
+%  \item Prozessor-Register wieder herstellen
+%\end{itemize}
+%\clearpage
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Realisierung von Unterbrechungen}
+\label{sec:impl-runtime-stackforging}
+
+In Abschnitt \ref{sec:impl-runtime-breakpoints-onhitbreakpoint} wurde die Implementierung der Behandlungsroutine für Breakpoints beschrieben. Sie realisiert die Sicherung und Wiederherstellung des Ausführungszustands des Prüflings sowie die Korrektur der Rücksprungadresse. Für die weitere Behandlung von Unterbrechung wird eine Routine von |SRS::RTDSegment| aufgerufen. Sie initiiert u.\,a. die Unterbrechung der Ausführung. In diesem Abschnitt soll die Implementierung des dafür verwendeten Mechanismus' vorgestellt werden. Die Grundlage bildet das in Abschnitt \ref{sec:concept-realtime-break} der Konzeption erarbeitete Verfahren.
+
+\subsubsection{Realisierung des separaten Stackspeichers}
+\label{sec:impl-runtime-stackforging-memory}
+
+%Zunächst wird daher ein Speicherbereich benötigt, der sich für die Aufnahme des entkoppelten Stacks eignet. 
+
+Voraussetzung für die Unterbrechung der Echtzeitverarbeitung bildet die Umleitung des Aufrufstacks. Dafür ist ein zusätzlicher Speicherbereich erforderlich, der als \emph{separater Stackspeicher} bezeichnet wurde (\ref{sec:concept-realtime-break-concept}). Als geeignet erweist sich ein Speicherbereich, dessen Position und Größe drei aufeinanderfolgenden Speicherseiten entspricht. Sowohl für die erste als auch für die letzte Speicherseite wird jeglicher Zugriff gesperrt\footnote{Im Falle von Windows kommt dafür die API-Funktion \emph{VirtualProtect} mit dem Parameter \emph{PAGE\_NOACCESS} zum Einsatz. Unter Mac OS X wird \emph{sys\_icache\_invalidate} verwendet.}. Die dazwischenliegende Seite dient als separater Stackspeicher. Durch die Sperrung der umliegenden Speicherseiten können Fehler durch Über- und Unterläufe des Stacks erkannt werden. Die Grenzen der verwendeten Speicherseite werden in den Membervariablen |StackTop| und |StackBottom| der Klasse |StackForge| gespeichert. Der separate Stackspeicher wird bei seiner Verwendung wie üblich in Richtung absteigender Adresswerte gefüllt. 
+
+\subsubsection{Wahl des Entkopplungspunkts}
+\label{sec:impl-runtime-stackforging-point}
+
+Die Stelle in der Aufrufhierarchie an der die Umleitung des Aufrufstacks stattfindet, wurde als \emph{Entkopplungspunkt} bezeichnet (\ref{sec:concept-realtime-break-concept}). Die Ausführung des Echtzeit-Threads muss den Entkopplungspunkt vor dem Prüflingscode erreichen. Dementsprechend muss sich der Entkopplungspunkt für Reaktor Core Programme in der Ausführungsumgebung Reaktor befinden. Eine geeignete Position stellt die Methode |processAudio| der Klasse |TReaktor| dar. Für die Vereinfachung der späteren Entkopplung wird hier ein zusätzlicher Funktionsaufruf eingefügt. Bei der aufgerufenen Funktion handelt es sich um die Methode |centralDecouplingRoutine| der Klasse |StackForge|. Sie stellt den Entkopplungspunkt dar und wird im folgenden Abschnitt \ref{sec:impl-runtime-stackforging-switch} detailliert betrachtet. 
+
+%Für die Zwecke der Umleitung des Aufrufstacks wird hier zunächst abgefragt, ob der Aufrufstack bereits entkoppelt wurde. Ist dies der Fall, wird die Methode |doSilenceAudio| aufgerufen, die den Wert des aktuellen Samples im Sample-Puffer auf Null setzt. Bei der Ausgabe des Samples wird später kein Ton erzeugt. Die Ausführung des Echtzeit-Threads kehrt daraufhin zurück. Ist der Aufrufstack nicht entkoppelt, erfolgt dessen Umleitung in den separaten Stackspeicher. Dies wird im folgenden Abschnitt beschrieben.
+
+\subsubsection{Umleitung des Aufrufstacks}
+\label{sec:impl-runtime-stackforging-switch}
+
+%\enlargethispage{0.4cm}
+Der gesamte Ablauf der im Folgenden beschriebenen Arbeitsschritte ist in Abbildung \ref{fig:stack-forgery} schematisch dargestellt. Pfeile mit durchgezogener Linie repräsentieren den gewöhnlichen Kontrollfluss innerhalb der Aufrufhierarchie der beteiligten Threads. Die einzelnen Manipulationen des Kontrollflusses sind durch die Pfeile mit gestrichelter Linie und den Nummerierungen (1) bis (4) dargestellt.
+
+\begin{figure}[hb!]
+  \centering
+  \includegraphics[scale=0.19]{05-stack-forgery.png} %[width=\textwidth]
+  \caption{Schematische Darstellung der Manipulationen des Kontrollflusses zur Realisierung von Unterbrechungen. Funktionen deren Stackframes im separaten Stackspeicher aufgebaut werden, sind als Hexagons dargestellt. Das Erreichen eines Breakpoints im Prüflingscode führt zur Entkopplung des Aufrufstacks (1). Die Ausführung im Echtzeit-Thread kehrt daraufhin zurück und kann etwaige Zeitschranken einhalten. Nach der Unterbrechung übernimmt der GUI-Thread die Ausführung des Prüflings (2). Der Echtzeit-Thread bleibt entkoppelt, bis das Ende des Prüflings erreicht wird (4). Zuvor kann es zu beliebig vielen weiteren Unterbrechungen kommen (2 und 3).}
+  \label{fig:stack-forgery}
+\end{figure}
+
+Neben der Funktionalität zur Erstellung des separaten Stackspeichers enthält die Klasse |StackForge| auch eine Methode, die sowohl die Umleitung als auch die Entkopplung des Aufrufstacks durchführt. Dabei handelt es sich um die Funktion |centralDecoupling| |Routine|. Die Verwendung einer einzigen Funktion für alle Aufgaben im Zusammenhang mit der Entkopplung erweist sich als günstig. 
+Zur Unterscheidung der verschiedenen Aufgaben erwartet die Funktion einen Parameter vom Aufzählungstyp |tCallingMode|. Er kann die Werte |INIT|, |PROCESSAUDIO|, |BREAK| und |CONTINUE| annehmen. Listing \ref{lst:decoupling} zeigt die Implementierung der Funktion in Pseudocode. Im Anschluss an die Erstellung des separaten Stackspeichers wird die Funktion einmalig mit dem Parameterwert |INIT| aufgerufen. Vor und nach diesem Aufruf wird der Wert des Stack-Pointer-Registers des Prozessors mit dem Wert der Variablen |StackTop| vertauscht. Der Stackframe für diesen Funktionsaufruf wird demzufolge im separaten Stackspeicher aufgebaut. Innerhalb der Funktion werden nun in Zeile 5 die Werte der Register von Stack- und Base-Pointer in den Membervariablen |StoredSP| und |StoredBP| gesichert. Diese Werte werden später für die Entkopplung des Aufrufstacks verwendet. Abbildung \ref{fig:separate-stack} zeigt den Inhalt des separaten Stackspeichers während der Initialisierung.
+
+\lstinputlisting[float=ht!, style=verbatimstyle, morekeywords={function,if,else,switch,case,return}, emph={STORE,XCHG}, numbers=left, caption={Implementierung der Funktion zur Umleitung, Entkopplung und Umschaltung des Aufrufstacks in Pseudocode. Der Parameter \emph{Mode} dient der Unterscheidung der verschiedenen Aufgaben. \emph{STORE} und \emph{XCHG} sind als Präprozessormacros realisiert. \emph{STORE} speichert die Werte der Stackregister in den angegebenen Variablen. \emph{XCHG} führt einen Austausch zwischen den Werten der Stackregister und den Werten der angegebenen Variablen durch.}, label={lst:decoupling}]{./listings/05-decoupling-pseudo-code.txt}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.25]{05-separate-stack.png} %[width=\textwidth]
+  \caption{Separater Stackspeicher während der Initialisierung. Die Grenzen der verwendeten Speicherseite werden von den Zeigern \emph{StackTop} und \emph{StackBottom} markiert. Da alle Operationen für das Umschalten des Stacks in derselben Funktion implementiert sind, können die bei der Initialisierung gespeicherten Adressen von Base- und Stack-Pointer für jeden Umschaltvorgang verwendet werden.}
+  \label{fig:separate-stack}
+\end{figure}
+
+\noindent
+Wie in \ref{sec:impl-runtime-stackforging-point} bereits erwähnt wurde, erfolgt in der Funktion |processAudio| der Klasse |TReaktor| ein Aufruf der Funktion |centralDecouplingRoutine|. Als Parameterwert wird dabei |PROCESSAUDIO| verwendet. In Zeile 9 wird daraufhin zunächst abgefragt, ob der Aufrufstack bereits entkoppelt wurde. Ist der Aufrufstack \emph{nicht} entkoppelt, erfolgt die Umleitung in den separaten Stackspeicher. Dies wird durch das Vertauschen der aktuellen Werte der Stackregister mit den während der Initialisierung gespeicherten Werten in Zeile 15 realisiert. Der Stackframe der in Zeile 17 aufgerufenen Funktion |doProcessAudio| wird daraufhin hinter dem bei der Initialisierung verwendeten Stackframe im separaten Stackspeicher erstellt. Die Ausführung erreicht den Prüflingscode während der Verarbeitung von |doProcessAudio|. Sollte dabei kein Breakpoint getroffen werden, wird die Funktion |doProcessAudio| regulär verlassen und deren Stackframe wieder abgebaut. Die Ausführung erreicht dann Zeile 19 von Listing \ref{lst:decoupling}. Die Werte der Stackregister des Prozessors entsprechen hier wieder den bei der Initialisierung gespeicherten Werten. Durch den Rücktausch in Zeile 19 wird also die Ausgangssituation wiederhergestellt. Die |return| Anweisung in Zeile 21 veranlasst den Abbau des Stackframes der Funktion |centralDecouplingRoutine| im regulären Stackspeicherbereich.
+
+\subsubsection{Entkopplung des Aufrufstacks}
+\label{sec:impl-runtime-stackforging-decouple}
+
+Wird bei der Verarbeitung des Prüflings ein Breakpoint getroffen, wird die Funktion |centralDecouplingRoutine| von der Behandlungsroutine der Klasse |SRS::RTDSegment| mit dem Parameterwert |BREAK| aufgerufen. Im Folgenden soll zunächst der Fall betrachtet werden, dass der Aufrufstack zu diesem Zeitpunkt \emph{nicht} entkoppelt ist. Dann befindet sich die Ausführung im Echtzeit-Thread und im Prüflingscode wurde gerade zum ersten Mal ein Breakpoint getroffen. Der Wert des aktuellen Samples wird daraufhin in Zeile 25 durch den Aufruf der Funktion |doSilenceAudio| auf Null gesetzt. Viel wichtiger ist jedoch, dass die Variablen |StoredSP| und |StoredBP| in diesem Fall die Werte des Ausgangszustandes enthalten (die bei der Initialisierung gespeicherten Werte). Der Austausch der aktuellen Werte der Stackregister mit denen von |StoredSP| und |StoredBP| in Zeile 26 realisiert damit die Entkopplung des Aufrufstacks. Denn bei der Ausführung der |return| Anweisung in Zeile 28 wird nun nicht die Rücksprungadresse im Stackframe der Funktion |centralDecouplingRoutine| im \emph{separaten} Stackspeicher verwendet, sondern die Rücksprungadresse im Stackframe der Funktion |centralDecouplingRoutine| im \emph{regulären} Stackspeicherbereich. Tatsächlich erfolgt hier also bereits der Rücksprung, der im Normalfall erst nach der Rückkehr aus der Funktion |doProcessAudio| in Zeile 21 erfolgt wäre (Pfeil (1) in Abbildung \ref{fig:stack-forgery}). Die Stackframes der dazwischen erfolgten Funktionsaufrufe verbleiben damit im separaten Stackspeicher. Die Ausführung im Echtzeit-Thread wird damit nur unwesentlich verzögert. Sie kehrt unter Einhaltung der vorgegeben Zeitschranke zurück.
+
+In allen weiteren Verarbeitungsdurchläufen wird nun in Zeile 9 erkannt, dass der Aufrufstack entkoppelt wurde.  Durch den Aufruf der Funktion |doSilenceAudio| in Zeile 10, wird dann der Wert des aktuellen Samples im Sample-Puffer auf Null gesetzt. Bei der Ausgabe des Samples wird später kein Ton erzeugt. Die Ausführung kehrt zurück ohne den Prüfling zu erreichen. Damit ist die Ausführung des Prüflings unterbrochen. Sein Ausführungszustand kann vom Benutzer in der Entwicklungsumgebung inspiziert werden.
+
+\subsubsection{Fortsetzung der Ausführung}
+\label{sec:impl-runtime-stackforging-continue}
+
+Der Austausch der Werte der Stackregister mit den Werten der Variablen |StoredSP| und |StoredBP| in \ref{sec:impl-runtime-stackforging-decouple} diente nicht nur zur Entkopplung des Aufrufstacks, sondern ermöglicht ebenfalls die Fortsetzung der Ausführung an der Stelle der Unterbrechung. Denn die nun in den Variablen |StoredSP| und |StoredBP| gespeicherten Werte sind genau die Werte der Stackregister des letzten im separaten Stackspeicher aufgebauten Stackframes. Auch hier handelt es sich um einen Stackframe der Funktion |centralDecouplingRoutine|.
+
+Wie in Abschnitt \ref{sec:concept-realtime-break-concept} des Konzeptionsteils vorgeschlagen wird, erfolgt die Fortsetzung der Ausführung des Prüflings durch einen Behelfs-Thread. Da die Fortsetzung der Ausführung durch eine Benutzerinteraktion initiiert wird, die im GUI-Thread von Reaktor behandelt wird, bietet sich die Verwendung des GUI-Threads als Behelfs-Thread an. Wie in allen ereignisbasierten Softwareanwendungen wartet der GUI-Thread in der Hauptereignisschleife der Anwendung auf das Eintreffen von Nachrichten.
+
+Initiiert der Benutzer die Fortsetzung der Ausführung in der Entwicklungsumgebung, wird eine entsprechende Nachricht an die Hauptereignisschleife der Anwendung gesendet. Im GUI-Thread wird daraufhin die zugehörige Behandlungsroutine des Debuggers aufgerufen. Soll beispielsweise ein Einzelschritt ausgeführt werden, handelt es sich dabei um die Methode |doStep|. Innerhalb der Methode wird die Funktion |centralDecouplingRouti| |ne| mit dem Parameterwert |CONTINUE| aufgerufen. Die Ausführung erreicht dann den Befehl zum erneuten Austausch der Stackregister in Zeile 31 von Listing \ref{lst:decoupling}. Damit wird der Stackframe der Funktion auf den letzten im separaten Stackspeicher aufgebauten Stackframe umgeschalten. Im Anschluss liegen die Werte der Stackregister, die den ursprünglichen Stackframe der Funktion im regulären Stackspeicherbereich des GUI-Threads markieren, in den Variablen |StoredSP| und |StoredBP|. Die Übernahme des Stackframes im separaten Stackspeicher ist unproblematisch, da er dieselbe Struktur aufweist wie der ursprüngliche Stackframe -- es handelt sich in beiden Fällen um einen Stackframe der Funktion |centralDecouplingRoutine|. Die |return| Anweisung in Zeile 32 verwendet daraufhin die Rücksprungadresse des letzten Stackframes im separaten Stackspeicher. Tatsächlich erfolgt hier also der Rücksprung, der im Normalfall in Zeile 28 den Aufruf der Funktion mit dem Parameterwert |BREAK| beendet hätte (Pfeil (2) in Abbildung \ref{fig:stack-forgery}). Dieser Aufruf erfolgte im Anschluss an die Sicherung des Ausführungszustandes des Prüflings und der Wiederherstellung des ursprünglichen Maschinencodes durch die Behandlungsroutine des RTDSegment. Die Verarbeitung wird an dieser Stelle fortgesetzt und erreicht schließlich wieder die Funktion |onHitBreakpoint| im Memory-Backend (\ref{sec:impl-runtime-breakpoints-onhitbreakpoint}).
+
+\subsubsection{Nachfolgende Unterbrechungen}
+\label{sec:impl-runtime-stackforging-furtherbreaks}
+
+Sollten bei der Verarbeitung des Prüflings durch den GUI-Thread weitere Breakpoints getroffen werden, kommt es erneut zur Vertauschung der Werte der Stackregister mit den Werten der Variablen |StoredSP| und |StoredBP|. Im Unterbrechungsfall (Pfeil (3) in Abbildung \ref{fig:stack-forgery}) enthalten die Variablen |StoredSP| und |StoredBP| stets die Werte, die sie bei der letzten Fortsetzung der Ausführung in \ref{sec:impl-runtime-stackforging-continue} erhalten haben. Sie markieren den letzten Stackframe im regulären Stackspeicherbereich des GUI-Threads. Bei der Unterbrechung der Ausführung kehrt der GUI-Thread zur Hauptereignisschleife zurück und wartet dort auf das Eintreffen von Nachrichten. Im Fortsetzungsfall (Pfeil (2) in Abbildung \ref{fig:stack-forgery}) enthalten die Variablen |StoredSP| und |StoredBP| stets die Werte, die sie bei der letzten Unterbrechung der Ausführung in \ref{sec:impl-runtime-stackforging-decouple} erhalten haben. Die Ausführung des Prüflings kann also beliebig häufig unterbrochen und wieder fortgesetzt werden. Im Gegensatz zur ersten Unterbrechung der Ausführung ist der Aufrufstack bei nachfolgenden Unterbrechungen bereits entkoppelt. In Listing \ref{lst:decoupling} wird dies durch die Abfrage der Statusvariablen |Status| ermittelt.
+
+\subsubsection{Ende der Verarbeitung des Prüflings}
+\label{sec:impl-runtime-stackforging-exit}
+
+Wenn der Programmcode des Prüflings vollständig abgearbeitet wurde (Pfeil (4) in Abbildung \ref{fig:stack-forgery}), kehrt die Ausführung zum Aufruf der Funktion |doProcessAudio| in Zeile 17 der Funktion |centralDecouplingRoutine| zurück. Die Werte der Stackregister des Prozessors entsprechen nun wieder den bei der Initialisierung gespeicherten Werten. Sie markieren also den ersten Stackframe des separaten Stackspeichers. Die Variablen |StoredSP| und |StoredBP| enthalten zu diesem Zeitpunkt dieselben Werte wie im Unterbrechungsfall in \ref{sec:impl-runtime-stackforging-furtherbreaks}. In Zeile 19 erfolgt eine abschließende Umschaltoperation. Damit wird für die Variablen |StoredSP| und |StoredBP| der Ausgangszustand wiederhergestellt. Die |return| Anweisung in Zeile 21 verwendet die Rücksprungadresse des Stackframes der Funktion |centralDecouplingRoutine| im regulären Stackspeicherbereich des GUI-Threads. Die Ausführung kehrt damit zur jeweiligen Behandlungsroutine des Debuggers\footnote{Im Falle eines Einzelschrittes, handelt es sich dabei wieder um die Methode \emph{doStep}.} und schließlich zur Hauptereignisschleife der Anwendung zurück.
+
+Beim Abschluss der Verarbeitung des Prüflings ist die Statusvariable |Status| in Zeile 20 von Listing \ref{lst:decoupling} auf |NOT_DECOUPLED| zurückgesetzt worden. Beim Berechnungsdurchlauf für das nächste Sample im Sample-Puffer erreicht die Ausführung im Echtzeit-Thread daraufhin wieder den Aufruf der Funktion |doProcessAudio| in Zeile 17. Damit wird die reguläre Echtzeitverarbeitung im Prüfling fortgesetzt.
+
+\subsubsection{Fazit}
+\label{sec:impl-runtime-stackforging-conclusion}
+
+Die in diesem Abschnitt beschriebene Implementierung des Verfahrens zur Manipulation des Kontrollflusses ermöglicht die Unterbrechung der Echtzeitverarbeitung des Prüflings ohne eine Verletzung bestehender Zeitschranken. Es ermöglicht zudem die Fortsetzung der Ausführung durch den GUI-Thread von Reaktor. Die Implementierung ist weitgehend unabhängig von den technischen Details zum Aufbau von Stackframes und der Durchführung von Funktionsaufrufen. Diese Details werden weiterhin vom verwendeten C++ Compiler bestimmt. Allein die in Listing \ref{lst:decoupling} verwendeten Mechanismen für die Sicherung und den Austausch der Stackregister müssen architekturspezifisch in Assembler implementiert werden. Die Implementierung ermöglicht außerdem die Kapselung der Funktionalität aller Manipulationsoperationen an einer zentralen Stelle im Quellcode.
+
+Die Echtzeitverarbeitung wird regulär ausgeführt, bis im Prüflingscode zum ersten Mal ein Breakpoint getroffen wird. Die Werte aller nachfolgenden Samples werden auf Null gesetzt. Bei der Ausgabe dieser Samples wird kein Ton erzeugt. Dies entspricht dem vom Benutzer erwarteten Verhalten, wenn die Verarbeitung des Prüflings unterbrochen ist. Nach Abschluss des durch einen Breakpoint unterbrochenen Verarbeitungsdurchlaufs wird die Echtzeitverarbeitung automatisch wieder aufgenommen. Die Audioausgabe wird ab diesem Zeitpunkt regulär 
+fortgesetzt.
+\clearpage
+
+%\begin{remark}
+%Wdh. Hintergrund: Audio-Processing läuft als Realtime-Thread, der nicht unterbrochen werden kann/sollte
+%\end{remark}
+
+%\begin{remark}
+%Todo: Die konzeptionellen Aspekte sollten schon im Konzept-Teil untergebracht werden. Hier darauf eingehen, wie das Konzept in Reaktor realisiert wurde.
+%\end{remark}
+
+%\noindent
+%Anforderungen / Schritte:
+%\begin{itemize}
+%  \item (1) beim ersten Halt muss:
+%  \begin{itemize}
+%    \item der aktuelle Ausführungszustand gesichert werden 
+%    \item der Audio-Thread entkoppelt werden und mit leerem Sample zurückkehren (Silence)
+%  \end{itemize}
+
+%  \item (2) für die Fortsetzung der Ausführung nach einem Halt muss:
+%  \begin{itemize}
+%    \item der GUI-Thread den gesicherten Ausführungszustand übernehmen
+%    \item und die Ausführung an der Stelle der Unterbrechung fortsetzen
+%  \end{itemize}
+  
+%  \item (3) bei jedem weiteren Halt muss:
+%  \begin{itemize}
+%    \item der aktuelle Ausführungszustand gesichert werden
+%    \item der GUI-Thread zur Ereignisschleife zurückkehren
+%  \end{itemize}
+  
+%  \item (4) wenn die Ausführung das Ende des Handlers erreicht, muss:
+%  \begin{itemize}
+%    \item die Entkopplung des Audio-Threads aufgehoben werden
+%    \item der GUI-Thread zur Ereignisschleife zurückkehren
+%  \end{itemize}
+%\end{itemize}
+
+%\clearpage
+%\noindent
+%konzeptionelle Konsequenzen:
+%\begin{itemize}
+%  \item Processing-Anfragen bei entkoppeltem Audio-Thread geben stets leeres Sample zurück
+%  \item GUI-Ereignisse können nur:    
+%  \begin{itemize}
+%    \item \emph{vor der ersten} Unterbrechung verarbeitet werden
+%    \item \emph{während} einer Unterbrechung der Fortsetzung der Ausführung \emph{nach} einer Unterbrechung kommt es zu einem Deadlock
+%  \end{itemize}
+%\end{itemize}
+
+%\noindent
+%Realisierung via StackForging wie in Abb. \ref{fig:stack-forgery} und \ref{fig:separate-stack} beschreiben.\\
+
+%[...] Die Stack-Frames der in Rechtecken dargestellten Funktionen, werden auf dem gewöhnlichen Aufrufstack der Anwendung abgelegt. Vor dem Aufruf der Funktion  doProcessAudio der Klasse TReaktor werden die Werte der Register ESP und EBP so manipuliert, dass alle weiteren Stack-Operationen in einem separaten Speicherbereich ausgeführt werden. Die betroffenen Funktionen sind als Hexagons dargestellt. Dies ermöglicht ein Abschneiden des Aufrufstacks zu einem späteren Zeitpunkt. [...]
+
+%[...] Insgesamt werden drei aufeinander folgende Pages des Hauptspeichers verwendet. Die erste und dritte Page werden gegenüber dem Betriebssystem als ungültig erklärt. Dadurch wird im Falle eines Überlaufs des Aufrufstacks eine Ausnahme ausgelöst, die die Erkennung des Fehlers ermöglicht. [...]
+
+%--------------------------------------------------------------------------------------------------
+
+
+\section{Ablauf des Single-Stepping}
+\label{sec:impl-stepping}
+
+Für die Ausführung eines Reaktor Core Programms in Einzelschritten muss der Benutzer in der Entwicklungsumgebung zunächst in den Debug-Modus wechseln (siehe Abbildung \ref{fig:single-stepping}). Daraufhin erfolgt die spezielle Kompilierung des Prüflings wie in Abschnitt \ref{sec:impl-buildtime-compilerchanges} beschrieben automatisch. Die Echtzeitverarbeitung wird regulär fortgesetzt. 
+
+Die Ausführung des Prüflings in Einzelschritten wird vom Benutzer durch das Betätigen der Funktionstaste F12 initiiert. Der Debugger ermittelt daraufhin den oder die ersten auszuführenden Module im Audio-Handler der Core Cell wie folgt. Ausgehend vom ersten linearen Segment im Maschinencode des Prüflings wird eine Breitensuche über den in \ref{sec:impl-buildtime-programdatalink-execution} aufgebauten Kontrollflussgraph des Prüflings gestartet\footnote{Beim ersten linearen Segment handelt es sich stets um den Prolog eines Handlers. Es ist zwar eindeutig, enthält aber keinen Maschinencode von Modulen der Core Cell.}. Ziel der Breitensuche ist es, den oder die ersten auszuführenden Module der Core Cell zu finden. Es werden also sukzessiv solange alle Nachfolgesegmente durchlaufen, bis für jeden möglichen Ausführungspfad ein erstes Modul gefunden wurde. Besuchte lineare Segmente werden entsprechend markiert und später nicht erneut durchlaufen. Im Falle der Programmstruktur aus Beispiel \ref{fig:successor-diagram} werden die linearen Segmente 0 bis 10 also in der folgenden Reihenfolge durchsucht: 0, 1, 7, 2, 6, 8, 10, 3, 4, 5, 9. Endet die Suche, ohne dass auf jedem möglichen Ausführungspfad ein Modul gefunden wird, werden im Folgenden nur die jeweils gefunden Module verwendet\footnote{Es kann auch vorkommen, dass bei der Suche überhaupt kein Modul gefunden wird. Dies ist z.\,B. bei einer leeren Core Cell der Fall. Die Einzelschrittausführung wird dann bereits hier abgebrochen.}. In diesem Fall kommt es möglicherweise erst nach einer Modifikation der Parametrisierung zu einer Unterbrechung der Ausführung (da andernfalls evtl. stets leere Ausführungspfade eingeschlagen werden).
+
+Für alle im Rahmen der Breitensuche gefundenen Module wird im Anschluss ein temporärer Breakpoint im jeweils zuständigen RTDSegment registriert. Dafür wird die Zuordnung zwischen den Modulen der Core Cell und den Speicheradressen ihrer Maschinenbefehle im Prüflingscode verwendet, die zur Übersetzungszeit in den Programmdaten hinterlegt worden sind. Schließlich wird das Callback-Flag vom Debugger gesetzt. Bei der Verarbeitung des nächsten Samples wird dies am Callback-Point des Prüflings registriert. Die entsprechende Behandlungsroutine des Debuggers markiert den Speicherbereich des Prüflingscodes als editierbar, implementiert die gesetzten Breakpoints, markiert den Speicherbereich wieder als ausführbar und kehrt zum Prüfling zurück. 
+
+Zu diesem Zeitpunkt erfolgt die Ausführung des Prüflings noch im Echtzeit-Thread von Reaktor. Wird in einem der folgenden Verarbeitungsdurchläufe des Prüflings ein Breakpoint getroffen, wird der Ausführungszustand des Prüflings in der Funktion |onHitBreak| |point| gesichert. Dies wurde in Abschnitt \ref{sec:impl-runtime-breakpoints-onhitbreakpoint} detailliert betrachtet. Außerdem kommt es zur Entkopplung des Aufrufstacks und zur Unterbrechung der Echtzeitverarbeitung. Hierfür kommt das Verfahren aus Abschnitt \ref{sec:impl-runtime-stackforging-decouple} zum Einsatz. Ab diesem Zeitpunkt erfolgt keine Audioausgabe mehr. Die Parametrisierung des Prüflings kann ebenfalls nicht mehr verändert werden. Nun wird der GUI-Thread benachrichtigt, die im folgenden Absatz beschriebenen Anpassungen der Benutzeroberfläche vorzunehmen. Dabei werden auch die für den Einzelschritt verwendeten temporären Breakpoints aus dem Maschinencode des Prüflings entfernt und erneut die zu Beginn beschriebene Breitensuche ausgeführt. In diesem Fall startet die Breitensuche am Punkt der Unterbrechung. Die Breakpoints für die gefundenen Module werden bereits jetzt registriert.
+
+Der Benutzer kann nun den Wire-Debugging-Mechanismus der Entwicklungsumgebung benutzen, um den Ausführungszustand des Prüflings zu inspizieren. Dafür wird der Mauszeiger über einen beliebigen Verbindungsdraht der Core Cell bewegt. Es erscheint eine Anzeige, die den Wert darstellt, welcher zum Zeitpunkt der Unterbrechung an dieser Verbindung anliegt. Zudem werden die Module der Core Cell ihrem Ausführungszustand entsprechend eingefärbt. Module deren Maschinencode innerhalb des aktuellen Verarbeitungsdurchlaufs bis zum Punkt der Unterbrechung nicht ausgeführt wurde, werden ausgegraut dargestellt. Die weitere Farbwahl orientiert sich an den gängigen Farbkonventionen der verbreiteten Entwicklungsumgebungen. Das Modul an dem die Ausführung unterbrochen wurde, erscheint gelb eingefärbt (aktueller Ausführungspunkt). Die möglichen Folgemodule erscheinen rot eingefärbt (Breakpoints). Der oder die Maschinenbefehle des gelb eingefärbten Moduls sind die im folgenden Einzelschritt auszuführenden Befehle. Abbildung \ref{fig:single-stepping} zeigt die Core Cell eines Low-Pass Filters nach der Ausführung einiger Einzelschritte.
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\textwidth]{05-single-stepping.png}
+  \caption{Ausführung eines Low-Pass Filters in Einzelschritten. Die Behandlung von Macros wurde bei der Implementierung des Prototypen ausgespart. Die Abbildung zeigt daher eine zu Abbildung \ref{fig:low-pass-filter} äquivalente Version eines Low-Pass Filters in der alle Macros in ihre Bestandteile zerlegt wurden. Der Debug-Modus wurde durch einen Klick auf den Knopf mit dem Symbol eines Käfers am linken Bildrand aktiviert.}
+  \label{fig:single-stepping}
+\end{figure}
+
+
+Betätigt der Benutzer die Taste F12 erneut, führt das zur Ausführung des nächsten Einzelschrittes. Die dafür zu verwendenden Breakpoints wurden bereits im Vorfeld der Unterbrechung ermittelt und müssen nun nur noch auf die in Abschnitt \ref{sec:impl-runtime-breakpoints-implemetation} beschriebene Weise implementiert werden. Im Anschluss wird die Ausführung des Prüflings vom GUI-Thread von Reaktor nach dem in \ref{sec:impl-runtime-stackforging-continue} beschriebenen Verfahren fortgesetzt. Mit Ausnahme der Entkopplung des Aufrufstacks werden alle weiteren Einzelschritte analog hierzu realisiert.
+
+Wird bei der Breitensuche kein Nachfolgemodul mehr gefunden, hat die Einzelschrittausführung das Ende der Core Cell erreicht. Es werden keine weiteren Breakpoints implementiert. Die Ausführung wird jedoch wie üblich mit F12 fortgesetzt. Das Verfahren zur Realisierung von Unterbrechungen wird dann, wie in Abschnitt \ref{sec:impl-runtime-stackforging-exit} beschrieben, beendet und ist für den erneuten Einsatz bereit. Ab der Verarbeitung des nächsten Samples wird die Echtzeitverarbeitung und damit auch die Audioausgabe wieder aufgenommen.
+
+
+%\begin{itemize}
+%  \item Zusammenspiel der einzelnen Funktionalitäten
+%  \item Ablauf des Single-Stepping für Audio-Handler erklären
+%  \begin{itemize}
+%    \item Registrierung von Breakpoints pro Segment
+%    \item Breakpoint kann sein: SimpleBreakpoink, Multibreakpoint, TracePoint, TrackPoint, etc.
+%    \item RTDSegment Instanzen werden on-Demand angelegt 
+%    \item Zuordnung und ggf. sequenzielles Scharfschalten wird von RTDSegment erledigt
+%    \item zu echten Unterbrechungen kommt es nur für sichtbare Module
+    
+%    \begin{remark}
+%      Hier ist die Implementierung ja schon einen Schritt weiter: Tracepoints werden von vornherein nur für sichtbare Module gesetzt! Sollte das schon mit erwähnt werden? Der Aufwand für das Auffinden der Tracepoint-Kandidaten ist damit wesentlich höher. Der Mechanismus des effizienten Suchverfahrens ist nicht weit weg vom naiven Ansatz, aber dafür umso gewöhnlicher: Breitensuche in Segmentstruktur mit Bitarray für bereits durchlaufene Segmente. Pro: typisches Standard-Informatik-Problem. Noch ein Pro: hier wird ein Boost-Container verwendet :) Contra: die Arbeit ist auch so schon recht umfangreich. Fazit: einfügen falls noch Platz ist!
+%    \end{remark}
+%  \end{itemize}
+%\end{itemize}
+%\clearpage
+

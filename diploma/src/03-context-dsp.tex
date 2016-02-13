@@ -1,0 +1,64 @@
+
+Die digitale Signalverarbeitung (Digital Signal Processing, DSP) beschäftigt sich mit der kontinuierlichen Verarbeitung digitaler Signale in Echtzeit. Ein digitales Signal ist dabei diskret in Zeit- und Wertebereich und wird während der Verarbeitung als Folge numerischer Werte gespeichert. Alle Betrachtungen in dieser Arbeit beziehen sich auf softwarebasierte DSP-Systeme. Die Verarbeitung erfolgt stets durch ein Softwareprogramm, welches auf einem der verbreiteten Betriebssysteme und einer nicht genauer definierten Hardware mit x86 Befehlssatzarchitektur zur Ausführung kommt. Ein Teilgebiet der digitalen Signalverarbeitung ist die digitale Klangsynthese, die sich mit der Erzeugung und Transformation von Audiosignalen befasst.
+
+\subsection{Echtzeitverarbeitung}
+\label{sec:context-dsp-realtime}
+
+In der Informatik spricht man von Echtzeitverarbeitung, wenn für den verarbeitenden Prozess\footnote{Mit dem Begriff \emph{Prozess} ist hier kein Prozess des Betriebssystems gemeint. Im Kontext der Echtzeitverarbeitung wird der Prozessbegriff im Sinne eines allgemeinen Datenverarbeitungsprozesses verwendet.} eine zeitliche Vorgabe für die Bereitstellung von Ergebnissen existiert. Der Zeitpunkt an dem ein Ergebnis vorliegen muss, wird als \emph{Zeitschranke} bezeichnet. 
+
+Im Hinblick auf die Bedingungen unter denen ein System eine Verarbeitung in Echtzeit gewährleisten kann, wird oft versucht zwischen harter und weicher Echtzeit zu differenzieren. Diese Einteilung ist für softwarebasierte DSP-Systeme jedoch nicht praktikabel. Sie führt zudem häufig zu Kontroversen. Im Detail ist nicht klar, ob die Unterscheidung zwischen harter und weicher Echtzeit anhand der technischen Realisierung eines Systems oder anhand der Folgen zu treffen ist, die mit dem Verletzen einer Zeitschranke verbundenen sind. Wird die Unterscheidung anhand der Folgen eines Ausfalls getroffen, ist keine allgemeine Aussage für DSP-Systeme möglich, da sie von der Verwendungsweise des Systems abhängen. Wird die Unterscheidung anhand der technischen Realisierung getroffen, sind nur solche Systeme Echtzeitsysteme, deren Ausführungszeit im Vorfeld berechnet werden kann. Im einfachsten Fall könnte dafür die Summe aller Takte des Prozessors gebildet werden, die nötig sind, um alle Befehle eines Programms abzuarbeiten. Bereits hier besteht eine Abhängigkeit von der verwendeten Hardware. Für softwarebasierte DSP-Systeme kann also auch in diesem Fall keine Aussage zur Zugehörigkeit gegeben werden.
+
+Die Unterteilung in harte und weiche Echtzeit trifft nicht den Kern der Problemstellung in einem DSP-System. Hier besteht das Ziel darin, neue Ergebnisse kontinuierlich in der Zeit bereitstellen zu können, die es braucht die vorherigen Ergebnisse auszuwerten oder weiterzuverarbeiten. Weiterführende Differenzierungen erweisen sich als unnötig. Ein einfaches Beispiel kann für die digitale Klangsynthese wie folgt gegeben werden. Wenn ein Verarbeitungsprozess 2.01 Sekunden benötigt um 2 Sekunden Audioausgabe zu produzieren, handelt es sich nicht um einen Echtzeitprozess. Benötigt er hingegen nur 1.99 Sekunden ist es ein Echtzeitprozess. Diesen Ansatz greift auch die folgende Definition von Robert Bristow-Johnson \cite{Realtime} auf. Sie bildet die Grundlage des Echtzeitbegriffs in dieser Arbeit.
+
+%Stattdessen wird hier oft auf treffendere Definitionen zurückgegriffen, wie die 
+%Eine solche Einteilung ist für DSP-Zwecke jedoch nicht praktikabel. Stattdessen wird hier oft auf treffendere Definitionen zurückgegriffen, wie die folgende von Robert Bristow-Johnson \cite{Realtime}.
+
+\begin{definition}[Echtzeitbedingung DSP]
+\label{def:realtime}
+In a real-time DSP process, the analyzed input and/or generated output samples [...] can be processed (or generated) continuously in the time it takes to input and/or output the same set of samples independent of the processing delay.
+\end{definition}
+
+\noindent
+In der digitalen Klangsynthese spricht man demzufolge immer dann von Echtzeitverarbeitung, wenn die Zeit zur Berechnung einer Audioausgabe die Zeit des Abspielens nie überschreitet. Die Größe der Verzögerung zwischen Eingabe und Ausgabe (\emph{Latenz}) ist dabei zunächst unwichtig. 
+
+%Eine garantierte Einhaltung der Echtzeitbedingung kann auch hier nur mit Hilfe eines speziellen Echtzeitbetriebssystems erreicht werden. Unter bestimmten Voraussetzungen kann die Bedingung aus Definition \ref{def:realtime} jedoch im Mittel auch von den verbreiteten Nicht-Echtzeitsystemen erfüllt werden.
+
+
+%\subsection{Verarbeitungsformen}
+%\label{sec:context-dsp-processing}
+
+%Die Berechnungsvorgänge digitaler Signalverarbeitungsprozesse können von speziellen digitalen Signalprozessoren (DSP-Prozessoren), programmierbarer Hardware oder gewöhnlichen Mikroprozessoren ausgeführt werden. DSP-Prozessoren enthalten spezielle Schaltungen zur effizienten Ausführung häufig benötigter Berechnungsaufgaben. Auch für komplexe Transformationen können damit oft niedrige Verarbeitungslatenzen erreicht werden. Zudem ist die Einhaltung harter Echtzeitbedingungen möglich. Die Abhängigkeit von den Möglichkeiten der verwendeten Hardware begrenzt jedoch im Gegenzug die Flexibilität bei der Gestaltung von Verarbeitungsvorgängen. Des Weiteren ist die Anschaffung der nötigen Hardware oft kostspielig. Eine ähnliche Situation ergibt sich im Hinblick auf programmierbare Hardware wie z.\,B. FPGAs. Diese Hardware-basierten Verarbeitungsformen kommen vor allem im industriellen Umfeld zum Einsatz. %Eine logische Schaltung kann hier am Computer erstellt und auf einen entsprechenden Hardwarebaustein synthetisiert werden.
+
+Durch die zunehmende Verfügbarkeit leistungsfähiger Mikroprozessoren wurde die rein softwarebasierte Signalverarbeitung gerade im Bereich von Endbenutzerprodukten immer attraktiver. Die Gestaltung der Verarbeitungsvorgänge ist hier nur von der Rechenleistung der zugrundeliegenden Hardware begrenzt. Die zunehmende Integration datenparalleler Operationen in moderene Befehlssatzarchitekturen (wie z.\,B. die SIMD-Erweiterungen des x86 Befehlssatzes) begünstigt diese Entwicklung. Die verbreiteten Betriebssysteme sind keine Echtzeitbetriebssysteme, stellen aber Mechanismen zur Verfügung um dies zu kompensieren. Dazu gehören beispielsweise speziell priorisierte \emph{Echtzeit-Threads}. Unter bestimmten Voraussetzungen kann damit die Echtzeitbedingung aus Definition \ref{def:realtime} im Mittel auch hier erfüllt werden. Diese Voraussetzungen werden im folgenden Abschnitt für das Teilgebiet der digitalen Klangsynthese erläutert.
+
+%Die Erfüllung harter Echtzeitbedingungen kann i.\,A. nicht gewährleistet werden, da die verbreiteten Betriebssysteme keine entsprechenden Funktionalitäten bereitstellen. 
+
+\subsection{Softwarebasierte digitale Klangsynthese}
+\label{sec:context-dsp-synth}
+
+Softwarebasierte digitale Klangsyntheseverfahren kommen heute vor allem in digitalen Musikinstrumenten zum Einsatz. Für die Implementierung werden entweder gewöhnliche Programmiersprachen oder domänenspezifische Entwicklungswerkzeuge verwendet. Zu den bekanntesten Vertretern gehören die quelloffenen Projekte Pure Data \cite{Steiner} und SuperCollider \cite{SuperCollider} sowie die proprietären Produkte Max/MSP \cite{Max} und Reaktor \cite{Reaktor}. Ähnlich den in der allgemeinen Anwendungsentwicklung verwendeten Werkzeugen, werden die damit erstellten Programme entweder in Maschinencode übersetzt oder von einer Ausführungsumgebung interpretiert. Aufgrund der hohen Perfomanzanforderungen der Echtzeitverarbeitung sind interpretative Ansätze für den professionellen Einsatz jedoch i.\,A. ungeeignet.
+
+%speziell auf die Konstruktion digitaler Instrumente zugeschnittene 
+
+Der grundlegende Verarbeitungsablauf erfolgt stets nach dem EVA-Prinzip \cite{Duden}. Für die Speicherung von Ein- und Ausgabe stehen sogenannte \emph{Sample-Puffer} zur Verfügung, die einen Ausschnitt des digitalen Signals durch eine Folge diskreter Werte abbilden. Die Konvertierung zwischen analoger Ein- und Ausgabe und digitaler Repräsentation in den Sample-Puffern wird durch den Hardware-Abstraction-Layer des Betriebssystems abstrahiert. Der zeitliche Abstand zwischen dem Befüllen des Eingabepuffers und dem Auslesen des Ausgabepuffers bestimmt die \emph{Verarbeitungslatenz} sowie, nach Definition \ref{def:realtime}, die Zeitschranke für die Berechung aller Ausgabesamples\footnote{Die akzeptablen Werte für Verarbeitungslatenzen liegen heute bei etwa 5 ms \cite{Audio101}. Bei einer Samplerate von 44100 Hz wird dafür eine Puffergröße von 256 Samples gewählt. Neben der Verarbeitungslatenz kommt es auch zu Verzögerungen bei der Ein- und Ausgabe der Signale aufgrund der DA- und AD-Konvertierung.}. Wird diese Zeitschranke nicht eingehalten, kommt es i.\,A. zu einem zwischenzeitlichen Aussetzen der Audioausgabe, einem sogenannten \emph{Drop-Out}.
+
+Die mangelnde Echtzeitunterstützung der verbreiteten Betriebssysteme stellt gewisse Bedingungen an die Implementierung des Verarbeitungsprozesses. Diese Bedingungen werden von Ross Bencina in \cite{Audio101} detailliert beschrieben. Im Kern seiner Aussage steht, dass die Verwendung von Operationen, deren Ausführungszeit im Vorfeld nicht sicher vorhergesagt werden kann, für die Zwecke der Audioverarbeitung in Echtzeit nicht akzeptabel ist. Daher sollten blockierende Anweisungen, Locking-Mechanismen, Speicherallokationen sowie Festplatten- und Netzwerkzugriffe im Code des Verarbeitungsprozesses vermieden werden. Zudem sollten keine externen Funktionen aufgerufen werden, die ihrerseits derartige Operationen verwenden. Unter Einhaltung dieser Bedingungen kann die Wahrscheinlichkeit von Drop-Outs minimiert werden.
+
+%Ein Ausschluss derartiger Verletzungen kann jedoch nicht sichergestellt werden.  Da die Verteilung der Rechenzeit an die einzelnen Prozesse des Betriebssystems vom Scheduling-Mechanismus bestimmt wird, kann jedoch auch unter Einhaltung dieser Bedingungen die Audioausgabe unterbrochen werden. Derartige Unterbrechungen werden auch als Drop-Outs bezeichnet.
+
+%°Daneben existieren experimentelle Live-Coding-Ansätze, wie z.\,B. in der Programmiersprache ChucK \ref{Wang}.°
+%°Zusätzliche Probleme können durch automatische Speicherbereinigung und Page Faults entstehen.° 
+
+%\begin{remark}
+%Weitere Details ergänzen soweit später erforderlich.
+%\end{remark}
+
+%modulare Programmierumgebung für Klangsynthese:
+%\begin{itemize}
+%	\item datenstromorientierte Programmierung
+%	\item stellt virtuell-analoge elektrotechnische Grundschaltungen (wie z.B. Oszillatoren, Filter, Hüllkurven, Logikelemente) zur Verfügung, welche	beliebig verschaltet werden können
+%	\item hohe Performanzanforderungen für Echtzeitverarbeitung
+%	\item Nutzer von Reaktor sind Domänenexperten der digitalen Klangsynthese (Instrumentenbauer, Sound-Designer)
+%	\item Legacy-System und Ausführungsrahmen für mit Reaktor Core entwickelte Komponenten
+%	\item Einführung in die Funktionsweise (vergleichbar z.\,B. mit LabView)
+%\end{itemize}

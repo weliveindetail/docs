@@ -1,0 +1,165 @@
+
+Debugger sind heute unverzichtbare Werkzeuge im Softwareentwicklungsprozess. Sie dienen der Identifikation der kausalen Zusammenhänge zwischen Ursache und Wirkung im untersuchten Programm auf Quellcodeebene. Über das Finden, Eingrenzen und Entfernen von Programmdefekten hinaus helfen sie Entwicklern damit auch ganz allgemein die dynamische Natur von Software zu verstehen. Debugger sind daher nicht nur zur Unterstützung bei der Fehlersuche, sondern auch zum Erlernen von Programmiersprachen und für die Einarbeitung in bestehende Softwareprojekte nützlich \cite{HowDebuggersWork}.
+
+\subsection{Grundlagen}
+\label{sec:context-debugging-basics}
+
+Rosenberg definiert drei für die Funktionsweise von Debuggern grundlegende Prinzipien \cite{HowDebuggersWork}. 
+Das \emph{Heisenberg Prinzip}\footnote{Die Bezeichnung des Heisenberg Prinzips geht auf den deutschen Physiker Werner Heisenberg und dessen Unschärferelation zurück.} sagt aus, dass die Ausführung des Prüflings durch die Existenz eines Debuggers nicht beeinflusst werden darf. Fehlerwirkungen, die scheinbar verschwinden sobald versucht wird ihre Ursache mit Hilfe eines Debuggers zu finden, werden auch als Heisenbugs bezeichnet. Dem Prinzip des \emph{Truthful Debugging} zufolge muss die Korrektheit aller von einem Debugger gelieferten Informationen zu jeder Zeit garantiert sein. Nur so ist es möglich das Vertrauen des Benutzers zu erhalten. Ein Fehler im Debugging-Mechanismus selbst hätte unabsehbare Konsequenzen. Schließlich muss ein Debugger Antworten auf die wichtigsten Fragen des Benutzers geben können. Nach Rosenberg sind das die Fragen danach, an welcher Stelle im Quellcode die Fehlerwirkung sichtbar wurde und wie dieser Ausführungspunkt erreicht worden ist. Zudem sollten z.\,B. Variablenwerte, Threads und CPU-Register inspiziert werden können.
+
+%Die grundlegenden Prinzipien für Debugger benennt Rosenberg in \cite{HowDebuggersWork} wie folgt:
+%\begin{itemize}
+%	\item Das \emph{Heisenberg Prinzip}\footnote{Die Bezeichnung des Heisenberg Prinzips geht auf den deutschen Physiker Werner Heisenberg und dessen Unschärferelation zurück.} sagt aus, dass die Ausführung des Prüflings durch die Existenz eines Debuggers nicht beeinflusst werden darf [Gramlich, 1983]. Fehlerwirkungen, die scheinbar verschwinden sobald versucht wird ihre Ursache mit Hilfe eines Debuggers zu finden, werden auch als Heisenbugs bezeichnet.
+%	\item Dem Prinzip des \emph{Truthful Debugging} zufolge muss die Korrektheit aller von einem Debugger gelieferten Informationen zu jeder Zeit garantiert sein. Nur so ist es möglich das Vertrauen des Benutzers zu erhalten. Ein Fehler im Debugging-Mechanismus selbst hätte unabsehbare Konsequenzen [Zellweger, 1984].
+%	\item Schließlich muss ein Debugger Antworten auf die wichtigsten Fragen des Benutzers geben können. Nach Rosenberg sind das die Fragen danach, an welcher Stelle im Quellcode die Fehlerwirkung sichtbar wurde und wie dieser Ausführungspunkt erreicht worden ist. Zudem sollten z.\,B. Variablenwerte, Ausführungsthreads und CPU-Register inspiziert werden können.
+%\end{itemize}
+
+Streng genommen kann die Einhaltung dieser Prinzipien durch einen Debugger jedoch nicht gewährleistet werden. So wird beispielsweise das Scheduling des zugrundeliegenden Betriebssystems durch die Existenz eines Debugger-Prozesses in gewisser Weise beeinflusst. Dies wirkt sich auch auf die Ausführung des untersuchten Prozesses aus. Es hat sich im praktischen Einsatz als ausreichend erwiesen, der Einhaltung der Prinzipien möglichst nahe zu kommen.
+
+\subsection{Verfahren}
+
+Bevor näher auf die konkrete Realisierung von Debugging-Mechanismen eingegangen wird, sollen in diesem Abschnitt zunächst verschiedene Debugging-Verfahren vorgestellt werden. 
+
+\subsubsection{Trace-Debugging}
+\label{sec:context-debugging-trace}
+
+Das Trace-Debugging ist die älteste und bis heute am weitesten verbreitete Debugging-Technik. Debugger für populäre objektorientierte Sprachen, wie Java, C\# oder C++, basieren nahezu ausschließlich auf dieser Technik \cite{JHyde}. Das Trace-Debugging beruht auf der Unterbrechung der Programmausführung an einem im Vorfeld definierten Haltepunkt (\emph{Breakpoint}) und der schrittweisen Ausführung von Folgeanweisungen (\emph{Single-Stepping}). Kontextinformationen werden nur während einer Unterbrechung und nur für den aktuellen Ausführungszustand bereitgestellt. Zu den wichtigsten Elementen des Programmzustandes zählen die Variablen, die im Kontext des gegenwärtigen Ausführungspunktes gültig sind und der Aufrufstack, also die Abfolge von Funktionsaufrufen, durch die der gegenwärtige Ausführungspunkt erreicht wurde.
+
+%\footnote{Weiterführende Informationen, z.\,B. in welchem Ausführungsthread ein Breakpoint getroffen wurde, sind ebenfalls Teil des Programmzustandes, spielen aber eine untergeordnete Rolle im Kontext dieser Arbeit.}
+
+%\begin{itemize}
+%	\item die Variablen, die im Kontext des gegenwärtigen Ausführungspunktes gültig sind und 
+%	\item der Aufrufstack, also die Abfolge von Funktionsaufrufen, durch die der gegenwärtige Ausführungspunkt erreicht wurde.
+%\end{itemize}
+
+%\noindent
+Trace-Debugger folgen der befehlsorientierten Natur der heute verbreitetsten Programmiersprachen. Sie sind daher sowohl vergleichsweise leicht realisierbar als auch von Programmierern intuitiv bedienbar. Für den grundlegenden Verwendungszweck von Debuggern, der Identifikation der Ursache für eine Fehlerwirkung, sind sie jedoch denkbar ungeeignet. Denn Trace-Debugger können naturgemäß nur der Ausführungsrichtung von Programmen \emph{folgen}. Anweisungen, die einmal ausgeführt wurden, können nicht mehr rückgängig gemacht werden. Die Ursache eines Defekts liegt zeitlich jedoch stets \emph{vor} dessen erkennbarer Wirkung. Hat der Entwickler Zeitpunkt und Ort der Wirkung im Quellcode identifiziert, müssen alle Ausführungspfade, die zur Quellcodeposition der Wirkung führen, manuell zurückverfolgt werden. Oft wird das durch eine sukzessive Wiederholung der Ausführung und das Setzen von Breakpoints an jeweils früheren Punkten im Programm erreicht. Die Fehlersuche gestaltet sich damit sehr zeitaufwändig. Die Einschränkung der Inspektionsrichtung bildet den zentralen Nachteil der Verwendung von Trace-Debuggern\footnote{Zwar wurde der Versuch unternommen, erweiterte Mechanismen zur Ablaufkontrolle in Trace-Debugger zu integrieren, diese haben sich im praktischen Einsatz jedoch nicht durchgesetzt. Beispiele hierfür sind \emph{Reversible Execution} \cite{ReverseExecution} und \emph{Replay} \cite{Replay}} \cite{JHyde}.
+
+%Eine Möglichkeit diesen Nachteil zu mindern ist es, den Aufrufstack um zusätzliche Informationen zum Programmablauf zu ergänzen. Im Normalfall enthält der Aufrufstack nur die übergeordneten (und damit bis zum betrachteten Ausführungspunkt noch nicht vollständig verarbeiteten) Funktionsaufrufe. Funktionsaufrufe einer übergeordneten Aufrufebene, die bereits zurückgekehrt sind, sind im Aufrufstack nicht enthalten. Die gesuchte Ursache könnte hier jedoch ebenfalls liegen. Der vollständige Aufrufpfad, der in einer konkreten Instanz zur Fehlerwirkung führte, muss damit ebenfalls manuell vom Entwickler rekonstruiert werden. Abhilfe kann die Aufzeichnung des Aufrufpfades schaffen. Diese auch als \emph{Slime Trail} bezeichnete Technik \cite{HowDebuggersWork} wird von gegenwärtigen Debuggern jedoch i.\,A. nicht unterstützt, da die damit verbundene hohe Zahl von Prozesswechseln die Ausführungsperformanz des Prüflings permanent (d.\,h. auch im Nicht-Fehlerfall) beeinträchtigt.
+
+%Quelle: Buch "`How Debuggers Work"' \cite{HowDebuggersWork}
+%\begin{itemize}
+%	\item einfaches Trace-Debugging beschreiben
+%	\item aktuell einziger im praktischen Einsatz verwendeter Ansatz \cite{JHyde}
+%	\item Vor- und Nachteile
+%	\item Call-Stack-als-History-Problematik \cite{HowDebuggersWork} möglichst erwähnen: frühere Funktionsaufrufe gehören zur History, sind aber nicht im Call-Stack, wenn sie bereits abgeschlossen wurden (im Implementierungsteil darauf zurück kommen: aufgrund der hohen Performanz konnte eine tatsächlihe History in Reaktor Core realisiert werden)
+%\end{itemize}
+
+\subsubsection{Andere Debugging-Ansätze}
+\label{sec:context-debugging-others}
+
+Neben dem Trace-Debugging existieren einige experimentelle Debugging-Verfahren. Diese Verfahren haben den Einzug in die praktische Verwendung noch nicht geschafft und werden vorrangig zu Forschungszwecken untersucht. Die bekannteste und vielversprechendste Alternative zum Trace-Debugging ist das Omniscient-Debugging, welches von Lewis erstmals 2003 als "`Debugging Backwards in Time"' umgesetzt wurde \cite{DbgBackwardsInTime}. Durch die Aufzeichnung sämtlicher Zustandsänderungen während der Ausführung eines Prüflings ist der Omniscient-Debugger in der Lage, dem Benutzer ein globales Bild der Programmausführung zu liefern. Der Programmzustand kann für beliebige Zeitpunkte rekonstruiert werden. Der Rückschluss von einer Fehlerwirkung auf den verantwortlichen Defekt wird damit deutlich erleichtert, da der Programmablauf von der Fehlerwirkung über die infizierten Zustände bis hin zum Defekt zurückverfolgt werden kann. Die Problematik des Ansatzes stellen die mit der Speicherung jeder einzelnen Zustandsänderung verbundenen, unverhältnismäßigen Datenmengen (etwa 100MB pro Sekunde) dar sowie die dadurch entstehenden Performanzeinbußen (Faktor 10 bis 300). 
+
+Einen weiteren vollkommen anderen Ansatz verfolgen deklarative (oder auch algorithmische) Debugger. Diese Methode wurde ursprünglich für die logische Programmiersprache Prolog entwickelt \cite{AlgorithmicDebug}. Die grundlegende Idee ist die Verwendung des Berechnungsbaums, der die Ausführung des Prüflings repräsentiert. Beim deklarativen Debugging werden keine einzelnen Anweisungen, sondern semantisch zusammenhängende Berechnungseinheiten auf ihre Validität überprüft. Für den Debugging-Prozess bedeutet dies, dass der Benutzer sich von der konkreten Implementierung lösen kann. Um einen Defekt zu lokalisieren, müssen die Berechnungen nicht mehr schrittweise nachvollzogen werden, sondern die Ergebnisse von Teilberechnungen bewertet werden. Weiterführende Informationen hierzu finden sich u.\,a. in \cite{JHyde}.
+
+%\begin{remark}
+%Nur erwähnen und kurz beschreiben. Im Konzeptionsteil darauf zurück kommen: Der omniscient-Ansatz hätte im aktuellen Stand auch in Reaktor Core verwendet werden können, ist aber nicht future-proof.
+%\end{remark}
+
+%\begin{itemize}
+% \item Post-Mortem Debugging
+%	\item Omniscient Debugging \cite{DbgBackwardsInTime}
+%	\item Deklaratives Debugging und Hybride Ansätze \cite{JHyde}
+	%\item Differenzierung: \verb!Übersetzungszeit = Compilezeit + Linkzeit!\\ und analog: \verb!Programmdaten = Compilezeitdaten + Linkzeitdaten!
+%\end{itemize}
+
+\subsection{Weitere Klassifizierung}
+\label{sec:context-debugging-classes}
+
+Neben dem realisierten Debugging-Verfahren, können Debugger anhand einiger weiterer Eigenschaften wie folgt unterschieden werden:
+
+\begin{itemize}
+	\item \emph{Post-mortem Debugger} zeichnen Ausführungsdaten zur späteren Analyse auf (z.\,B. Kernel-Dumps oder Omniscient-Debugger). Im Gegensatz dazu ermöglichen \emph{interaktive Debugger} eine Untersuchung während der Laufzeit des Prüflings.
+	\item \emph{Stand-alone Debugger} sind eigenständige Anwendungen, die unabhängig vom verwendeten Compiler arbeiten. Aufgrund zunehmend komfortablerer Entwicklungsumgebungen machen sie gegenüber \emph{integrierten Debuggern} nur einen geringen Anteil aus.
+	\item \emph{Symbolische Debugger} verfügen über Mechanismen zur Ablaufkontrolle und Darstellung des Programmkontextes auf dem Abstraktionsniveau einer höheren Programmiersprache. Demgegenüber werden Debugger, die nur auf Maschinen- oder Assemblerebene arbeiten, als \emph{Low-Level Debugger} bezeichnet.
+\end{itemize}
+
+%außerhalb einer Entwicklungsumgebung und unabhängig vom 
+	
+\subsection{Funktionsweise herkömmlicher Debugger}
+\label{sec:context-debugging-separate}
+
+Als herkömmliche Debugger werden im Folgenden interaktive symbolische Trace-Debugger für kompilierte imperative Programmiersprachen bezeichnet, die zusammen mit anderen Entwicklungswerkzeugen innerhalb einer Entwicklungsumgebung verwendet werden. Zudem wird die Kompilierung in Maschinencode einer x86 Befehlssatzarchitektur angenommen. Die grundlegenden Verfahren sind jedoch für andere Befehlssatzarchitekturen oder auch virtuelle Maschinen sehr ähnlich. Die im folgenden vorgestellten Verfahrensweisen werden von Rosenberg in \cite{HowDebuggersWork} vollständig beschrieben.
+
+\subsubsection{Vorbetrachtung}
+\label{sec:context-debugging-separate-prolog}
+
+Die zentrale Problematik bei der Bereitstellung von symbolischen Debuggern ist die Überwindung der semantischen Barriere zwischen den Ausdrücken auf Sprachebene (\emph{Source-Level}) und den Operationen auf Maschinenebene (\emph{Instruction-Level}). Aufgabe eines Compilers ist die Übersetzung des Programmcodes auf Sprachebene in Binärcode auf Maschinenebene. Um einem Debugger die Zuordnung in der Rückrichtung zu ermöglichen, muss der Compiler zusätzliche Informationen, sogenannte \emph{Programmdaten}, speichern. Neben der zeilenweisen Zuordnung zwischen Sprach- und Maschinenebene, werden hier auch die Speicheradressen von Variablen, die Struktur abstrakter Datentypen, Dateinamen und andere Informationen hinterlegt. Je nach Beschaffenheit der verwendeten Hochsprache kann es zwischen Programm- und Maschinencode auch zu Uneindeutigkeiten kommen\footnote{Bekannte Probleme stellen z.\,B. Klassen-Templates in C++ dar (\emph{One-to-Many Problems}) \cite{HowDebuggersWork}.}. Im Allgemeinen wird eine exakte Zuordnung umso schwieriger, je höher das Abstraktionsniveau der Programmiersprache ist und je weiter sich ihr Programmierparadigma von der imperativen Funktionsweise des Maschinenbefehlssatzes loslöst. Zusätzliche Probleme können Compiler\-optimierungen verursachen, die zur Verringerung des Ausführungsaufwandes z.\,B. die Abfolge von Anweisungen ändern, implizit Parallelisierungen vornehmen oder Variablen eliminieren, die aus technischer Sicht überflüssig sind. Für die Zwecke des Debuggings werden derartige Optimierungen in heutigen Compilern für gewöhnlich deaktiviert.
+
+Sobald der Übersetzungsvorgang vom Compiler abgeschlossen wurde, liegen die ausführbare Datei und die entsprechenden Programmdaten des Prüflings vor. Da der Debugger Zugriff auf die Instanz des Prüflingsprozesses benötigt, registriert er sich über spezielle API-Funktionen beim Betriebssystem\footnote{Je nach Betriebssystem sind dafür besondere Privilegien, wie eine Signierung des Debuggers, eine Authentifizierung als Administrator o.\,ä. erforderlich.}. Debugger und Prüfling müssen nicht zwangsläufig auf demselben Computer ausgeführt werden. Wird der Prüfling auf einem entfernten Rechner ausgeführt, spricht man auch von \emph{Remote-Debugging}. Ebenfalls muss der Debugger den Prüflingsprozess nicht zwangsläufig selbst starten. Die meisten Betriebsysteme gestatten es einem Debugger auch sich mit einem bereits laufenden Prozess zu verbinden.
+
+\subsubsection{Breakpoints}
+\label{sec:context-debugging-separate-breakpoints}
+
+Soll nun ein Breakpoint an einer Anweisung im Programmcode gesetzt werden, ermittelt der Debugger zuerst die Speicheradresse des entsprechenden Maschinenbefehls aus den Programmdaten. Über eine Funktion des Betriebssystems kann ein Breakpoint an der jeweiligen Speicheradresse des Prüflingsprozesses gesetzt werden. Da ein schreibender Zugriff in dessen Speicherbereich nicht möglich ist, wenn der Prozess gerade ausgeführt wird, ist der genaue Zeitpunkt des Einfügens vom Scheduling des Betriebssystems abhängig. 
+
+Bevor der Breakpoint eingefügt werden kann, wird der Byte-Wert an der angegebenen Speicherstelle des Prüflings zuerst zwischengespeichert. Die Adresse der zu verwendenden Speicherzelle wird vom Debugger als Parameter übergeben. Im Anschluss wird die Speicherstelle mit einer INT3 Operation überschrieben\footnote{Einen Breakpoint an oder auf einen Befehl zu setzen, bewirkt daher stets eine Unterbrechung \emph{vor} der Ausführung des Befehls.}. Der INT3 Befehl der x86 Befehlssatzarchitektur stellt einen 1-Byte Opcode dar, der speziell für Debugging-Zwecke verwendet wird \cite{Intel3}. Da ein Byte hier die kleinste Befehlseinheit ist, kann der ursprüngliche Befehlscode ebenfalls nur ein Byte oder länger gewesen sein. Beim INT3 besteht also nicht die Gefahr, versehentlich Folgebefehle zu verfälschen\footnote{Diese Eigenschaft ist sehr wichtig, da der Folgebefehl im Speicher möglicherweise vor dem Breakpoint ausgeführt wird. Das ist genau dann der Fall, wenn es sich bei dem Folgebefehl um ein Sprungziel handelt.}. Nach dem Ersetzungsvorgang kehrt der Systemaufruf zum Debugger zurück. Dieser muss nun die Adresse der Speicherstelle zusammen mit dem ursprünglichen Bytewert speichern. 
+
+%Die dafür verwendete Datenstruktur identifiziert einen Breakpoint auf physischer Ebene im Speicherbereich des Prüflingsprozesses. Instanzen dieser Datenstruktur werden auch als \emph{Physical Breakpoint}s bezeichnet. Für den Umgang mit Breakpoints fallen darüber hinaus weitere Daten an, die den Breakpoint aus logischer Sicht charakterisieren (\emph{Logical Breakpoint}). Hierzu zählen beispielsweise Flags für interne und temporäre Breakpoints sowie Bedingungen, die im Falle sogenannter \emph{Conditional Breakpoints} vor einer Unterbrechung zuerst überprüft werden. Weitere Details zu Eigenschaften von Breakpoints und entsprechenden Datenstrukturen sind in \cite{HowDebuggersWork} zu finden.
+%Wurden diese Daten vom Debugger gespeichert, 
+
+Wird bei der Fortsetzung der Ausführung des Prüflings ein Breakpoint erreicht, löst der Prozessor einen hochpriorisierten Interrupt aus. Das Betriebssystem unterbricht die Ausführung des verantwortlichen Prozesses daraufhin umgehend und benachrichtigt den für den Prozess registrierten Debuggerprozess. Dieser kann wieder mit Hilfe von Betriebssystemfunktionen Informationen zum Ausführungszustand des Prüflingsprozesses erhalten und damit u.\,a. ermitteln um welchen Breakpoint es sich handelt. Zu Beginn einer Unterbrechung stellt der Debugger meist zuerst den Originalcode des Prüflings wieder her. Das ist in Hinblick auf das Prinzip des Truthful-Debugging (\ref{sec:context-debugging-basics}) wichtig. Da der Breakpoint einen Teil des ursprünglichen Befehls überschreibt, könnte es an der Stelle des Breakpoints andernfalls zu Fehlinterpretationen diverser Folgebefehle beim Betrachten des Maschinencodes in einer Assemblerdarstellung kommen. Das könnte zur Verwirrung des Benutzers führen und Skepsis gegenüber der Korrektheit des Debugging-Mechanismus' schüren. Das Löschen von Breakpoints erfolgt analog zum Einfügen. Da der INT3 Befehl wie jede andere Maschinenoperation zur Inkrementierung des Program-Counter Registers des Prozessors führt, ist dessen Wert zum Zeitpunkt der Unterbrechung um ein Byte zu groß. Es sollte ebenfalls bereits zu Beginn einer Unterbrechung korrigiert werden. Während einer Unterbrechung kann dem Benutzer schließlich der unveränderte Originalzustand des Prüflings zur Inspektion bereitgestellt werden. 
+
+Bevor die Ausführung des Prüflings nach einer Unterbrechung normal fortgesetzt wird, veranlasst der Debugger zuerst die Ausführung eines Einzelschrittes auf Maschinenebene (siehe Abschnitt \ref{sec:context-debugging-separate-stepping}). Dies erweist sich in vielen Fällen als günstig. Soll ein Breakpoint beispielsweise permanent sein, also im nächsten Durchlauf wieder eine Unterbrechung auslösen, muss der entsprechende Befehl unmittelbar nach seiner Ausführung erneut durch einen INT3 Befehl ersetzt werden. Dies kann nach Ausführung des Einzelschrittes erfolgen.
+
+Breakpoints die nach dem soeben beschriebenen Verfahren realisiert werden, werden auch als \emph{Software Breakpoints} bezeichnet. Alternativ dazu verfügen verschiedene Prozessoren über eine begrenzte Zahl von \emph{Hardware Breakpoints}. Die Verwendung von Hardware Breakpoints gestaltet sich sehr einfach. In einem speziellen Breakpoint-Address Register \cite{Intel3} wird die Speicheradresse des Maschinenbefehls hinterlegt, an dem eine Unterbrechung erfolgen soll. Nach der Ausführung von Befehlen durch den Prozessor wird das Program-Counter Register inkrementiert und der neue Wert mit den Werten der Breakpoint-Address Register verglichen. Im Falle einer Übereinstimmung wird ein Interrupt ausgelöst und der Kontrollfluss an den Debugger übergeben. Hardware Breakpoints werden aufgrund ihrer einfachen Handhabung und ihrer Nicht-Invasivität oft bevorzugt verwendet. Software Breakpoints kommen dann erst zum Einsatz, wenn alle verfügbaren Breakpoint-Address Register belegt sind.
+
+\subsubsection{Einzelschrittausführung}
+\label{sec:context-debugging-separate-stepping}
+
+Neben einem Breakpoint-Mechanismus gehört die Einzelschrittausführung zu den Kernfunktionalitäten von Trace-Debuggern. Sie kommt vor allem dann zum Einsatz, wenn die Auswirkung einzelner Anweisungen auf den Ausführungszustand des Prüflings beobachtet werden soll. Die Grundlage für die Realisierung der Einzelschrittausführung bildet das Trap-Flag, ein Bit im Prozesskontext des Prozessors\footnote{Dieser Teil des Prozesskontextes ist i.\,A. auch threadspezifisch. Die schrittweise Ausführung eines Threads beeinflusst andere Prozesse oder Threads also nicht.}. Nach jeder Befehlsverarbeitung durch den Prozessor wird der Wert des Trap-Flags überprüft. Ist es gesetzt, wird die Ausführung des Prozesses wie im Falle eines Breakpoints unterbrochen. Das Betriebssystem sendet eine Benachrichtigung an den registrierten Debugger-Prozess. Der methodische Unterschied dieses Ansatzes gegenüber dem Breakpoint-Mechanismus ist seine Asynchronität. Das Setzen des Trap-Flags bewirkt eine Unterbrechung des Prüflingsprozesses nach der Verarbeitung des nächsten Maschinenbefehls -- unabhängig davon welcher Befehl es ist. Auf diese Weise lassen sich auch beliebige asynchrone Unterbrechungen des Programmablaufs erreichen.
+
+Die Ausführung eines einzelnen Maschinenbefehls, eines sogenannten \emph{Instruction-Level Step}s, ist für den Benutzer einer höheren Programmiersprache i.\,A. unzureichend. Als Einzelschritt wird hier die Ausführung einer Anweisung auf Sprachebene verstanden, die auch als \emph{Source-Level Step} bezeichnet wird. Um das zu erreichen, können im einfachsten Fall mehrere Instruction-Level Steps ausgeführt werden. Dies ist für einfache Anweisungen akzeptabel. Im Falle eines Funktionsaufrufes kann es jedoch zu längeren Verzögerungen kommen. Daher wird zwischen den folgenden Varianten von Source-Level Steps unterschieden:
+
+%, da möglicherweise eine Vielzahl weiterer Anweisungen verarbeitet werden muss°\footnote{Jeder einzelne Instruction-Level Step führt zu zwei Prozesswechseln im Betriebssystem. Gegenüber der normalen Ausführung eines Programms ist eine solche Einzelschrittausführung um den Faktor 1000 langsamer.}°. Für Funktionsaufrufe
+
+\begin{itemize}
+	\item \emph{Step Into} überspringt nicht den gesamten Funktionsaufruf, sondern nur den aufrufenden Befehl. Die nächste Unterbrechung erfolgt also an der ersten Anweisung der aufgerufenen Funktion. Ein ggf. wiederholtes Instruction-Level Stepping ist hier angemessen.
+	\item \emph{Step Over} überspringt alle Anweisungen des Funktionsaufrufs einschließlich aller geschachtelten Funktionsaufrufe. Ein wiederholtes Instruction-Level Stepping könnte hier unnötige Verzögerungen hervorrufen. Step Over wird daher meist über das Setzen eines Breakpoints auf die Rücksprungadresse, also die Adresse des ersten Maschinenbefehls nach der Verarbeitung der Funktion, realisiert.
+\end{itemize}
+
+\noindent
+Darüber hinaus verfügen viele Debugger über einen \emph{Step Out} Mechanismus. Dieser kann als "`nachträgliches Step Over"' verstanden werden: Die Ausführung wird bis zum ersten Befehl nach Abschluss der aktuellen Funktion fortgesetzt. Die Speicheradresse dieses Befehls entspricht der Rücksprungadresse im aktuellen Stackframe.
+
+%Quelle: Buch "`How Debuggers Work"' \cite{HowDebuggersWork}
+%\begin{itemize}
+%	\item Separate-Process Ansatz
+%	\item Hardware-Unterstützung: INT3, Breakpoint-Register, Trap-Flag
+%	\item OS-Unterstützung: APIs zur Ablaufkontrolle und Inspektion fremder Prozesse, Voraussetzungen, Privilegien
+%\end{itemize}
+
+\subsection{Same-Process Debugger}
+\label{sec:context-debugging-same}
+
+Ein Debugger wird genau dann als \emph{Same-Process Debugger} bezeichnet, wenn er in demselben Prozess des Betriebssystems ausgeführt wird wie der Prüfling \cite{Paxson}. Damit hat ein Same-Process Debugger direkten Zugriff auf den Speicherbereich des Prüflings. Herkömmliche Debugger werden in einem eigenen Prozess ausgeführt und in diesem Zusammenhang auch als \emph{Separate-Process Debugger} bezeichnet. Hier besteht keine Möglichkeit des direkten Speicherzugriffs. Stattdessen stehen ihnen spezielle Systemfunktionen für die Manipulation und Inspektion des Prüflings zur Verfügung. Historisch betrachtet waren alle Debugger vor der Entwicklung multitaskingfähiger Betriebssysteme Same-Process Debugger, so z.\,B. auch der Debugger CodeView für MS DOS Programme \cite{DosDebug}.
+
+Für die Realisierung von Debuggern in Multitaskingsystemen erwies sich der Se\-pa\-ra\-te-Pro\-cess Ansatz als vorteilhaft. Die Gefahr der Verfälschung des Prüflingsverhaltens nach dem Heisenberg Prinzip (\ref{sec:context-debugging-basics}) wird durch die strikte Trennung auf Prozessebene deutlich verringert. Die notwendigen Voraussetzungen, wie die Bereitstellung adäquater API Funktionen, wurden spätestens seit den 1990er Jahren von allen verbreiteten Betriebssystemen erfüllt. Die Trennung von Debugger und Prüfling auf Prozessebene gilt heute als Voraussetzung für die Verwendung von Debugging APIs. Im Hinblick auf die Inspektion des Prüflings entstehen für Same-Process Debugger daraus keine Nachteile. Jedoch müssen alle in Abschnitt \ref{sec:context-debugging-separate} erwähnten Funktionalitäten zur Ablaufkontrolle des Prüflings ohne Betriebssystem- und Hardware-Unterstützung auskommen.
+
+%°Zudem wurden effektive Speicherschutzmechanismen immer wichtiger.° 
+
+Die Grundlage für das in dieser Arbeit entwickelte Verfahren bildet die Forschungsarbeit von Peter Kessler \cite{FastBreakpoints}. Anlass der Untersuchung Kesslers war der hohe Laufzeit\-overhead, der bei der Verwendung herkömmlicher Breakpoints anfällt. Die Übergabe des Kontrollflusses an den Debugger und zurück zum Prüfling erfordert stets zwei Prozesswechsel im Betriebssystem. Prozesswechsel gelten generell als aufwändige Operationen. Auch wenn es beispielsweise im Falle von Conditional Breakpoints in vielen Fällen nicht zur Unterbrechung der Ausführung kommt, sind für die Auswertung der Unterbrechungsbedingung nach dem herkömmlichen Verfahren zur Realisierung von Breakpoints (siehe Abschnitt \ref{sec:context-debugging-separate-breakpoints}) trotzdem zwei Prozesswechsel erforderlich. Das Ziel Kesslers ist es, diesen Aufwand zu reduzieren.
+
+Statt einen Breakpoint mit Hilfe eines Interrupt-Befehls zu realisieren, soll ein einfacher Verzweigungsbefehl zum Einsatz kommen. Damit wird der Ausführungsfluss in einen im Vorfeld vorbereiteten Behelfscode (\emph{Breakpoint-Code}) im Speicherbereich des Prüflingsprozesses umgeleitet. Der Breakpoint-Code enthält einerseits die ursprüngliche Anweisung an der Stelle des Breakpoints sowie einen Verzweigungsbefehl zurück zum Programmcode des Prüflings. Andererseits können hier beliebige Anweisungen, z.\,B. für die Auswertung einer Unterbrechungsbedingung, für die Überprüfung von Assertions oder für den Aufruf eines interaktiven Debuggers zur Inspektion des Prüflings ergänzt werden. Um das Ausführungsverhalten des Prüflings durch die zusätzlichen Anweisungen nicht zu verfälschen, muss dessen Ausführungszustand (z.\,B. die Werte von Registern) zuvor gesichert und im Nachhinein wiederhergestellt werden. Der Vorschlag Kesslers zur allgemeinen Form eines solchen Breakpoints ist in Abbildung \ref{fig:fast-breakpoints} dargestellt.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=\textwidth]{03-fast-breakpoints.png} %[scale=0.25]
+  \caption{Darstellung der allgemeinen Form eines schnellen Breakpoints nach \cite{FastBreakpoints}. Die ursprüngliche Operation an der Stelle der Breakpoint-Adresse wurde durch eine Verzweigungsoperation ersetzt, die eine Umleitung des Kontrollflusses initiiert. Innerhalb des Breakpoint-Codes können beliebige Operationen im Ausführungskontext des Prüflings ausgeführt werden (invoke closure). Dessen Ausführungszustand muss im Vorfeld gesichert und im Nachhinein wiederhergestellt werden. Schließlich kommt die ursprüngliche Operation zur Ausführung, bevor der Kontrollfluss zum Prüflingscode zurückkehrt.}
+  \label{fig:fast-breakpoints}
+\end{figure}
+
+\noindent
+Der Vorschlag Kesslers stellt einige Voraussetzungen an die Speicherschutzmechanismen des Betriebssystems sowie die Möglichkeiten der zugrundeliegenden Befehlssatzarchitektur. Diese sollen im Folgenden zusammengefasst werden. Zunächst ist ein schreibender Zugriff auf den Programmcode des Prüflings erforderlich. Darin unterscheidet sich der Ansatz Kesslers nicht von der gewöhnlichen Verfahrensweise für Software Breakpoints. Jedoch sind die üblichen Funktionen der Debugging API von Betriebssystemen oft auf das Einfügen von Interrupt-Befehlen beschränkt. Hierfür müssen Alternativen existieren. Der zusätzlich erforderliche Breakpoint-Code muss ebenfalls zur Laufzeit in einen ausführbaren Speicherbereich des Prüflingsprozesses geschrieben werden können. Der dafür nötige Speicherplatz muss verfügbar sein. Für die Sicherung des Ausführungszustandes muss weiterhin eine dynamische Allokation von Speicherplatz durch den Breakpoint-Code möglich sein. Eine weitere Problematik betrifft Befehlssatzarchitekturen mit Befehlen unterschiedlicher Länge. Nimmt eine Verzweigungsoperation mehr Speicherplatz ein als der zu ersetzende Befehl, wird der im Programmcode nachfolgende Befehl dadurch ganz oder teilweise überschrieben. Das ist genau dann problematisch, wenn es sich bei dem Folgebefehl um ein Sprungziel handelt. Dies würde die Semantik des Prüflings unwiderruflich verfälschen.
+
+Für die Implementierung seines Ansatzes verwendete Kessler die Programmierumgebung Cedar und das Betriebssystem UNIX auf Basis einer SPARC Befehlssatzarchitektur. Diese Konfiguration erfüllt alle oben beschriebenen Voraussetzungen. Insbesondere stellt die Ersetzung beliebiger Befehle durch eine Verzweigungsoperation hier kein Problem dar, da alle Operationen der SPARC Architektur Wortlänge haben \cite{Sparc}. Das Ergebnis ist ein um den Faktor 1000 beschleunigter Breakpoint-Mechanismus (im Vergleich zu Standard-Breakpoints unter UNIX). Das Verfahren ist damit nicht nur für Conditional Breakpoints geeignet, sondern auch für Profiling-Zwecke oder zur Realisierung von Watchpoints \cite{FastDataBreakpoints}.
+
+%Schreibzugriff auf Programmcode im Prüflingsprozesses
+%atomare Schreiboperation für Anwendbarkeit in Multitasking-Umgebung
+%ersetzte Maschinenoperation darf nicht länger sein, als Verzweigungsoperation
+%Platz für zusätzlichen Breakpoint-Code
+%Breakpoint-Code muss Speicherplatz allozieren dürfen
+
+%\begin{itemize}
+%	\item Begriff, Vor- und Nachteile: A Survey of Support For Implementing Debuggers \cite{Paxson}
+%	\item keine OS-Unterstützung und Stand der Technik: Fast Breakpoints \cite{FastBreakpoints}
+%\end{itemize}

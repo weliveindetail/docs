@@ -1,0 +1,147 @@
+
+%\begin{remark}
+%Begriff DSL \cite{DslBib} und Überblick zu untergeordneten Abschnitten: worauf wird eingegangen und worauf nicht (z.\,B. Vor- und Nachteile)
+%\end{remark}
+
+Formale Programmiersprachen, die speziell auf die Bearbeitung von Aufgabenstellungen in einem abgeschlossenen Anwendungsbereich (einer \emph{Domäne}) zugeschnitten sind, heißen domänenspezifische Sprachen (\emph{Domain-Specific Language}, kurz \emph{DSL}). Die Sprachmittel von DSLs können speziell auf die Lösung von Problemstellungen der Domäne zugeschnitten werden. Gegenüber den Anwendungsfällen in der Zieldomäne erreichen DSLs dadurch ein höheres Abstraktionsniveau als universelle Programmiersprachen. Bei der Verwendung von DSLs verringert sich damit die Modellierungslücke \cite{ComparingGplsAndDsls}, also die Distanz zwischen der abstrakten Problembeschreibung als Vorstellung des Entwicklers und der konkreten Darstellung in der Programmiersprache. In der Folge sinkt der Entwicklungsaufwand für Programmieraufgaben in der Zieldomäne. Um dies zu gewährleisten, sollten DSLs einerseits alle Probleme der Domäne möglichst treffend darstellen können, während andererseits keine Probleme darstellbar sein sollten, die außerhalb der Domäne liegen \cite{DslBib}. 
+
+Die folgenden Abschnitte widmen sich den Eigenschaften, der Werkzeugunterstützung und den Nutzergruppen von DSLs. Die Vor- und Nachteile der Verwendung von DSLs sind in der Literatur bereits vielfältig untersucht worden und sollen hier nicht erneut behandelt werden. Eine strukturierte Zusammenfassung findet sich in \cite{Spinellis}. 
+
+% und Czarnecki \cite{GenerativeProgramming} verwiesen.
+
+% zur Differenzierung von DSLs betrachtet, der aktueller Stand der Werkzeugunterstützung für die Erstellung von und die Arbeit mit DSLs vorgestellt und die Nutzergruppen verschiedener DSLs 
+
+%DSLs erreichen oft eine hohe Problemspezifität, da ihre Sprachmittel wesentlich besser auf die Lösung von Problemstellungen der Domäne zugeschnitten werden können, als dies für universelle Programmiersprachen möglich wäre. Damit kann die Modellierungslücke, also die Distanz zwischen der abstrakten Problembeschreibung als Vorstellung des Entwicklers und der konkreten Darstellung in einer Programmiersprache. 
+
+%Diese Betrachtungsweise stellt die \emph{Begrenzung} der Mächtigkeit als vorrangige Eigenschaft von DSLs heraus. Das bedeutet einerseits, dass DSLs alle Probleme der Domäne möglichst treffend darstellen können sollen und andererseits, dass keine Probleme darstellbar sein sollen, die außerhalb der Domäne liegen \cite{DslBib}. 
+
+%, im Falle von C für viele Anwendungsfälle besonders groÿ. Ein hoher Anteil des Aufwandes der zur Überführung eines abstrakten Modells in die Notation von C nötig wird, hat keinen problemspezi?schen sondern einen technischen Hintergrund.
+
+%Die Erhöhung des Abstraktionsniveaus von Programmiersprachen kann die Modellierungslücke verkleinern und damit den Aufwand bei der Verwendung der Sprache für bestimmte Anwendungsfälle reduzieren \cite{Bell}. 
+
+%Eine systematische Einordnung von DSLs innerhalb der Programmiersprachen wird in Abschnitt \ref{sec:context-dsls-classification} vorgenommen. Im Anschluss soll in \ref{sec:context-dsls-differentiation} eine Kategorisierung von DSLs anhand der wichtigsten Eigenschaften erfolgen. Abschnitt \ref{sec:context-dsls-tools} behandelt die Problematik der Werkzeugunterstützung für die Erstellung und die Arbeit mit DSLs. Eine Betrachtung der verschiedenen Nutzergruppen von DSLs wird schließlich in Abschnitt \ref{sec:context-dsls-users} gegeben. 
+
+%\subsection{Einordnung}
+%\label{sec:context-dsls-classification}
+
+%\begin{itemize}
+%	\item Versuch einer systematischen Einordnung als Programmiersprachen anhand der allgemeinen Eigenschaften Mächtigkeit, Sprachumfang und Abstraktionsniveau (auf die Mächtigkeit wird später wieder eingegangen - geringe Mächtigkeit von DSLs ist Voraussetzung für Umsetzbarkeit der Debugging-Mechanismusses)
+%	\item Verringerung der Modellierungslücke ergibt sich als zentraler Aspekt \cite{Bell} \cite{LightweightLangs}
+%	\item DSLs müssen spezialisieren UND eingrenzen \cite{LanguageWorkbenches} \cite{Bell}
+%\end{itemize}
+
+%DSLs unterscheiden sich in vielerlei Hinsicht von universellen Programmiersprachen. Um eine systematische Unterscheidung vorzunehmen, werden im Folgenden drei allgemeine Eigenschaften von Programmiersprachen betrachtet. 
+% Mächtigkeit, Sprachumfang und Abstraktionsniveau betrachtet. 
+% (\emph{General-Purpose Language}, kurz \emph{GPL})
+
+%\begin{itemize}
+%	\item Die \emph{Mächtigkeit} einer Sprache ist definiert durch die Menge an Problemen, die in dieser Programmiersprache entscheidbar sind [Quelle finden]. Je höher die Mächtigkeit einer Sprache ist, desto vielseitiger lässt sie sich einsetzen.
+%	\item Der \emph{Sprachumfang} einer Programmiersprache bestimmt sich durch die Menge der syntaktischen Konstrukte, die dem Entwickler zur Verfügung stehen, um eine Intention direkt in der Notation der Sprache abzubilden \cite{ToolsFuerDsls}. Im Allgemeinen gelten Sprachen mit geringerem Umfang als leichter erlernbar. Die geringere Anzahl und Flexibilität von Beschreibungsmitteln kann jedoch dazu führen, dass bestimmte Intentionen nur über Umwege dargestellt werden können \cite{ComparingGplsAndDsls}.
+%	\item Das \emph{Abstraktionsniveau} beschreibt, wie weit sich die Beschreibungsmittel einer Sprache von der technischen Darstellung im Maschinencode abheben. Das abstrahierte Detailwissen wird nicht mehr im Programmcode spezifiziert, sondern ist in der Sprache enthalten \cite{GenerativeProgramming}. Oft kann eine Problemlösung umso einfacher in die Notation einer Programmiersprache übertragen werden, je höher deren Abstraktionsniveau ist.
+%\end{itemize}
+
+%\noindent
+%Am Beispiel der Programmiersprache C sollen diese Begriffe verdeutlicht werden. Wie der Großteil der universellen Programmiersprachen ist auch C Turing-vollständig. Die Mächtigkeit von C umfasst damit die Menge aller berechenbaren Funktionen. Der Sprachumfang von C ist sehr klein, da die Anzahl der syntaktischen Konstrukte der Sprache und die Menge der Schlüsselwörter im Vergleich zu anderen Sprachen gering ist\footnote{Standard ANSI C nennt gerade einmal 32 Schlüsselwörter und umfasst damit bereits primitive Datentypen. Zudem ist die Komplexität der sprachlichen Konstrukte in C sehr gering. Im Vergleich zu umfangreicheren Programmiersprachen wie z.\,B. Scala bietet C für eine Vielzahl von Programmierkonzepten keine syntaktische Repräsentationen. Einige Beispiele hierfür sind Vererbung, Polymorphismus, Reflection und Pattern Matching sowie Möglichkeiten zur Darstellung von Asynchronität und Parallelität.}. An dieser Stelle wird bereits klar, dass das Abstraktionsniveau der Sprache im Durchschnitt ebenfalls gering sein muss. Denn um mit einer geringen Menge von Beschreibungsmitteln eine große Bandbreite an Problemstellungen abzudecken, muss die Problemspezifität der einzelnen Beschreibungsmittel gering sein. Dadurch ist die Modellierungslücke, also die Distanz zwischen der ursprünglichen Problembeschreibung als Vorstellung des Anwenders und dem Abstraktionsniveau einer Programmiersprache \cite{ComparingGplsAndDsls}, im Falle von C für viele Anwendungsfälle besonders groß. Ein hoher Anteil des Aufwandes der zur Überführung eines abstrakten Modells in die Notation von C nötig wird, hat keinen problemspezifischen sondern einen technischen Hintergrund. Die Größe der Modellierungslücke einer Programmiersprache gegenüber einem Anwendungsfall hat also direkte Auswirkungen auf die Effizienz bei der Darstellung des Anwendungsfalls in der Sprache.
+
+%Die Erhöhung des Abstraktionsniveaus von Programmiersprachen kann die Modellierungslücke verkleinern und damit den Aufwand bei der Verwendung der Sprache für bestimmte Anwendungsfälle reduzieren \cite{Bell}. Um dies zu erreichen sind zwei verschiedene Ansätze denkbar. Zum einen kann das Abstraktionsniveau erhöht werden, indem der Sprachumfang vergrößert wird. Dies ermöglicht eine höhere Problemspezifität der einzelnen Beschreibungsmittel bei gleichbleibender Mächtigkeit der Sprache. Im Rückschluss wird das Erlernen der Sprache oft schwieriger. Alternativ kann aber auch die Mächtigkeit der Sprache verringert werden, sodass die Beschreibungsmittel auf konkretere Anwendungsfälle zugeschnitten werden können. Bei gleichbleibendem Sprachumfang kann damit ebenfalls das Abstraktionsniveau einer Programmiersprache erhöht werden. Dieser Ansatz wird von domänenspezifischen Sprachen verfolgt. Diese Betrachtungsweise stellt die \emph{Begrenzung} der Mächtigkeit als vorrangige Eigenschaft von DSLs heraus. Das bedeutet einerseits, dass DSLs alle Probleme der Domäne möglichst treffend darstellen können sollen und andererseits, dass keine Probleme darstellbar sein sollen, die außerhalb der Domäne liegen \cite{DslBib}. 
+
+%\subsection{Eigenschaften und Vorteile}
+%\noindent
+%Die Vorteile bei der Verwendung von DSLs ergeben sich aus der gezielten Begrenzung\footnote{Die \emph{Begrenzung} ist tatsächlich das vorrangige Ziel beim Entwurf domänenspezifischer Sprachen. Denn einerseits sollen DSLs alle Probleme der Domäne darstellen können (notwendiges Kriterium), während andererseits keine Probleme darstellbar sein sollen, die außerhalb der Domäne liegen (hinreichendes Kriterium).} ihrer Mächtigkeit auf eine bestimmte Problemdomäne. Ermöglicht wird z.\,B. die Anpassung der Notation in DSLs an die etablierten Notationen des Anwendungsgebietes, sodass DSLs tendenziell auch von Domänenexperten ohne Kenntnisse universeller Programmiersprachen verwendet werden können. Probleme der Zieldomäne können mit DSLs oft wesentlich treffender abgebildet werden, als dies mit universellen Programmiersprachen möglich ist. Im Allgemeinen verringert dies sowohl Entwicklungsaufwand als auch Wartungskosten bei Entwicklungsaufgaben in der Zieldomäne.
+
+\subsection{Differenzierung}
+\label{sec:context-dsls-differentiation}
+
+%\begin{itemize}
+%	\item DSLs im Besonderen: Form der Realisierung (intern/extern) \cite{LanguageWorkbenches} und Ausführbarkeit \cite{Mernik05} (direkt ausführbar, indirekt ausführbar (Eingabe für Codegenerator), partiell indirekt ausführbar, nicht ausführbar)
+%	\item außerdem auch nach allgemeinen Eigenschaften von Programmiersprachen: Paradigma \cite{Wu08} (imperativ, deklarativ, hybrid), Verarbeitungsmodell\footnote{Verarbeitungsmodelle sind nur für externe DSLs relevant. Interne DSLs sind an das Verarbeitungsmodell ihrer Wirtssprache gebunden.} \cite{Mernik05} (kompiliert, interpretiert, source-to-source) und Notation \cite{DslsVisualStudio} (grafisch, textuell)
+%\end{itemize}
+
+\enlargethispage{0.8cm}
+Die Differenzierung domänenspezifischer Sprachen erfolgt heute in erster Linie anhand ihrer Realisierungsform, dem Grad der Ausführbarkeit und der Notationsform. Die häufigste Unterteilung von DSLs nach Realisierungsformen wird u.\,a. von Fowler in \cite{LanguageWorkbenches} beschrieben. Fowler unterscheidet zwischen internen und externen DSLs\footnote{Eine andere Unterteilung wird z.\,B. von Czarnecki und Eisenecker in \cite{GenerativeProgramming} vorgenommen. Sie unterscheiden die drei Kategorien "`fixed separate"', "`embedded"' und "`modularly composable"'. Neben rein terminologischen Unterschieden ist oft auch der ungenau abgegrenzte Begriff einer DSL selbst Ursache für verschiedene Einteilungen.}. 
+
+%Für die Differenzierung domänenspezifischer Sprachen werden in erster Linie DSL-spezifische Eigenschaften betrachtet. Dazu zählen vor allem die Realisierungsform, der Grad der Ausführbarkeit und die Notationsform. 
+
+\noindent
+Interne DSLs werden als Untermenge einer Wirtssprache definiert und oft als "`Languages inside languages"' bezeichnet. Die Bereitstellung interner DSLs gestaltet sich dadurch vergleichsweise leicht. Es besteht keine Notwendigkeit der Erstellung von Parsern, Interpretern oder Compilern. Die Syntax interner DSLs ist im Gegenzug auf die syntaktischen Möglichkeiten der Wirtssprache begrenzt \cite{Mernik05}. Als Wirtssprachen haben sich daher im Wesentlichen Sprachen mit sehr flexibler Syntax etabliert. Dabei handelt es sich häufig um dynamisch typisierte Sprachen wie Ruby oder Lisp. Eine wesentliche Problematik interner DSLs ist die mangelnde Begrenzung ihrer Mächtigkeit auf eine Problemdomäne, da prinzipiell alle Konstrukte der Wirtssprache innerhalb der DSL gültig sind. Dies erschwert die Einarbeitung vor allem für unerfahrene Benutzer. Fowler verweist hier auf das von Simonyi beschriebene Problem der "`Degrees of Freedom"' \cite{DegreesOfFreedom}. Interne DSLs entwickeln sich oft als Weiterentwicklung einfacher Programmbibliotheken. Die begriffliche Abgrenzung ist unscharf \cite{Mernik05}. Ein bekanntes Beispiel einer internen DSL ist das auf Ruby aufsetzende Build-Management-Werkzeug Rake \cite{rake}. 
+
+Externe DSLs stellen eigenständige Sprachen dar. Damit können domänenspezifische Anforderungen, wie die in der Zieldomäne etablierten Notationen, meist wesentlich besser in der Sprache abgebildet werden \cite{Mernik05}. Der anfängliche Aufwand für die Bereitstellung externer DSLs ist jedoch vergleichsweise hoch, denn die Erstellung von Übersetzern oder Interpretern stellt i.\,A. wesentlich höhere Anforderungen an Entwurf und Implementierung als die allgemeine Anwendungsentwicklung in der jeweiligen Domäne. Die wohl bekannteste externe DSL ist die Datenbankanfragesprache SQL \cite{sql}. Eine exakte Abgrenzung externer DSLs gestaltet sich vor allem gegenüber Skriptsprachen (wie z.\,B. Action\-Script oder Unix shell scripts) und Auszeichnungssprachen (wie z.\,B. TeX oder CSS) schwierig.
+
+%Hilfestellung bieten dabei traditionell Werkzeuge wie Parsergeneratoren. Neuere Entwicklungen, sogenannte Language Workbenches, sollen auch die Generierung von Programmierwerkzeugen wie Entwicklungsumgebungen und Debugger für erstellte Sprachen ermöglichen \cite{LanguageWorkbenches}. 
+
+Im Gegensatz zu universellen Programmiersprachen müssen DSLs nicht notwendigerweise ausführbar sein\footnote{Da interne DSLs an das Ausführungsmodell ihrer Wirtssprache gebunden sind und es sich dabei i.\,A. um eine universelle Programmiersprache handelt, gehören diese meist der Kategorie ausführbarer DSLs an.}. Eine Klasseneinteilung nach dem Grad der Ausführbarkeit einer DSL wird von Mernik in \cite{Mernik05} gegeben. Die erste Klasse bilden direkt ausführbare DSLs. Hierzu zählen beispielweise Macro-Sprachen in Tabellenkalkulationsprogrammen und anwendungsspezifische Skriptsprachen wie VBA. Daneben existieren drei weitere Klassen für alle nicht unmittelbar ausführbaren DSLs. Für derartige DSLs kann der Programmbegriff irreführend sein. Mernik empfiehlt daher die Verwendung von Begriffen wie \emph{Spezifikation} oder \emph{Beschreibung}. Eingabesprachen für Anwendungs- oder Quellcodegeneratoren bilden eine Klasse nicht unmittelbar ausführbarer DSLs. Zwar wird aus ihnen ausführbarer Code generiert, doch für gewöhnlich haben sie einen eher deklarativen Charakter. Als Beispiel wird die Modellierungssprache ATMOL \cite{atmol} genannt. Eine weitere Klasse umfasst vollständig deklarative DSLs, die nur eine unterstützende Rolle bei der Anwendungsgenerierung spielen. Dazu zählt z.\,B. die Backus-Naur-Form zur Darstellung kontextfreier Grammatiken. Die letzte Klasse umfasst schließlich alle nicht ausführbaren DSLs, wie formale Datenstrukturen sowie Analyse- und Visualisierungssprachen.
+
+\label{sec:context-dsls-differentiation-notation}
+Die Notationsform einer Sprache kann als weiteres Unterscheidungsmerkmal dienen. Unterschieden werden kann zwischen textueller und grafischer Notation. Da alle verbreiteten universellen Programmiersprachen eine textuelle Notation verwenden, ist diese Eigenschaft ebenfalls vorrangig für DSLs relevant. Die bekannteste grafische Notationsform ist das Prinzip der "`Boxes and Arrows"'. Sie eignet sich vor allem für die Verwendung durch Endbenutzer und wird oft für Modellierungsaufgaben eingesetzt. Speziell in der datenflussorientierten Programmierung wird die Verwendung von Kästen zur Darstellung von Objekten und Verbindungen zur Darstellung von Daten- und Kontrollflüssen als natürliche Notation empfunden. Klassische Beispiele hierfür sind LabVIEW \cite{Labview} und Simulink \cite{Simulink}. Daneben existieren experimentelle Ansätze zur Integration der grafischen Notation in der beispielorientierten Programmierung \cite{Subtext}.
+
+Innerhalb dieser Kategorien kann eine weitere Differenzierung anhand allgemeiner Eigenschaften von Programmiersprachen vorgenommen werden. So können direkt ausführbare DSLs nach ihrem Programmierparadigma in imperative und deklarative DSLs und nach ihrer Ausführungsform in kompilierte und interpretierte DSLs unterteilt werden. Nicht unmittelbar ausführbare DSLs sind naturgemäß deklarativ und werden weder im klassischen Sinne kompiliert noch interpretiert. Stattdessen werden sogenannte "`source-to-source"' Transformationen angewendet. Das Ergebnis ist entweder eine benutzerverständliche visuelle Darstellung oder ein maschinenverständlicher äquivalenter Quellcode in einer anderen Programmiersprache.
+
+%\footnote{Mischformen aus imperativem und deklarativem Paradigma, wie sie in verschiedenen universellen Sprachen wie Scala oder C\# (ab Version 3) existieren, sind unter DSLs nicht verbreitet.° Hybride Ausführungsformen sind ebenfalls unüblich, können aber bei internen DSLs von der Wirtssprache geerbt werden.°}
+
+%Programmierwerkzeuge die eine solche Transformation durchführen werden auch Cross-Compiler genannt. 
+
+%\begin{itemize}
+%\item Paradigma \emph{[Lightweight Languages as Software Engineering Tools]}: 	
+%\item Ausführungsmodell \emph{[When and how to develop domain-specific languages]}: analog zu universellen Programmiersprachen zwischen interpretierten und kompilierten DSLs unterschieden. Hybride Ansätze wie sie bei Programmiersprachen der Plattformen Java und .NET verwendet werden, sind unter DSLs weniger verbreitet. Eine wichtige Rolle spielen jedoch Cross-Compiler, die wiederum im Bereich universeller Programmiersprachen selten sind\footnote{Eine bekannte Ausnahme bildet z.\,B. das Google Web Toolkit, welches einen Cross-Compiler für die Erzeugung von JavaScript Code aus Java Applikationen enthält \cite{JavaCrossCompiler}.}. Cross-Compiler generieren Quellcode einer universellen Programmiersprache aus den in einer DSL getätigten Beschreibungen. Zur Ausführung kann dann der Interpreter oder Compiler der Zielsprache verwendet werden. 
+%	\item Notationsform \emph{[Domain Specific Development with Visual Studio DSL Tools]}: grafisch /textuell
+%\end{itemize}
+%So wird im Hinblick auf das verwendete Auswertungsmodell  
+
+%\footnote{Eine maßgebliche Rolle spielt hierbei auch die Entwicklung von LLVM Compilern \cite{LLVM}, die eine möglichst maschinennahe aber immer noch portable Zwischendarstellung verwenden. Dies verbindet die effiziente Ausführung von Programmen mit den Vorteilen virtueller Maschinen. Der LLVM Ansatz ist damit besonders für perfomanzkritische Anwendungsfälle geeignet bei denen Portabilität wichtig sind.}
+
+% Ebenfalls . Eine besondere Rolle .. DSLs spielen Cross-Compiler, deren  Während im Bereich der universellen Programmiersprachen das imperative Programmierparadigma vorherrschend ist, kommt bei DSLs oft auf eine deklarative Notation zum Einsatz. 
+
+%Weiterhin können DSLs anhand derselben Eigenschaften unterschieden werden, wie im Falle universeller Programmiersprachen können DSLs weiterhin anhand ihres Programmierparadigmas sowie der
+%Auswertungs- und Notationsform unterschieden werden.  Die wesentlichen Notationsformen  imperativ/deklarativ
+%Auswertung: Codegenrator/kompiliert/interpretiert, ??: 
+
+\subsection{Werkzeugunterstützung}
+\label{sec:context-dsls-tools}
+
+%\begin{itemize}
+%	\item Situation und Probleme im Hinblick auf Tool-Support für DSLs \cite{LanguageWorkbenches} \cite{Spinellis} \cite{DslCaseStudy} %\cite{DslRequirements} \cite{DslEclipse}
+%	\item ganz kurz Lösungsmöglichkeiten durch Language-Oriented Programming \cite{Ward}, Grammar-Driven Tool-Generation \cite{Wu08} und Language Workbenches \cite{LanguageWorkbenches} anreißen - das ist nicht sinnvoll für bestehende DSLs und erst recht nicht im DSP-Bereich, aber hebt die Notwendigkeit der speziellen Betrachtung hervor
+%\end{itemize}
+
+Erste Untersuchungen zu Verfügbarkeit und Qualität von Entwicklungswerkzeugen für DSLs \cite{DslCaseStudy}\cite{DslEclipse} zeigen einen deutlichen Mangel gegenüber der Angebotssituation von Entwicklungswerkzeugen für universelle Programmiersprachen. Dieser Mangel wird häufig als zentraler Nachteil bei der Verwendung domänenspezifisher Sprachen genannt \cite{Spinellis}\cite{LanguageWorkbenches}. Denn für einen dauerhaften produktiven Einsatz von DSLs ist eine adäquate Werkzeugunterstützung zwingend erforderlich \cite{DslRequirements}.
+
+%\noindent
+Im Zuge der zunehmenden Popularität des Language-Oriented Programming, einem von Ward bereits 1994 beschriebenen Programmierparadigma \cite{Ward}, haben auch DSLs innerhalb der letzten Jahre stark an Bedeutung gewonnen. In diesem Zusammenhang sind erste umfangreichere Entwicklungswerkzeuge (sogenannte Language Workbenches \cite{LanguageWorkbenches} oder Language Development Systems \cite{Mernik05}) entstanden, deren Ziel es ist, die Entwicklung von und die Arbeit mit DSLs zu vereinfachen. Beispiele hierfür sind JetBrains' Meta-Programming System \cite{mps} sowie Intentional Software \cite{InterntionalSoftware}. Ein zentraler Aspekt von Language Workbenches ist die automatische Generierung zeitgemäßer Programmierwerkzeuge aus einer Sprachspezifikation\footnote{Während dies zunächst nur einer Erweiterung der Anwendungsbereiche traditioneller Programmierwerkzeuge, wie Parsergeneratoren und Compiler-Compilern entspricht, gibt es auf diesem Gebiet auch Bemühungen die Arbeit mit Programmiersprachen gänzlich zu revolutionieren \cite{InterntionalSoftware}.}.
+Diese Entwicklung macht die Bedeutung adäquater Programmierwerkzeuge deutlich, bietet jedoch keine Perspektive für bestehende DSLs. Zudem können in bestimmten Domänen Anforderungen an Benutzerfreundlichkeit, Integrierbarkeit und Performanz existieren, die durch Language Workbenches (noch) nicht erfüllt werden können.
+
+\subsection{Nutzergruppen}
+\label{sec:context-dsls-users}
+
+% Quelle prüfen und herausfinden in welchem Paper CASE Tools erwähnt wurden
+%Unterscheidung \cite{LanguageWorkbenches} zwischen DSLs für:
+%\begin{itemize}
+%	\item Entwickler zur Unterstützung im Software-Engineering (im Sinne von CASE Tools \cite{Spinellis})
+%	\item Endbenutzer die weiterhin unterschieden werden \cite{EndUserNeeds} in:
+%	\begin{itemize}
+%		\item Endbenutzern allgemein ("`A user of an application program. Typically, the term means that the person is not a computer programmer. A person who uses a computer as part of daily life or daily work, but is not interested in computers per se."')
+%		\item und Domänenexperten im speziellen ("`[Domain-expert users] are experts in a specific domain, not necessarily experts in computer science, who use computer environments to perform their daily tasks. They have also the responsibility for induced errors and mistakes."')
+%	\end{itemize}
+%\end{itemize}
+%\clearpage
+
+Die Entwicklung von DSLs kann sehr unterschiedlich motiviert sein. Einerseits kann die Zieldomäne einer DSL ein Problemfeld im Entwicklungsprozess von Softwareanwendungen sein. Dies trifft beispielsweise in der Produktlinienentwicklung\footnote{Der Ansatz der Produktlinienentwicklung verfolgt das Ziel einer dauerhaften Reduktion des Entwicklungsaufwandes für wiederkehrende Aufgaben bei der häufigen Erstellung ähnlicher Produkte. Dies wird durch eine gezielte Priorisierung von Entwicklungsplattformen erreicht, die eine stetige Steigerung des Wiederverwendungsgrades von Programmfragmenten ermöglicht.} zu. Die Benutzergruppe der DSL umfasst demzufolge Personen, von denen ein hoher Grad an Erfahrung bei der Verwendung von Werkzeugen zur Softwareentwicklung vorausgesetzt werden kann. Der Entwurf der Werkzeuge zur Arbeit mit einer solchen DSL kann sich in diesem Fall also an den Standards universeller Programmiersprachen und CASE Werkzeugen orientieren.
+
+Andererseits kann die Zieldomäne jedoch auch ein Problemfeld sein, dessen Benutzer keinerlei Erfahrung mit der Entwicklung von Software haben. Ein klassisches Beispiel sind Tabellenkalkulationsprogramme. In diesem Zusammenhang spricht man auch vom sogenannten \emph{End-User-Development}. Mit der stetig zunehmenden Präsenz von Computerprogrammen in Alltagssituationen steigt auch der Wunsch von Endbenutzern bestehende Software an ihre jeweiligen Bedürfnisse anzupassen und Programme in bestimmten Grenzen selbst zu erstellen \cite{EndUserDevEnv}. DSLs spielen hierbei eine wichtige Rolle. Sprachen und Umgebungen die es Endbenutzern gestatten derartige Programmieraufgaben zu bewältigen, stellen jedoch vollkommen neue Anforderungen. Diese werden in \cite{EndUserDevEnv} ausführlich diskutiert. Eine Teilmenge von Endbenutzern bilden sogenannte Domänenexperten. Die folgende Definition findet sich ebenfalls in \cite{EndUserDevEnv}.
+
+\begin{definition}[Domänenexperte]
+[Domain-expert users] are experts in a specific domain, not necessarily experts in computer science, who use computer environments to perform their daily tasks. They have also the responsibility for induced errors and mistakes.
+\end{definition}
+
+\noindent
+Während es im allgemeinen End-User Development also um die Allgemeinverständlichkeit von Programmiersprachen und -werkzeugen geht, steht bei End-User-Development-Systemen für Domänenexperten die \emph{eigenverantwortliche} domänenspezifische Programmierung im Vordergrund. Hier genügt es, dem Benutzer eine Programmierumgebung zur Verfügung zu stellen, die die in der Domäne üblichen Notationen und Arbeitsabläufe möglichst natürlich abbildet. DSLs in Entwicklungsumgebungen zur Programmierung digitaler Signalverarbeitungsprozesse sind solche Systeme.
+
+
+
+%Es ermöglicht es Benutzern, die keine professionellen Softwareentwickler sind, Programme oder Programmfragmente in einem gewissen Rahmen selbst zu erstellen oder zu verändern \cite{EndUserDevEnv}.
+
+%EUD wird in \cite{EndUserDevEnv} wie folgt definiert:
+%\begin{definition}[End-User Development]
+%End-User Development is a set of activities or techniques that allow people, who are non-professional software developers, at some point to create or modify a software artifact.
+%\end{definition}
+
+%\noindent

@@ -1,0 +1,14 @@
+	...
+	mov ebx, pCallbackFlag
+	cmp byte ptr [ebx], 0x00
+	je continue
+	push ecx
+	push edx
+	push pHandler
+	mov ebx, pCallee
+	call ebx
+	pop edx
+	pop ecx
+
+continue:
+	...

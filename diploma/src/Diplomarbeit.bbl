@@ -1,0 +1,392 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{KOM{\etalchar{+}}10}
+  \providebibliographyfont{name}{}%
+  \providebibliographyfont{lastname}{}%
+  \providebibliographyfont{title}{\emph}%
+  \providebibliographyfont{jtitle}{\btxtitlefont}%
+  \providebibliographyfont{etal}{\emph}%
+  \providebibliographyfont{journal}{}%
+  \providebibliographyfont{volume}{}%
+  \providebibliographyfont{ISBN}{\MakeUppercase}%
+  \providebibliographyfont{ISSN}{\MakeUppercase}%
+  \providebibliographyfont{url}{\url}%
+  \providebibliographyfont{numeral}{}%
+  \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+
+\expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+\bibitem [{ANCS00}]{Replay}
+\btxnamefont {\btxlastnamefont {Alpern}, B.}, \btxnamefont {T. \btxlastnamefont
+  {Ngo}}, \btxnamefont {J.D. \btxlastnamefont {Choi}}\btxandcomma {}
+  \btxandlong {}\ \btxnamefont {M. \btxlastnamefont
+  {Sridharan}}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase {Dejavu:
+  deterministic java replay debugger for jalape{\~n}o java virtual
+  machine}{DejaVu: deterministic Java replay debugger for Jalape{\~n}o Java
+  virtual machine}}.
+\newblock \btxjournalfont {Proceedings of OOPSLA 2000--Addendum}, \btxpageslong
+  {}\ 165--166, 2000.
+
+\bibitem [{App12}]{MacRealtime}
+Apple Inc.\btxauthorcolon\ \btxtitlefont {Mac Developer Library, Kernel
+  Programming Guide: Mach Scheduling and Thread Interfaces},
+  \btxprintmonthyear{.}{Februar}{2012}{long}.
+\newblock {\latintext
+  \btxurlfont{https://developer.apple.com/library/mac/\#documentation/Darwin/C%
+onceptual/KernelProgramming/scheduler/scheduler.html\#//apple_ref/doc/uid/TP30%
+000905-CH211-TPXREF108}}.
+
+\bibitem [{ASL{\etalchar{+}}08}]{Compiler}
+\btxnamefont {\btxlastnamefont {Aho}, A.V.}, \btxnamefont {R. \btxlastnamefont
+  {Sethi}}, \btxnamefont {M.S. \btxlastnamefont {Lam}}\btxandcomma {}
+  \btxetalfont {\btxetalshort {.}}\btxauthorcolon\ \btxtitlefont {Compiler:
+  Prinzipien, Techniken und Werkzeuge}.
+\newblock \btxpublisherfont {Pearson Deutschland GmbH}, 2008.
+
+\bibitem [{Ben11}]{Audio101}
+\btxnamefont {\btxlastnamefont {Bencina}, Ross}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Real-time audio programming 101: time waits for
+  nothing}{Real-time audio programming 101: time waits for nothing}},
+  \btxprintmonthyear{.}{August}{2011}{long}.
+\newblock {\latintext
+  \btxurlfont{http://www.rossbencina.com/code/real-time-audio-programming-101-%
+time-waits-for-nothing}}.
+
+\bibitem [{BJ98}]{Realtime}
+\btxnamefont {\btxlastnamefont {Bristow-Johnson}, Robert}\btxauthorcolon\
+  \btxtitlefont {\btxifchangecase {Comp.realtime: Frequently asked questions
+  (version 3.5)}{Comp.realtime: Frequently Asked Questions (Version 3.5)}},
+  \btxprintmonthyear{.}{Juli}{1998}{long}.
+\newblock {\latintext
+  \btxurlfont{http://www.faqs.org/faqs/realtime-computing/faq/}}.
+
+\bibitem [{CE00}]{GenerativeProgramming}
+\btxnamefont {\btxlastnamefont {Czarnecki}, Krzysztof} \btxandlong {}\
+  \btxnamefont {Ulrich\btxfnamespacelong W. \btxlastnamefont
+  {Eisenecker}}\btxauthorcolon\ \btxtitlefont {Generative programming: methods,
+  tools and applications}.
+\newblock \btxpublisherfont {ACM Press/Addison-Wesley Publishing Co.}, New
+  York, NY, USA, 2000\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont
+  {0-201-30977-7}}}.
+
+\bibitem [{CFMP04}]{EndUserDevEnv}
+\btxnamefont {\btxlastnamefont {Costabile}, Maria\btxfnamespacelong Francesca},
+  \btxnamefont {Daniela \btxlastnamefont {Fogli}}, \btxnamefont {Piero
+  \btxlastnamefont {Mussio}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Antonio \btxlastnamefont {Piccinno}}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Software environments for end-user development and
+  tailoring}{Software environments for end-user development and tailoring}}.
+\newblock \btxjournalfont {Psychnology}, 2:99--122, 2004.
+
+\bibitem [{CS03}]{Duden}
+\btxnamefont {\btxlastnamefont {Claus}, Volker} \btxandlong {}\ \btxnamefont
+  {Andreas \btxlastnamefont {Schwill}}\btxauthorcolon\ \btxtitlefont {Duden.
+  Informatik. Ein Fachlexikon f{\"u}r Studium und Praxis.}
+\newblock \btxpublisherfont {Bibliographisches Institut, Mannheim}, 2003.
+
+\bibitem [{DD87}]{sql}
+\btxnamefont {\btxlastnamefont {Date}, C.J.} \btxandlong {}\ \btxnamefont {H.
+  \btxlastnamefont {Darwen}}\btxauthorcolon\ \btxtitlefont {A Guide to the SQL
+  Standard}, \btxvolumelong {}~\btxvolumefont {3}.
+\newblock \btxpublisherfont {Addison-Wesley Reading (Ma) et al.}, 1987.
+
+\bibitem [{Don10}]{DslCaseStudy}
+\btxnamefont {\btxlastnamefont {Donohue}, Aran}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Debugging domain-specific languages}{Debugging
+  Domain-Specific Languages}}.
+\newblock \btxmastthesis {}, University of Toronto, 2010.
+
+\bibitem [{Dun88}]{DosDebug}
+\btxnamefont {\btxlastnamefont {Duncan}, R.}\btxauthorcolon\ \btxtitlefont
+  {Advanced MS-DOS Programming}.
+\newblock \btxpublisherfont {Microsoft Press}, 1988.
+
+\bibitem [{Edw05}]{Subtext}
+\btxnamefont {\btxlastnamefont {Edwards}, J.}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Subtext: uncovering the simplicity of
+  programming}{Subtext: uncovering the simplicity of programming}}.
+\newblock \Btxinlong {}\ \btxtitlefont {ACM SIGPLAN Notices}, \btxvolumelong
+  {}~\btxvolumefont {40}, \btxpageslong {}\ 505--518. ACM, 2005.
+
+\bibitem [{Fow05a}]{LanguageWorkbenches}
+\btxnamefont {\btxlastnamefont {Fowler}, Martin}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Language workbenches: The killer-app for domain specific
+  languages?}{Language Workbenches: The Killer-App for Domain Specific
+  Languages?}}, \btxprintmonthyear{.}{Juni}{2005}{long}.
+\newblock {\latintext
+  \btxurlfont{http://martinfowler.com/articles/languageWorkbench.html}}.
+
+\bibitem [{Fow05b}]{rake}
+\btxnamefont {\btxlastnamefont {Fowler}, Martin}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Using the rake build language}{Using the Rake Build
+  Language}}, \btxprintmonthyear{.}{August}{2005}{long}.
+\newblock {\latintext \btxurlfont{http://martinfowler.com/articles/rake.html}}.
+
+\bibitem [{GHVJ09}]{gof}
+\btxnamefont {\btxlastnamefont {Gamma}, E.}, \btxnamefont {R. \btxlastnamefont
+  {Helm}}, \btxnamefont {J. \btxlastnamefont {Vlissides}}\btxandcomma {}
+  \btxandlong {}\ \btxnamefont {R. \btxlastnamefont {Johnson}}\btxauthorcolon\
+  \btxtitlefont {Entwurfsmuster}.
+\newblock \btxpublisherfont {Pearson Deutschland GmbH}, 2009.
+
+\bibitem [{Hag01}]{Klangsynthese}
+\btxnamefont {\btxlastnamefont {Hagenow}, Henri}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Digitale synthese komplexer wellenformen zur simulation
+  akustischer, elektrischer und optischer eigenzust{\"a}nde mehrdimensionaler
+  systeme}{Digitale Synthese komplexer Wellenformen zur Simulation akustischer,
+  elektrischer und optischer Eigenzust{\"a}nde mehrdimensionaler Systeme}}.
+\newblock \btxmastthesis {}, Optisches Institut der Technischen Universit{\"a}t
+  Berlin, 2001.
+\newblock {\latintext
+  \btxurlfont{http://www.brothers-in-music.de/klangsynthese/Klangsynthese&Phys%
+icalModeling_HH.pdf}}.
+
+\bibitem [{Her11}]{JHyde}
+\btxnamefont {\btxlastnamefont {Herrmanns}, C.}\btxauthorcolon\ \btxtitlefont
+  {Entwicklung und Implementierung eines hybriden Debuggers f{\"u}r Java}.
+\newblock Wissenschaftliche Schriften der WWU M{\"u}nster / 4.
+  \btxpublisherfont {Westf{\"a}lische Wilhelms-Universit{\"a}t}, 2011.
+
+\bibitem [{Hug04}]{Hughes}
+\btxnamefont {\btxlastnamefont {Hughes}, T.P.}\btxauthorcolon\ \btxtitlefont
+  {American genesis: a century of invention and technological enthusiasm,
+  1870-1970}.
+\newblock \btxpublisherfont {University of Chicago Press}, 2004.
+
+\bibitem [{Int12a}]{Intel2}
+Intel\btxauthorcolon\ \btxtitlefont {Intel 64 and IA-32 Architectures Software
+  Developer's Manual Volume 2: Instruction Set Reference}, \btxeditionnumlong
+  {043}{}, \btxprintmonthyear{.}{Mai}{2012}{long}.
+
+\bibitem [{Int12b}]{Intel3}
+Intel\btxauthorcolon\ \btxtitlefont {Intel 64 and IA-32 Architectures Software
+  Developer's Manual Volume 3: System Programming Guide}, \btxeditionnumlong
+  {043}{}, \btxprintmonthyear{.}{Mai}{2012}{long}.
+
+\bibitem [{JG04}]{DslEclipse}
+\btxnamefont {\btxlastnamefont {Jeff~Gray},~Hui~Wu, Marjan\btxfnamespacelong
+  Mernik}\btxauthorcolon\ \btxtitlefont {\btxifchangecase {Debugging
+  domain-specific languages in eclipse}{Debugging Domain-Specific Languages in
+  Eclipse}}.
+\newblock \btxtechreplong {}, University of Alabama at Birmingham, University
+  of Maribor, 2004.
+
+\bibitem [{Kep93}]{FastDataBreakpoints}
+\btxnamefont {\btxlastnamefont {Keppel}, D.}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Fast data breakpoints}{Fast Data Breakpoints}}.
+\newblock \Btxtechreplong {}\ TR-93-04-06, University of Washington, 1993.
+
+\bibitem [{Kes90}]{FastBreakpoints}
+\btxnamefont {\btxlastnamefont {Kessler}, Peter\btxfnamespacelong
+  B.}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase {Fast breakpoints:
+  design and implementation}{Fast breakpoints: design and implementation}}.
+\newblock \btxjournalfont {SIGPLAN Not.}, 25(6):78--84,
+  \btxprintmonthyear{.}{6}{1990}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {0362-1340}}}.
+
+\bibitem [{KOM{\etalchar{+}}10}]{ComparingGplsAndDsls}
+\btxnamefont {\btxlastnamefont {Kosar}, Toma\v{z}}, \btxnamefont {Nuno
+  \btxlastnamefont {Oliveira}}, \btxnamefont {Marjan \btxlastnamefont
+  {Mernik}}, \btxnamefont {Maria\btxfnamespacelong J.\btxfnamespacelong V.
+  \btxlastnamefont {Pereira}}, \btxnamefont {Matej \btxlastnamefont
+  {\v{C}repin\v{s}ek}}, \btxnamefont {Daniela da~\btxlastnamefont
+  {Cruz}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Pedro\btxfnamespacelong
+  R. \btxlastnamefont {Henriques}}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Comparing general-purpose and domain-specific languages:
+  An empirical study}{Comparing General-Purpose and Domain-Specific Languages:
+  An Empirical Study}}.
+\newblock \btxjournalfont {Computer Science and Information Systems},
+  7(2):247--264, \btxprintmonthyear{.}{5}{2010}{long}.
+
+\bibitem [{KPKP06}]{DslRequirements}
+\btxnamefont {\btxlastnamefont {Kolovos}, Dimitrios\btxfnamespacelong S.},
+  \btxnamefont {Richard\btxfnamespacelong F. \btxlastnamefont {Paige}},
+  \btxnamefont {Tim \btxlastnamefont {Kelly}}\btxandcomma {} \btxandlong {}\
+  \btxnamefont {Fiona\btxfnamespacelong A.\btxfnamespacelong C.
+  \btxlastnamefont {Polack}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase
+  {Requirements for {Domain-Specific} languages}{Requirements for
+  {Domain-Specific} Languages}}.
+\newblock \Btxinlong {}\ \btxtitlefont {Proc. 1st ECOOP Workshop on
+  Domain-Specific Program Development (DSPD 2006)}, Nantes, France,
+  \btxprintmonthyear{.}{7}{2006}{long}.
+
+\bibitem [{Lab12}]{Labview}
+\btxnamefont {\btxlastnamefont {LabVIEW}, National\btxfnamespacelong
+  Instruments\btxfnamespacelong Webseite},
+  \btxprintmonthyear{.}{Dezember}{2012}{long}.
+\newblock {\latintext \btxurlfont{http://www.ni.com/labview/d/}}.
+
+\bibitem [{Lew03}]{DbgBackwardsInTime}
+\btxnamefont {\btxlastnamefont {Lewis}, Bil}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Debugging backwards in time}{Debugging Backwards in
+  Time}}.
+\newblock \btxjournalfont {CoRR}, cs.SE/0310016, 2003.
+
+\bibitem [{Max12}]{Max}
+\btxnamefont {\btxlastnamefont {Max/MSP}, Cycling'74\btxfnamespacelong
+  Webseite}, \btxprintmonthyear{.}{Dezember}{2012}{long}.
+\newblock {\latintext \btxurlfont{http://cycling74.com/}}.
+
+\bibitem [{McC02}]{SuperCollider}
+\btxnamefont {\btxlastnamefont {McCartney}, J.}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Rethinking the computer music language:
+  Supercollider}{Rethinking the computer music language: SuperCollider}}.
+\newblock \btxjournalfont {Computer Music Journal}, 26(4):61--68, 2002.
+
+\bibitem [{MHS05}]{Mernik05}
+\btxnamefont {\btxlastnamefont {Mernik}, Marjan}, \btxnamefont {Jan
+  \btxlastnamefont {Heering}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Anthony\btxfnamespacelong M. \btxlastnamefont {Sloane}}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {When and how to develop domain-specific
+  languages}{When and how to develop domain-specific languages}}.
+\newblock \btxjournalfont {ACM Comput. Surv.}, 37(4):316--344,
+  \btxprintmonthyear{.}{12}{2005}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {0360-0300}}}.
+
+\bibitem [{Mic12a}]{AlignedAlloc}
+Microsoft\btxauthorcolon\ \btxtitlefont {Dokumentation zur Verwendung der
+  Funktion \_aligned\_malloc der Windows API},
+  \btxprintmonthyear{.}{Oktober}{2012}{long}.
+\newblock {\latintext
+  \btxurlfont{http://msdn.microsoft.com/en-us/library/8z34s9c6\%28VS.80\%29.as%
+px}}.
+
+\bibitem [{Mic12b}]{VirtualAllocProtect}
+Microsoft\btxauthorcolon\ \btxtitlefont {Dokumentation zur Verwendung der
+  Funktionen VirtualAlloc und VirtualProtect der Windows API},
+  \btxprintmonthyear{.}{Oktober}{2012}{long}.
+\newblock {\latintext
+  \btxurlfont{http://msdn.microsoft.com/en-us/library/windows/desktop/aa366887%
+\%28v=vs.85\%29.aspx}}.
+
+\bibitem [{MRB98}]{NullObjectPattern}
+\btxnamefont {\btxlastnamefont {Martin}, R.C.}, \btxnamefont {D.
+  \btxlastnamefont {Riehle}}\btxandcomma {} \btxandlong {}\ \btxnamefont {F.
+  \btxlastnamefont {Buschmann}}\btxauthorcolon\ \btxtitlefont {Pattern
+  languages of program design 3}.
+\newblock \btxpublisherfont {Addison-Wesley}, 1998.
+
+\bibitem [{Nat10}]{CoreReference}
+Native Instruments\btxauthorcolon\ \btxtitlefont {Reaktor 5 Core Reference},
+  2010.
+
+\bibitem [{PA90}]{Paxson}
+\btxnamefont {\btxlastnamefont {Paxson}, Vern} \btxandlong {}\ \btxnamefont
+  {Prof \btxlastnamefont {Anderson}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {A survey of support for implementing debuggers}{A Survey
+  of Support For Implementing Debuggers}}.
+\newblock \btxtechreplong {}, Lawrence Berkeley Laboratory, Berkeley CA, 1990.
+
+\bibitem [{Rea12}]{Reaktor}
+\btxnamefont {\btxlastnamefont {Reaktor}, Native\btxfnamespacelong
+  Instruments\btxfnamespacelong Webseite},
+  \btxprintmonthyear{.}{Dezember}{2012}{long}.
+\newblock {\latintext
+  \btxurlfont{http://www.native-instruments.com/\#/de/products/producer/reakto%
+r-5/}}.
+
+\bibitem [{Ros96}]{HowDebuggersWork}
+\btxnamefont {\btxlastnamefont {Rosenberg}, Jonathan\btxfnamespacelong
+  B.}\btxauthorcolon\ \btxtitlefont {How debuggers work: algorithms, data
+  structures, and architecture}.
+\newblock \btxpublisherfont {John Wiley \& Sons, Inc.}, New York, NY, USA,
+  1996\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont {0-471-14966-7}}}.
+
+\bibitem [{SCC06}]{InterntionalSoftware}
+\btxnamefont {\btxlastnamefont {Simonyi}, Charles}, \btxnamefont {Magnus
+  \btxlastnamefont {Christerson}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Shane \btxlastnamefont {Clifford}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Intentional software}{Intentional software}}.
+\newblock \Btxinlong {}\ \btxtitlefont {Proceedings of the 21st annual ACM
+  SIGPLAN conference on Object-oriented programming systems, languages, and
+  applications}, OOPSLA '06, \btxpageslong {}\ 451--464, New York, NY, USA,
+  2006. \btxpublisherfont {ACM}\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont
+  {1-59593-348-4}}}.
+
+\bibitem [{Sha82}]{AlgorithmicDebug}
+\btxnamefont {\btxlastnamefont {Shapiro}, E.Y.}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Algorithmic program debugging.}{Algorithmic program
+  debugging.}}
+\newblock \btxjournalfont {Dissertation Abstracts International Part B: Science
+  and Engineering}, 43(5):1982, 1982.
+
+\bibitem [{Sim05}]{DegreesOfFreedom}
+\btxnamefont {\btxlastnamefont {Simonyi}, Charles}\btxauthorcolon\
+  \btxtitlefont {\btxifchangecase {Notations and programming
+  languages}{Notations and Programming Languages}},
+  \btxprintmonthyear{.}{May}{2005}{long}.
+\newblock {\latintext \btxurlfont{http://www.intentsoft.com/notations_and_p/}}.
+
+\bibitem [{Sim12}]{Simulink}
+\btxnamefont {\btxlastnamefont {Simulink}, MathWorks\btxfnamespacelong
+  Webseite}, \btxprintmonthyear{.}{Dezember}{2012}{long}.
+\newblock {\latintext \btxurlfont{http://www.mathworks.de/products/simulink/}}.
+
+\bibitem [{SPA92}]{Sparc}
+SPARC International\btxauthorcolon\ \btxtitlefont {The SPARC Architecture
+  Manual}, \btxeditionnumlong {version 8}{}, 1992.
+
+\bibitem [{Spi01}]{Spinellis}
+\btxnamefont {\btxlastnamefont {Spinellis}, Diomidis}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {Notable design patterns for domain-specific
+  languages}{Notable design patterns for domain-specific languages}}.
+\newblock \btxjournalfont {J. Syst. Softw.}, 56(1):91--99,
+  \btxprintmonthyear{.}{2}{2001}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {0164-1212}}}.
+
+\bibitem [{Ste06}]{Steiner}
+\btxnamefont {\btxlastnamefont {Steiner}, Hans\btxfnamespacelong
+  Christoph}\btxauthorcolon\ \btxtitlefont {bang pure data}, \btxchapterlong
+  {}\ Building your own instrument with Pd, \btxpageslong {}\ 72--79.
+\newblock \btxpublisherfont {Wolke Verlag}, 2006.
+\newblock {\latintext
+  \btxurlfont{http://puredata.info/groups/pd-graz/label/book01}}.
+
+\bibitem [{TA95}]{ReverseExecution}
+\btxnamefont {\btxlastnamefont {Tolmach}, A.} \btxandlong {}\ \btxnamefont
+  {A.W. \btxlastnamefont {Appel}}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {A debugger for standard ml}{A debugger for Standard ML}}.
+\newblock \btxjournalfont {Journal of Functional Programming}, 5(02):155--200,
+  1995.
+
+\bibitem [{vDKV00}]{DslBib}
+\btxnamefont {\btxlastnamefont {Deursen}, Arie~van}, \btxnamefont {Paul
+  \btxlastnamefont {Klint}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Joost
+  \btxlastnamefont {Visser}}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase
+  {Domain-specific languages: an annotated bibliography}{Domain-specific
+  languages: an annotated bibliography}}.
+\newblock \btxjournalfont {SIGPLAN Not.}, 35(6):26--36,
+  \btxprintmonthyear{.}{6}{2000}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {0362-1340}}}.
+
+\bibitem [{vE01}]{atmol}
+\btxnamefont {\btxlastnamefont {Engelen}, Robert\btxfnamespacelong
+  A.~van}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase {Atmol: A
+  domain-specific language for atmospheric modeling.}{ATMOL: A domain-specific
+  language for atmospheric modeling.}}
+\newblock \btxjournalfont {Journal of Computing and Information Technology
+  (CIT)}, 9(4):289--303, 2001\ifbtxprintISSN {, \mbox{\btxISSN~\btxISSNfont
+  {1330-1136}}}.
+
+\bibitem [{VS10}]{mps}
+\btxnamefont {\btxlastnamefont {Voelter}, M.} \btxandlong {}\ \btxnamefont {K.
+  \btxlastnamefont {Solomatov}}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Language modularization and composition with projectional
+  language workbenches illustrated with mps}{Language modularization and
+  composition with projectional language workbenches illustrated with MPS}}.
+\newblock \btxjournalfont {Software Language Engineering, SLE}, 2010.
+
+\bibitem [{War94}]{Ward}
+\btxnamefont {\btxlastnamefont {Ward}, M.P.}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Language-oriented programming}{Language-oriented
+  programming}}.
+\newblock \btxjournalfont {Software - Concepts and Tools}, 15(4):147--161,
+  1994.
+
+\bibitem [{Zav12}]{FilterDesign}
+\btxnamefont {\btxlastnamefont {Zavalishin}, Vadim}\btxauthorcolon\
+  \btxtitlefont {The Art of VA Filter Design}.
+\newblock \btxpublisherfont {Native Instruments}, 2012.
+\newblock {\latintext
+  \btxurlfont{http://images-l3.native-instruments.com/fileadmin/ni_media/downl%
+oads/pdf/VAFilterDesign_1.0.3.pdf}}.
+
+\end{thebibliography}

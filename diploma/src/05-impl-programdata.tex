@@ -1,0 +1,169 @@
+
+Im folgenden Abschnitt werden die Aspekte der Implementierung eines Same-Process Debuggers betrachtet, die bei der Übersetzung des Prüflings erforderlich werden.
+
+%Nach dem in Kapitel \ref{sec:concept} erarbeiteten Konzept erfordert die Verwendung eines Same-Process Debuggers eine spezielle Kompilierung des Prüflings.  wie die nötigen Programmdaten zum Prüfling während der Übersetzung gesammelt und dem Debugger übergeben werden. %Zudem müssen während der Übersetzung verschiedene Daten zum Prüfling gesammelt werden. 
+
+\subsection{Überblick}
+\label{sec:impl-buildtime-overview}
+
+Für die Verwendung eines Same-Process Debuggers nach dem in Kapitel \ref{sec:concept} erarbeiteten Konzept sind verschiedene Informationen zum Prüflingsprogramm erforderlich. Sie werden zur Übersetzungszeit vom Compiler gesammelt und dem Debugger als \emph{Programmdaten} (\ref{sec:context-debugging-separate}) übergeben.
+
+Alle nötigen Änderungen am Quellcode des Compilers sollen möglichst gering gehalten werden. Aus diesem Grund erfolgt die Aufzeichnung der Programmdaten in einem Modul des Debuggers. Dieses Modul wird im Folgenden als \emph{Debug-Data-Factory} bezeichnet. Es ist im Quellcode durch die Klasse |SRS::DebugDataFactory| repräsentiert. Instanzen der Klasse gehören\footnote{Mit dem Begriff "`gehören"' ist der Besitz eines Objekts gemeint (engl. Ownership). Der Besitzer eines Objekts ist dafür verantwortlich, das Objekt zu löschen und dessen Speicher freizugeben, wenn es nicht mehr benötigt wird.} dem Compiler und existieren nur zur Übersetzungszeit. Der Compiler selbst speichert keine Programmdaten. Stattdessen übergibt er sie der Debug-Data-Factory in den Parametern entsprechender Funktionsaufrufe. Diese Funktionsaufrufe erfolgen direkt an denjenigen Stellen des Übersetzungsvorgangs, an denen die jeweiligen Daten anfallen. Die Zuordnung und strukturierte Speicherung der Programmdaten wird von der Debug-Data-Factory vorgenommen. 
+
+%Da alle Sprünge im Maschinencode von Reaktor Core Programmen in Richtung der Ausführung erfolgen (\ref{sec:impl-preface-properties}), kann die Korrektur von Sprunganweisungen bei der Kompilierung des Prüflings entfallen. Zudem sollen die Mechanismen zur Ablaufkontrolle zunächst nur für den Audio-Handler verfügbar sein. Die Anpassungen am Reaktor Core Compiler begrenzen sich damit zunächst auf das Einfügen von Puffern vor jedem Sprungziel im Audio-Handler und die Ergänzung eines Callback-Points an dessen Beginn. Beide Operationen werden zur Linkzeit ausgeführt.
+
+Die Änderungen am Quellcode des Compilers können noch weiter beschränkt werden, wenn nicht bei jedem Funktionsaufruf zur Übergabe von Programmdaten überprüft werden muss, ob der Prüfling überhaupt im Debug-Modus übersetzt wird. Dies wäre notwendig, wenn die Debug-Data-Factory nur im Debug-Fall existieren würde und die vom Compiler gehaltene Referenz andernfalls ungültig wäre. Um sich eine solche Abfrage bei jedem Funktionsaufruf zu sparen, wurde die Debug-Data-Factory nach dem Abstract Factory Pattern implementiert \cite{gof}. Die Klasse |SRS::DebugDataFactory| bildet demnach nur die abstrakte Schnittstelle zur Debug-Data-Factory. Die tatsächliche Implementierung ist durch |SRS::DebugDataFactoryImpl| gegeben. Diese Klasse wird im Debug-Fall instanziiert. Andernfalls dient eine Instanz der Klasse |SRS::DebugDataFactoryDummy| als Ersatz für einen ungültigen Zeiger. Sie zeichnet keinerlei Daten auf und verhält sich gegenüber dem Compiler vollkommen neutral. Sie folgt damit dem sogenannten Null Object Pattern \cite{NullObjectPattern}. Diese Konstruktion hat einen weiteren interessanten Vorteil. Sie erlaubt die einfache Einbindung beliebiger zusätzlicher Klassen zur Aufzeichnung von Programmdaten. Als Hilfestellung bei der Implementierung des Debuggers kam beispielsweise die Klasse |SRS::DebugDataFactoryImplDump| zum Einsatz, die in einem Konsolenfenster Informationen zum Aufzeichnungsprozess ausgab\footnote{Tatsächlich bot sie in erster Linie Hilfestellung beim \emph{Debugging} des Debuggers.}.
+%Implementierung und 
+
+Abbildung \ref{fig:factory-workflow} gibt einen Überblick zum Ablauf des Aufzeichnungsprozesses. Der Übersetzungsvorgang wird von der Klasse |SEC::Instrument| koordiniert und erfolgt in drei Phasen (\ref{sec:impl-preface-compilation}). Die Debug-Data-Factory wird noch vor Beginn der Vorbereitungsphase von |SEC::Instrument| instanziiert. Während der Vorbereitungsphase fallen keine Programmdaten an. Zur Compilezeit werden die Bestandteile des Prüflings aufgezeichnet und für den strukturierten Zugriff vorgereitet. Dies wird in Abschnitt \ref{sec:impl-buildtime-programdatacompile} beschrieben. Abschnitt \ref{sec:impl-buildtime-programdatalink} widmet sich dann den Aufgaben zur Linkzeit. Hier erfolgt im Wesentlichen die Analyse der Kontrollflussstruktur des Prüflings.
+
+%Die Aufzeichnung der zur Compilezeit anfallenden Programmdaten wird in Abschnitt \ref{sec:impl-programdata-compile} betrachtet.  wird und zur Linkzeit betrachtet.
+
+%Programmdaten fallen dabei nur zur Compilezeit und zur Linkzeit nicht aber während der Vorbereitungsphase an. Die Aufzeichnung der Programmdaten erfolgt sowohl zur Compilezeit als auch zur Linkzeit. 
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{05-factory-workflow.png} %[scale=0.25]
+  \caption{Übersicht zum Ablauf des Aufzeichnungsprozesses. Die Übersetzung einer Core Cell wird in Folge von Änderungen der Datenbasis initiiert. Der Vorgang wird von einer Instanz der Klasse \emph{SEC::Instrument} koordiniert. Sie instanziiert ebenfalls die \emph{Debug-Data-Factory}. Die Übersetzung erfolgt in drei Phasen. Programmdaten fallen dabei nur zur Compilezeit und zur Linkzeit nicht aber während der Vorbereitungsphase an.}
+  \label{fig:factory-workflow}
+\end{figure}
+
+%--------------------------------------------------------------------------------------------------
+
+\subsection{Aufzeichnung der Programmelemente zur Compilezeit}
+\label{sec:impl-buildtime-programdatacompile}
+
+Die charakteristische Eigenschaft eines symbolischen Debuggers bildet die Möglichkeit, mit dem Debugger auf dem Abstraktionsniveau der verwendeten Programmiersprache zu arbeiten (\ref{sec:context-debugging-classes}). Im Hinblick auf die Realisierung von Ablaufkontrollmechanismen wird dafür eine zeilenweise Zuordnung zwischen den Befehlen auf Source-Level und den Befehlen auf Instruction-Level benötigt. Eine solche Zuordnung findet sich in den Programmdaten eines jeden symbolischen Debuggers. Da die Darstellung des Source-Levels in Reaktor Core grafisch erfolgt, kann es keine zeilenweise Zuordnung geben. Hier ist eine Zuordnung zwischen den Modulen der hierarchischen Struktur einer Core Cell und deren Operationen im Maschinencode erforderlich. 
+
+Zur Compilezeit wird die Methode |compileBCB| vom Compiler für alle Module der Core Cell aufgerufen. Der Aufruf erfolgt während der Übersetzung der entsprechenden Terminal-Condition in ein lineares Segment (\ref{sec:impl-preface-compilation-compile}). Zu diesem Zeitpunkt kann die Zuordnung zwischen einem Modul der Datenbasis und der Position des dafür erzeugten Befehlscodes\footnote{Der Begriff \emph{Befehlscode} bezeichnet hier einen oder mehrere Maschinenbefehle.} \emph{relativ} zum jeweiligen linearen Segment hergestellt werden. Diese Information wird der Debug-Data-Factory durch einen Aufruf der Methode |addModule| übergeben. Für den weiteren Verarbeitungsvorgang sind jedoch zusätzliche Informationen nötig. Dazu gehört das lineare Segment und der Handler, zu dem das Modul gehört sowie -- für die künftige Weiterentwicklung des Prototypen -- auch die zugehörige Core Cell.
+
+%Für eine eindeutige Zuordnung zwischen den Befehlen auf Source- und Instruction-Level reicht diese Information jedoch noch nicht aus. So muss beispielsweise zur Linkzeit bekannt sein, zu welchem linearen Segment ein Modul gehört. Dies ist erforderlich, da die absolute Addresse des Befehlscodes im Maschinencode des Prüflings erst beim Linken des linearen Segments bestimmt werden kann. Darüber hinaus muss bekannt sein, welchem Handler das Modul zugeordnet wurde. Für die Weiterentwicklung des Prototypen könnte es zudem auch wichtig werden zu wissen, zu welcher Core Cell das Modul gehört. 
+
+All diese Daten könnten nun durch die Aufrufebenen des Compilers bis zur Funktion |compileBCB| weitergegeben werden. Dies hätte jedoch unverhältnismäßig viele Änderungen am Quellcode des Compilers zur Folge. Eine weitere Folge wäre ein stark zunehmendes Speicheraufkommen. Denn die Daten müssten in den Stackframes der Funktionen aller Aufrufebenen zwischengespeichert werden. Eine günstigere und flexiblere Lösung stellt die Realisierung der Debug-Data-Factory als Zustandsautomat dar. Beginn und Ende eines Übersetzungsabschnitts könnten durch den Aufruf bestimmter Funktionen markiert werden. Im Kontext der Debug-Data-Factory wäre dann klar, dass die dazwischenliegenden Funktionsaufrufe diesem Übersetzungsabschnitt zuzuordnen sind. Dieser Ansatz wird für die gesamte Kommunikation zwischen Compiler und Debug-Data-Factory verwendet. Eine schematische Darstellung des Kommunikationsverlaufs zur Compilezeit ist in Abbildung \ref{fig:factory-workflow-compilation} dargestellt. Zur Identifizierung der beteiligten Konstrukte werden zudem verschiedene Parameter übergeben. Zur Compilezeit erfolgt je eine Benachrichtigung beim Betreten und Verlassen der in Tabelle \ref{tab:compiletime-calls} aufgeführten Übersetzungsabschnitte.
+
+\begin{table*}[h]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline \bf Abschnitt 			& {\bf Funktion} (begin/end)	& \bf Parameter 						\\ 
+			\hline Core Cell 					& CompileInstrument		 				& Zeiger auf SD::Instrument	\\
+			\hline Handler						& CompileHandler 							& Handler ID								\\
+			\hline Terminal-Instance 	& CompileSegment 							& Segment ID								\\
+			\hline
+		\end{tabular}
+	\caption{Benachrichtigungen des Compilers an die Debug-Data-Factory beim Betreten und Verlassen von Übersetzungsabschnitten zur Compilezeit}
+	\label{tab:compiletime-calls}
+\end{table*}
+
+\noindent
+Bei der Handler ID handelt es sich um eine nicht negative, ganze Zahl. In Reaktor Core existiert die Konvention, dass die ID des Init-Handler Null und die ID des Audio-Handlers Eins ist. IDs von Zwei aufwärts bezeichnen Event-Handler. Weder Terminal-Instances noch lineare Segmente verfügen über einen expliziten Identifikationsmechanismus. Als Segment ID kann jedoch die Speicheradresse eines linearen Segments dienen. Da das lineare Segment beim Betreten der Terminal-Instance noch nicht existiert, wird die ID durch die Funktion |endCompileSegment| übergeben. 
+
+Die Methode |addModule| wird ausschließlich während der Verarbeitung von Terminal-Conditions aufgerufen. Damit kann jedes Modul eindeutig einem linearen Segment zugeordnet werden. Lineare Segmente können wiederum Handlern und diese schließlich Core Cells zugeordnet werden. Ausgehend von einer relativen Speicherposition innerhalb eines linearen Segments kann nun bereits das zugehörige Modul in der Datenbasis identifiziert werden. Sobald zur Linkzeit die endgültige Position des linearen Segments bekannt ist, ist die Zuordnung zwischen den Befehlen auf Source-Level und Instruction-Level vollständig. 
+
+%Einige Modultypen in Reaktor Core führen zur Erzeugung von Befehlscode an verschiedenen Stellen des Prüflingscodes. Dies betrifft die sogenannten \emph{Non-Solid Macros}\footnote{Die Module von Non-Solid Macros . Dies ist in erster Linie für die Auflösung von Feedback-Schleifen erforderlich. Für detaillierte Informationen hinzu wird an die Reaktor Core Referenz verwiesen \cite{CoreReference}}. Ein Beispiel hierfür ist 
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{05-factory-workflow-compilation.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Kommunikation zwischen Compiler und Debug-Data-Factory zur Compilezeit. Benachrichtigungen zu Beginn und Ende von Übersetzungsabschnitten stellen eine flexible Möglichkeit dar, den Aufbau des Prüflings zu übermitteln.}
+  \label{fig:factory-workflow-compilation}
+\end{figure}
+
+%--------------------------------------------------------------------------------------------------
+
+\newpage
+\subsection{Kontrollflussanalyse zur Linkzeit}
+\label{sec:impl-buildtime-programdatalink}
+
+Die Kontrollflussanalyse bezeichnet ein statisches Verfahren zur Analyse des Ausführungsverlaufs in einem Programm \cite{Compiler}. Es wird ermittelt, auf welchen Ausführungspfaden ein Programm oder ein Programmfragment durchlaufen werden kann. Das Ergebnis liegt in Form eines \emph{Kontrollflussgraphen} vor.
+
+\subsubsection{Vorbetrachtung}
+\label{sec:impl-buildtime-programdatalink-overview}
+
+Für die Realisierung eines Einzelschrittverfahrens nach \ref{sec:concept-sameprocess-stepping} müssen die möglichen Folgebefehle eines Maschinenbefehls bekannt sein. Dafür könnte der Maschinenbefehl an der Stelle der Unterbrechung dekodiert werden\footnote{Einzelschritte können nur in Folge einer Unterbrechung ausgeführt werden}. Handelt es sich um einen Sprungbefehl, könnte die Sprungbedingung ausgewertet und das Sprungziel anhand der Sprungdistanz im Argument des Befehls ermittelt werden. Die Befehlsdekodierung erfordert jedoch einen erheblichen Aufwand bei der Implementierung und wird hier daher nicht verwendet. 
+
+Stattdessen erfolgt eine einfache Kontrollflussanalyse zur Linkzeit. Dem Verfahren kommt die einfache Struktur von Reaktor Core Programmen zugute. Da die Adressen der linearen Segmente für die Befehlszuordnung zwischen Source- und Instruction-Level ohnehin von der Debug-Data-Factory aufgezeichnet werden, genügt es zusätzlich die Verzweigungsstruktur der linearen Segmente zu ermitteln und in den Programmdaten zu hinterlegen. Innerhalb von linearen Segmenten existieren keine Sprungbefehle. Der einzig mögliche Folgebefehl eines Maschinenbefehls ist hier also stets der im Speicher direkt nachfolgende Befehl. Der Maschinencode aller Module, die am Verarbeitungsprozess direkt mitwirken, befindet sich innerhalb der linearen Segmente. Nur die Module \emph{Router} und \emph{Merge} lassen sich nicht eindeutig einem linearen Segment zuordnen. Ihre Folgemodule ergeben sich aus der Verzeigung der linearen Segmente.
+
+Die Kontrollflussanalyse findet in der Debug-Data-Factory statt. Während des Link-Prozesses wird sie vom Compiler über die entscheidenden Übersetzungsabschnitte benachrichtigt. Dafür kommt das gleiche Verfahren zum Einsatz wie auch schon zur Compilezeit. Es erfolgt je eine Benachrichtigung beim Betreten und Verlassen der in Tabelle \ref{tab:linktime-calls} aufgeführten Übersetzungsabschnitte.
+
+\begin{table*}[h]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline \bf Abschnitt 	& {\bf Funktion} (begin/end)	& \bf Parameter 						\\ 
+			\hline Core Cell 			& LinkInstrument							& Zeiger auf SD::Instrument	\\
+			\hline Handler				& LinkHandler						 			& Handler ID								\\
+			\hline Then-Zweig			& LinkThen								 		& -													\\
+			\hline Else-Zweig			& LinkElse						 				& -													\\
+			\hline
+		\end{tabular}
+	\caption{Benachrichtigungen des Compilers an die Debug-Data-Factory beim Betreten und Verlassen von Übersetzungsabschnitten zur Linkzeit}
+	\label{tab:linktime-calls}
+\end{table*}
+
+Die Benachrichtigungen zu Then- und Else-Zweigen erfolgen während der Verarbeitung eines Forks (\ref{sec:impl-preface-compilation-link}). Wird während des Link-Prozesses der Quellcode eines linearen Segments in den Zielspeicherbereich kopiert, ist deren endgültige Position im Prüflingscode bekannt. Hier erfolgt ein Aufruf der Funktion |addRawCodeElement| unter Angabe der Segment ID und der Zieladresse. Der Benachrichtigungsverlauf während des Link-Prozesses ist in Abbildung \ref{fig:factory-workflow-linking} beispielhaft dargestellt.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{05-factory-workflow-linking.png} %[scale=0.25]
+  \caption{Schematische Darstellung der Kommunikation zwischen Compiler und Debug-Data-Factory zur Linkzeit. Es kommt derselbe Benachrichtigungsmechanismus zum Einsatz wie auch schon zur Compilezeit.}
+  \label{fig:factory-workflow-linking}
+\end{figure}
+
+\subsubsection{Algorithmus zur Rekonstruktion des Kontrollflusses}
+\label{sec:impl-buildtime-programdatalink-execution}
+
+Aus diesen Informationen kann die Debug-Data-Factory den Kontrollfluss im Prüfling rekonstruieren. Damit die Daten nicht zwischengespeichert werden müssen, soll dies direkt während des Link-Prozesses erfolgen. Konkret müssen die möglichen Nachfolgesegmente für jedes lineare Segment des Audio-Handlers ermittelt werden. Die Segmente werden in der sequenziellen Reihenfolge ihrer Position im Maschinencode gelinkt. Die eigentliche Problematik besteht also darin, die Vorgänger für jedes ankommende Segment zu finden. Ein Beispiel für eine mögliche Verzweigungsstruktur ist in Abbildung \ref{fig:successor-diagram} dargestellt.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\textwidth]{05-successor-diagram-ext.png} %[scale=0.25]
+  \caption{Beispiel einer zu rekonstruierenden Verzweigungsstruktur. Die linearen Segmente sind in der Reihenfolge nummeriert, in der sie vom Linker verarbeitet werden. Nachfolger im Kontrollfluss sind mit Pfeilen markiert. Für die Segmente 2 und 4 konnten bereits alle Nachfolger gefunden werden, während für die Segmente 0, 1, 3 und 5 noch Nachfolger erwartet werden. Alle ausgegrauten Elemente sind noch unbekannt.}
+  \label{fig:successor-diagram}
+\end{figure}
+
+\noindent
+Die Idee des Algorithmus' bildet die Zusammenfassung der ankommenden linearen Segmente zu \emph{Branches}, die eine rekursive Struktur aufbauen. Branches sind Datenstrukturen, die über die folgenden Variablen verfügen:
+
+\begin{itemize}
+	\item \textbf{type}: Der Typ eines Branches, der einen der Werte |TopLevel|, |Then| oder |Else| annehmen kann.
+	\item \textbf{openSegment}: Das Segment in einem Branch, für welches noch ein Nachfolgesegment erwartet wird. Es wird im Folgenden als \emph{offenes Segment} bezeichnet. Ein Branch kann stets nur maximal ein offenes Segment enthalten. 
+
+	\item \textbf{neverHadSegments}: Boolescher Wert der mit |false| initialisiert wird. Er wird auf |true| gesetzt, sobald ein Segment für den Branch registriert wird.
+	
+	\item \textbf{lastThen}: Untergeordneter \emph{Kind-Branch} des letzten Then-Zweigs innerhalb des Branches. Die Variable wird mit |NULL| initialisiert. Dieser Wert sagt aus, dass es (noch) keinen untergeordneten Then-Zweig gab.
+	\item \textbf{lastElse}: Untergeordneter \emph{Kind-Branch} des letzten Else-Zweigs innerhalb des Branches analog zu \emph{lastThen}.
+	\item \textbf{parent}: Übergeordneter \emph{Eltern-Branch}. Im Falle eines Top-Level-Branches ist der Wert dieser Variablen |NULL|. Alle anderen Branches besitzen einen Eltern-Branch. Der Eltern-Branch wird bei der Initialisierung gesetzt und ist von da an konstant.
+\end{itemize} 
+
+\noindent
+Der Branch für den über einen Aufruf der Funktion |addRawCodeElement| das zuletzt gelinkte Segment übergeben wird, heißt \emph{aktiver Branch}. Der jeweils aktive Branch wird in der globalen Variable |currentBranch| gespeichert. Die globale Variable |parentBranch| speichert den Eltern-Branch des jeweils aktiven Branches. Diese Variablen stellen nur Referenzen dar. Eine Änderung der Werte ändert nichts an der rekursiven Struktur der Branches. Den Ausgangspunkt bildet ein Top-Level-Branch, der zu Beginn der Kontrollflussanalyse beim Aufruf der Funktion |beginLinkHandler| erstellt wird. Er ist einzigartig und besitzt keinen übergeordneten Eltern-Branch. Er ist der aktive Branch zu Beginn des Verfahrens. |parentBranch| hat zunächst den Wert |NULL|. 
+
+Listing \ref{lst:branching-thenelse} stellt eine Implementierung der Funktionen zur Verwaltung der Branches in Pseudocode dar. Die Funktionen |beginLinkThen| und |beginLinkElse| werden beim Betreten von Then- und Else-Zweigen vom Linker aufgerufen. In Abbildung \ref{fig:successor-diagram} erfolgt ein Aufruf der Funktion |beginLinkThen| vor dem Erreichen der Segmente 1, 2, 3, 8 und 9. |beginLinkElse| wird vor dem Erreichen der Segmente 4, 6 und 7 aufgerufen. Innerhalb der Funktionen wird zuerst ein neuer Branch als Kind-Branch des aktiven Branches erstellt (Zeile 2 bzw. 8). Als Parameter ist dabei der Typ des Branches (|Then| oder |Else|) sowie der Eltern-Branch anzugeben. Beim Eltern-Branch handelt es sich stets um den zu diesem Zeitpunkt aktiven Branch. Danach wird der neu erstellte Branch zum aktiven Branch (Zeile 4 bzw. 10). Als |parentBranch| wird der zuvor aktive Branch übernommen (Zeile 3 bzw. 9). 
+
+Die Funktionen |endLinkThen| und |endLinkElse| werden beim Verlassen von Then- und Else-Zweigen vom Linker aufgerufen. In Abbildung \ref{fig:successor-diagram} erfolgt ein Aufruf der Funktion |endLinkThen| nach dem Erreichen der Segmente 3, 5, 6, 8 und 9. |endLinkElse| wird nach dem Erreichen der Segmente 5, 6 und 7 aufgerufen. Innerhalb der Funktionen wird zuerst überprüft, ob für den aktiven Branch Segmente registriert wurden (Zeile 14 bzw. 20). Ist dies \emph{nicht} der Fall, ist der Branch leer und kann ignoriert werden. Im Anschluss werden die Werte der globalen Variablen |currentBranch| und |parentBranch| wieder auf die jeweils übergeordneten Branches gesetzt (Zeile 15 und 16 bzw. 22 und 23). Beim Verlasen eines Else-Zweigs muss zudem überprüft werden, ob es sowohl einen Then- als auch Else-Zweig gab. Ist dies der Fall, wurden für das offene Segment des aktiven Branches bereits alle Nachfolger gefunden. Das Segment kann dann \emph{geschlossen} werden. In der Datenstruktur des aktiven Branches wird das durch das Zurücksetzen der Variablen |openSegment| auf |NULL| realisiert.
+
+\lstinputlisting[float=htb, style=verbatimstyle, basicstyle=\ttfamily\scriptsize, morekeywords={function,if,else,and,new}, emph={tBranch,tSegment, Then, Else,TopLevel,NULL}, numbers=left, caption={Implementierung der Funktionen zur Verwaltung von Branches in Pseudo-Code. Die Funktionen mit dem Präfix \emph{begin} erstellen untergeordnete Branches. Die Funktionen mit dem Präfix \emph{end} schließen diese wieder. Für die enthaltenen Segmente sind zu diesem Zeitpunkt noch nicht notwendigerweise alle Nachfolger gefunden worden. In allen Funktionen werden die Variablen \emph{currentBranch} und \emph{parentBranch} aktualisiert.}, label={lst:branching-thenelse}]{./listings/05-branching-thenelse.txt}
+
+\noindent
+Bei der Verarbeitung eines linearen Segments durch den Linker wird die Funktion |addRaw| |CodeBlock| aufgerufen. Für die Kontrollflussanalyse bedeutet das, dass das Segment dem aktuell aktiven Branch hinzugefügt werden muss. Zudem muss es als Nachfolger verschiedener zuvor gelinkter Segmente registriert werden. Die Registrierung eines Nachfolgers für ein Segment erfolgt durch den Aufruf der Methode |addSuccessor| eines Segments. Listing \ref{lst:branching-addsegment} zeigt die Implementierung der Funktion |addRawCodeBlock| in Pseudocode. In Zeile 3 wird hier zunächst abgefragt, ob für den aktiven Branch zu einem früheren Zeitpunkt bereits ein Segment registriert wurde. Ist dies nicht der Fall, wurde der Branch gerade neu erstellt. Damit ist das neue Segment ein möglicher Nachfolger des offenen Segments im Eltern-Branch (Zeile 6). In Beispiel \ref{fig:successor-diagram} betrifft dies die Segmente 1 bis 4 und 6 bis 9. Im Eltern-Branch existiert ein offenes Segment genau dann, wenn es sich beim aktiven Branch nicht um den Top-Level-Branch handelt (Zeile 5). Das neue Segment wird im Anschluss als offenes Segment des aktiven Branches registriert (Zeile 12).
+
+\lstinputlisting[float=htb,style=verbatimstyle, basicstyle=\ttfamily\scriptsize, morekeywords={function,if,else,and,new}, emph={tBranch,tSegment, Then, Else,TopLevel,NULL}, numbers=left, caption={Implementierung der Funktionen zur Registrierung eines Segments als Nachfolger vorheriger Segmente in Pseudo-Code. Neue Segmente werden vom Linker als Parameter der Funktion \emph{addRawCodeBlock} übergeben. Die Registrierung des neuen Segments als Nachfolger der offenen Segmente in untergeordneten Kind-Branches erfolgt durch Rekursion in der Funktion \emph{finalizePreviousNestedBranches}.}, label={lst:branching-addsegment}]{./listings/05-branching-addsegment.txt}
+
+\noindent
+Wurde hingegen für den aktiven Branch zu einem früheren Zeitpunkt bereits ein Segment registriert, wird der Kontrollfluss das neue Segment immer dann erreichen, wenn das zuvor registrierte Segment auch erreicht wurde. In Beispiel \ref{fig:successor-diagram} ist dies für die Segmente 5 und 10 der Fall. Das neue Segment ist damit der Nachfolger des offenen Segment des aktiven Branches und der offenen Segmente aller untergeordneter Branches. Dafür wird in Zeile 10 die Funktion |finalizePreviousNestedBranches| aufgerufen. Innerhalb dieser Funktion erfolgt je ein rekursiver Aufruf für untergeordnete Then- und Else-Branches, sofern diese existieren (Zeilen 18 und 22). Für alle auf diese Weise durchlaufenen Branches wird das neue Segment in Zeile 26 als Nachfolger des jeweils offenen Segments registriert. In Beispiel \ref{fig:successor-diagram} werden für das Segment 10 der Reihe nach die Vorgängersegmente 3, 5, 6, 9, 8 und 7 registriert. Die Segmente 0, 1 und 2 hingegen sind keine Vorgänger von 10, da sie zu diesem Zeitpunkt bereits über je einen Nachfolger für Then- und Else-Fall verfügen. Beim Verlassen der entsprechenden Else-Zweige wurde |openSegment| für deren Branches zu diesem Zweck auf |NULL| gesetzt (siehe Zeile 26 in Listing \ref{lst:branching-thenelse} zum Vergleich). Im Falle von Segment 5 kommt es hingegen zu keinem rekursiven Aufruf der Funktion |finalizePreviousNestedBranches|, da keine untergeordneten Branches existieren. Hier wird das Segment 5 in Zeile 26 nur als direkter Nachfolger des offenen Segments 4 des aktiven Branches registriert.
+
+Der Abschluss des Link-Prozesses für einen Handler wird durch einen Aufruf der Funktion |endLinkHandler| markiert. In der Debug-Data-Factory liegt zu diesem Zeitpunkt der vollständige Kontrollflussgraph des Handlers vor.
+
+
+%Compiler Anpassungen:
+%  Puffer einfügen
+%  Callback Point
+%  mindestens NOP für jedes Modul
+
+%Infos sammeln:
+%  Befehlszuordnung	(check)
+%  lineare Segmente (check)
+%  Verzeigungsstruktur
+  
+%Kommunikation:
+%  Debugger zeichnet Daten selbst auf
+  

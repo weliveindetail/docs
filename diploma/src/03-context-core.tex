@@ -1,0 +1,99 @@
+
+Reaktor ist eine Entwicklungs- und Ausführungsumgebung für modulare, digitale Musikinstrumente. Reaktor Core bezeichnet eine Progammiersprache zur Implementierung eigener Grundschaltelemente für die digitale Klangsynthese in Reaktor. Es handelt sich um eine domänenspezifische Sprache, die für Domänenexperten der digitalen Signalverarbeitung zugeschnitten ist. Die Sprache lässt sich als grafische, direkt ausführbare, externe, deklarative, kompilierte DSL einordnen. Die mit Reaktor Core erstellten Programme folgen dem datenstromorientierten Programmieransatz. Die Sprache ist stark spezialisiert und in ihrer Mächtigkeit auf die Erzeugung und Transformation digitaler Signale begrenzt.
+
+\subsection{Programmierumgebung}
+\label{sec:context-core-env}
+
+%Reaktor ist eine Entwicklungsumgebung zur Konstruktion modularer digitaler Musikinstrumente. Dafür 
+Innerhalb von Reaktor stehen virtuell-analoge elektrotechnische Grundschaltelemente, wie z.B. Oszillatoren, Filter, Hüllkurven und logische Operatoren zur Verfügung, die beliebig kombiniert werden können. Mittels einer geeigneten Parametrisierung lassen sich so Signale generieren, deren Eigenschaften und Klang denen echter Instrumente sehr nahe kommen \cite{Klangsynthese}. Reaktor folgt dem datenstromorientierten Programmieransatz, der die grafische Notation nach dem Prinzip der "`Boxes and Arrows"' begünstigt (siehe \ref{sec:context-dsls-differentiation-notation}). Dieser Ansatz ist in der digitalen Signalverarbeitung weit verbreitet und findet sich in ähnlicher Form auch in anderen Entwicklungsumgebungen wie z.\,B. LabVIEW \cite{Labview}, Pure Data \cite{Steiner} und Max/MSP \cite{Max}. Der Verarbeitungsvorgang wird dabei als gerichteter Graph dargestellt, dessen Knoten einzelne Verarbeitungsschritte (\emph{Module}) repräsentieren. Die Verbindungen zwischen den Knoten des Graphen (\emph{Wires}) definieren die Abhängigkeiten zwischen den Modulen und legen damit den Datenfluss sowie die Reihenfolge der Verarbeitungsschritte fest. Module sind entweder Grundschaltelemente oder \emph{Macros}, die selbst wieder eine innere Struktur enthalten. Durch diese hierarchische Organisation der Modulstruktur wird eine übersichtliche Darstellung des Signalverarbeitungsprozesses erreicht.
+
+Die verfügbaren Grundschaltelemente wurden üblicherweise direkt in C oder Assembler implementiert und waren damit innerhalb von Reaktor unveränderlich. Reaktor Core ergänzt diese Funktionalität in Reaktor unter Beibehaltung des gewohnten Bedienkonzepts und ermöglicht damit die Implementierung eigener Grundschaltelemente. Diese Ebene der Low-Level Programmierung wird als \emph{Core Level} bezeichnet. Demgegenüber findet die herkömmliche Arbeit mit Reaktor auf dem \emph{Primary Level} statt. Als Schnittstellen zwischen diesen Ebenen kommen spezielle Module zum Einsatz, sogenannte \emph{Core Cells}. Sie dienen als Container für die mit Reaktor Core entwickelten Grundschaltelemente. 
+
+Reaktor dient gleichzeitig als Entwicklungs- und Ausführungsumgebung für Reaktor Core und übernimmt u.\,a. Aufgaben wie die Ein- und Ausgabe von Daten und die grafische Darstellung einer Benutzeroberfläche. Die Programmierung in Reaktor Core ist auf die Erzeugung und Transformation digitaler Signale innerhalb von Core Cells reduziert.
+
+Abbildung \ref{fig:low-pass-filter-primary} zeigt die Verwendung eines Low-Pass Filters in einer Testumgebung\footnote{Dieses Beispiel wurde der Reaktor 5 Core Reference entnommen \cite{CoreReference}}. Die \emph{Struktur-Ansicht} im oberen Teil stellt das Verarbeitungsmodell auf Primary Level dar. Das Signal einer Sägezahnkurve und der Wert einer Cutoff-Frequenz dienen als Eingabeparameter des Low-Pass Filters. Das transformierte Ausgabesignal wird nicht akkustisch ausgegeben, sondern durch ein Oszilloskop grafisch dargestellt. Das Ergebnis ist im unteren Teil der Abbildung, der sogenannten \emph{Panel-Ansicht}, zu sehen. Mit Hilfe der Regler "`Pitch"', "`Ampl"' und "`Cutoff"' kann die Parametrisierung in Echtzeit variiert werden.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.75\textwidth]{03-low-pass-filter-primary.png} %[]
+  \caption{Testumgebung für einen Low-Pass Filter in Reaktor. Position und Darstellung der Bedienelemente werden in der Panel-Ansicht (unten) festgelegt. Ihre Aufgaben im Instrument gehen aus den Verknüpfungen in der Struktur-Ansicht (oben) hervor.}
+  \label{fig:low-pass-filter-primary}
+\end{figure}
+
+\subsection{Einführendes Beispiel}
+\label{sec:context-core-example}
+
+Ausgehend von einer Core Cell erfolgt die Abbildung von Verarbeitungsvorgängen durch Module, Macros und Wires auf dem Core Level analog zum Primary Level. Die Primitive sind hier jedoch keine Grundschaltelemente sondern Maschinenoperationen. Dazu zählen arithmetische und logische Operationen sowie Lese- und Schreib\-operationen. 
+
+\begin{figure}[b!]
+  \centering
+  \includegraphics[width=\textwidth]{03-low-pass-filter-core-with-macros.png} %[scale=0.25]
+  \caption{Implementierung eines einfachen Low-Pass Filters in Reaktor Core. Im oberen
+Teil der Abbildung ist die Struktur der Core Cell zu sehen. Module sind grün und Macros grau
+dargestellt. Die Struktur des Macros "`x mul a"' ist in der zweiten Strukturansicht im unteren Teil dargestellt.}
+  \label{fig:low-pass-filter}
+\end{figure}
+
+Abbildung \ref{fig:low-pass-filter} zeigt die Implementierung des in Abbildung \ref{fig:low-pass-filter-primary} verwendeten Low-Pass Filters in Reaktor Core. Die Struktur der Core Cell ist im oberen Teil der Abbildung dargestellt. Das Eingangssignal erreicht die Core Cell am oberen unbenannten Eingangsmodul ($In$). Der Wert der Cutoff-Frequenz steht am unteren Eingangsmodul mit der Beschriftung $F$ bereit. Das transformierte Signal wird durch den unbenannten Ausgang ($Out$) am rechten Bildrand an die nächsthöhere Verarbeitungsebene weitergegeben. Die von einem einfachen einpoligen Low-Pass Filter ausgeführte Transformation bestimmt sich anhand der folgenden Rekursionsgleichung\footnote{Dieses Beispiel wurde der Reaktor 5 Core Reference entnommen \cite{CoreReference}.
+Darüber hinaus finden sich Details zur Herleitung der angegebenen Gleichungen und zur Konstruktion virtuell-analoger Filter im Allgemeinen in \cite{FilterDesign}.}: %°eines Eingabesamples $x$° 
+\begin{displaymath}
+  \mathrm{y_i}~=~\mathrm{bx} + \mathrm{(1 - b)}\mathrm{y_{i-1}}
+\end{displaymath}
+
+\noindent
+Das Ausgabesample $y_i$ ergibt sich als gewichtete Summe aus dem Eingabesample $x$ und dem vorherigen Ausgabesample $y_{i-1}$. Als Gewichtung kommt die normalisierte zirkuläre Cutoff-Frequenz $b$ zum Einsatz, die sich wie folgt aus der Eingabefrequenz $F$ und der Samplerate $f_{SR}$ ergibt:
+\begin{displaymath}
+  b~=~\mathrm{F} \frac{2\pi}{\mathrm{f_{SR}} }
+\end{displaymath}
+
+\noindent
+Eine Implementierung in Pseudo-Code könnte demnach wie folgt aussehen:
+\begin{lstverbatim}[mathescape, numbers=left, keywords={function,return}]
+function LowPassFilter($In$, $F$, $y_{i-1}$, $f_{SR}$)
+{
+	$a$ := $In$
+	$b$ := $F$ * (6,28319 / $f_{SR}$)
+	$c$ := $y_{i-1}$ * (1 - $b$)
+		
+	$Out$ := $a$ * $b$ + $c$
+	return $Out$
+}  
+\end{lstverbatim}
+
+\noindent
+Die Berechnung kann in Form eines Schaltbildes direkt in der Notation von Reaktor Core dargestellt werden. Abbildung \ref{fig:low-pass-filter} zeigt die Referenzimplementierung im oberen Teil. Zum besseren Verständnis wurden die Variablennamen $a$, $b$ und $c$ an den Stellen ergänzt, an denen die jeweiligen Zwischenergebnisse zur Verfügung stehen. 
+
+Zur Erhöhung der Ausführungsgeschwindigkeit enthält die Implementierung einige Optimierungen. Anstatt einfacher Multiplikationen wird das sogenannte Modulations-Macro "'x mul a"' für die Berechnung von $c$ und $Out$ verwendet. Die Struktur dieses Macros ist im unteren Teil von Abbildung \ref{fig:low-pass-filter} dargestellt. Der Modulationswert $a$ wird hier in einem \emph{Latch} zwischengespeichert. An dieser Stelle werden die verschiedenen Berechnungsstränge des Low-Pass Filters getrennt, da sie unterschiedlich häufig ausgeführt werden müssen. Am oberen Eingangsmodul liegt ein Audiosignal an (schwarz), das mit jedem Takt der Samplerate verarbeitet wird\footnote{Bei Verwendung der Standard-Samplerate etwa sind 44100 Neuberechnungen pro Sekunde nötig.}. Die Modulationswerte der Macros "`x mul a"' hängen jedoch ausschließlich vom Parameterwert $F$ ab. Da sich dieser Wert nur vergleichsweise selten ändert, ist der Eingang als Event-Eingang (rot) markiert. Wurden die Modulationswerte einmal berechnet und von den Latches zwischengespeichert, müssen sie erst dann erneut berechnet werden, wenn sich der Wert des Parameters $F$ ändert. In der überwiedenden Mehrheit der Fälle ist dies jedoch nicht nötig. Dann reduziert sich der Aufwand zur Berechnung der Transformation auf die Auswertung des Terms:
+\begin{equation}
+	\label{thm:low-pass-filter-audio-handler}
+	\mathrm{In} * \mathrm{L_1} + \mathrm{y_{i-1}} * \mathrm{L_2}
+\end{equation}
+
+\noindent
+Dabei bezeichnen $L_1$ und $L_2$ die durch die Latches zwischengespeicherten Werte. Dieses als \emph{Latching} bekannte Verfahren kommt in der digitalen Signalverarbeitung sehr häufig und nicht nur für Optimierungen zum Einsatz.
+
+\subsection{Grundlegende Arbeitsweise}
+\label{sec:context-core-execution}
+
+Ausgehend von ihrer hierarchischen Modulstruktur wird eine Core Cell vom Reaktor Core Compiler in direkt ausführbaren, optimierten Maschinencode der jeweiligen Befehlssatzarchitektur\footnote{Heute betriff dies im Wesentlichen die x86 Architektur von Intel. Variationen existieren jedoch beim Grad der Unterstützung von SSE-Optimierungen sowie der Adresslänge des verwendeten Systems.} kompiliert. Das Ergebnis liegt in Form mehrerer sogenannter \emph{Handler} vor. Ein Handler ist eine einfache Funktionen die von der Ausführungsumgebung direkt aufgerufen werden kann. Es wird zwischen den folgenden Arten von Handlern unterschieden:
+\begin{itemize}
+	\item Der \emph{Init Handler} wird einmalig direkt im Anschluss an den Übersetzungsvorgang aufgerufen und dient der Initialisierung von Speicherfeldern.
+	\item Der \emph{Audio Handler} wird fortlaufend für jedes Sample im Sample-Puffer ausgeführt. Hier findet der eigentliche Signalverarbeitungsvorgang statt. Im Falle des Low-Pass Filters in Abbildung \ref{fig:low-pass-filter} wird vom Audio Handler nur der reduzierte Term (\ref{thm:low-pass-filter-audio-handler}) ausgewertet.
+	\item \emph{Event Handler} dienen der Modifikation von Parametern. Zwar kann die Kompilierung hier variieren, i.\,A. wird jedoch für jeden separat bedienbaren Parameter ein Event-Handler erzeugt.
+\end{itemize}
+
+\noindent
+Die Kompilierung wird bei jeder Änderungen an der Struktur einer Core Cell automatisch im Hintergrund ausgeführt. Nach Abschluss des Übersetzungsvorgangs kommt der kompilierte Programmcode sofort zur Ausführung. Damit bleiben Kompilierung und Ausführung für den Benutzer transparent. Der Eindruck einer kontinuierlichen Verarbeitung in Echtzeit kann dadurch auch während der Konstruktion von DSP-Programmen erhalten werden.
+
+%\begin{remark}
+%Weitere Details ergänzen soweit erforderlich.
+%\end{remark}
+
+%\begin{itemize}	
+%	\item Die Reaktor Core Technologie:
+%	\begin{itemize}
+% 	\item Einordnung: grafische, externe, deklarative, kompilierte\footnote{Wahlweise können Komponeten auch nach C++ übersetzt werden (source-to-source)} DSL
+%		\item für Low-Level Programmierung eigener Grundschaltelemente in Reaktor
+%	\end{itemize}
+%\end{itemize}
+

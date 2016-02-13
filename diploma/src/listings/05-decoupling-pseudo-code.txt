@@ -1,0 +1,34 @@
+function centralDecouplingRoutine(tCallingMode Mode)
+{    
+  switch (Mode) {
+    case INIT:
+        STORE(StoredBP, StoredSP)
+        return
+
+    case PROCESSAUDIO:
+        if(Status = DECOUPLED) {
+            doSilenceAudio()
+            return
+        }
+        else {
+            Status = NOT_DECOUPLED
+            XCHG(StoredBP, StoredSP)
+
+            doProcessAudio()
+
+            XCHG(StoredBP, StoredSP)
+            Status = NOT_DECOUPLED
+            return
+        }
+        
+    case BREAK:
+        if(Status = NOT_DECOUPLED) doSilenceAudio()        
+        XCHG(StoredBP, StoredSP)
+        Status = DECOUPLED
+        return
+
+    case CONTINUE:
+        XCHG(StoredBP, StoredSP)
+        return
+  }
+}
